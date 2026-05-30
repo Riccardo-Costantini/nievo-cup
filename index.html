@@ -10,7 +10,7 @@
 
   <style>
     /* ===========================
-       CSS VARIABLES (identico all'originale)
+       CSS VARIABLES (identico al tuo)
     =========================== */
     :root {
       --bg:           #0b0f17;
@@ -80,7 +80,6 @@
         );
     }
 
-    /* Layout */
     .wrap {
       position: relative;
       z-index: 1;
@@ -89,7 +88,6 @@
       padding: 0 1.5rem 4rem;
     }
 
-    /* Header */
     header {
       padding: 1.625rem 0 1.25rem;
       border-bottom: 1px solid var(--border);
@@ -100,7 +98,6 @@
       gap: 1rem;
       flex-wrap: wrap;
     }
-
     .brand {
       display: flex;
       align-items: center;
@@ -189,7 +186,6 @@
     }
     @keyframes pulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.35;transform:scale(.75);} }
 
-    /* Calendar */
     .section-lbl {
       font-family: 'Rajdhani', sans-serif;
       font-size: 0.68rem;
@@ -329,7 +325,6 @@
     .sc-ball { color: var(--accent-l); font-size: 0.65rem; }
     .sc-empty { font-size: 0.68rem; color: var(--text-3); font-style: italic; }
 
-    /* Footer */
     footer {
       text-align: center;
       padding: 2rem 0 1rem;
@@ -342,7 +337,6 @@
       margin-top: 3rem;
     }
 
-    /* Toast */
     #toast {
       position: fixed;
       bottom: 1.75rem;
@@ -427,11 +421,11 @@
 
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
-  const matchesRef = ref(db, 'matches');
 
-  let matchesData = {}; // oggetto { id: { ... } }
+  // Dati separati
+  let matchesData = {};      // dettagli fissi (nomi, date, orari, emoji)
+  let liveResultsData = {};  // goal e stato
 
-  // Helper: trasforma in array sicuro
   function toArray(val) {
     if (!val) return [];
     if (Array.isArray(val)) return val;
@@ -452,7 +446,18 @@
     });
   }
 
-  // Renderizza il calendario basandosi sui dati in matchesData
+  // Ordine cronologico (data + ora)
+  function sortMatchesByDateTime(matchesArray) {
+    return [...matchesArray].sort((a, b) => {
+      const dateCompare = (a.date || '').localeCompare(b.date || '');
+      if (dateCompare !== 0) return dateCompare;
+      const timeA = a.time || '00:00';
+      const timeB = b.time || '00:00';
+      return timeA.localeCompare(timeB);
+    });
+  }
+
+  // Combina i dati fissi con i risultati live e renderizza
   function renderCalendar() {
     const container = document.getElementById('calendar');
     const matchesArray = Object.values(matchesData);
@@ -462,7 +467,7 @@
       return;
     }
 
-    // Raggruppa per data (usa il campo "date" di ogni match)
+    // Raggruppa per data
     const grouped = {};
     for (const match of matchesArray) {
       const date = match.date || '2025-01-01';
@@ -471,53 +476,57 @@
     }
 
     let html = '';
-    for (const date of Object.keys(grouped).sort()) {
+    // Ordina le date crescenti
+    const sortedDates = Object.keys(grouped).sort();
+    for (const date of sortedDates) {
       const matchesOnDate = grouped[date];
-      // Usa il round del primo match del giorno (se presente)
-      const round = matchesOnDate[0]?.round || '';
+      // Ordina i match di questa data per orario
+      const sortedMatches = sortMatchesByDateTime(matchesOnDate);
+      const round = sortedMatches[0]?.round || '';
       html += `
         <div class="day-group">
           <div class="day-hdr">📅 ${fmtDate(date)} &nbsp;·&nbsp; ${esc(round)}</div>
       `;
-      for (const m of matchesOnDate) {
-        const homeScore = toArray(m.scorersHome).length;
-        const awayScore = toArray(m.scorersAway).length;
-        const status = m.status || 'In programma';
+      for (const match of sortedMatches) {
+        const result = liveResultsData[match.id] || {};
+        const scorersHome = toArray(result.scorersHome);
+        const scorersAway = toArray(result.scorersAway);
+        const status = result.status || 'In programma';
         const cls = status === 'Live' ? ' is-live' : (status === 'Finita' ? ' is-finished' : '');
         const badgeHtml = status === 'Live' ? '<span class="badge b-live">● LIVE</span>'
                          : status === 'Finita' ? '<span class="badge b-fin">✔ Finita</span>'
                          : '<span class="badge b-sched">In programma</span>';
         
-        const hList = toArray(m.scorersHome).length
-          ? toArray(m.scorersHome).map(s => `<div class="sc-item"><span class="sc-ball">⚽</span>${esc(s)}</div>`).join('')
+        const hList = scorersHome.length
+          ? scorersHome.map(s => `<div class="sc-item"><span class="sc-ball">⚽</span>${esc(s)}</div>`).join('')
           : '<div class="sc-empty">—</div>';
-        const aList = toArray(m.scorersAway).length
-          ? toArray(m.scorersAway).map(s => `<div class="sc-item">${esc(s)}<span class="sc-ball" style="margin-left:.25rem">⚽</span></div>`).join('')
+        const aList = scorersAway.length
+          ? scorersAway.map(s => `<div class="sc-item">${esc(s)}<span class="sc-ball" style="margin-left:.25rem">⚽</span></div>`).join('')
           : '<div class="sc-empty">—</div>';
 
         html += `
           <div class="match-card${cls}">
             <div class="card-top">
               <div class="match-meta">
-                <span>⏱ ${esc(m.time || '--:--')}</span>
+                <span>⏱ ${esc(match.time || '--:--')}</span>
                 <span class="meta-dot">·</span>
-                <span>${esc(m.id?.toUpperCase() || '?')}</span>
+                <span>${esc(match.id?.toUpperCase() || '?')}</span>
               </div>
               ${badgeHtml}
             </div>
             <div class="score-row">
               <div class="team-blk">
-                <div class="t-emoji">${esc(m.home?.emoji || '🏠')}</div>
-                <div class="t-name">${esc(m.home?.name || 'Casa')}</div>
+                <div class="t-emoji">${esc(match.home?.emoji || '🏠')}</div>
+                <div class="t-name">${esc(match.home?.name || 'Casa')}</div>
               </div>
               <div class="score-ctr">
-                <span class="score-n">${homeScore}</span>
+                <span class="score-n">${scorersHome.length}</span>
                 <span class="score-sep">:</span>
-                <span class="score-n">${awayScore}</span>
+                <span class="score-n">${scorersAway.length}</span>
               </div>
               <div class="team-blk away">
-                <div class="t-emoji">${esc(m.away?.emoji || '✈️')}</div>
-                <div class="t-name">${esc(m.away?.name || 'Trasferta')}</div>
+                <div class="t-emoji">${esc(match.away?.emoji || '✈️')}</div>
+                <div class="t-name">${esc(match.away?.name || 'Trasferta')}</div>
               </div>
             </div>
             <div class="scorers-wrap">
@@ -532,7 +541,6 @@
     container.innerHTML = html;
   }
 
-  // Aggiorna badge connessione
   function setConnected(ok) {
     const badge = document.getElementById('fb-badge');
     const dot = document.getElementById('fb-dot');
@@ -557,17 +565,26 @@
     toastTimer = setTimeout(() => { el.className = ''; }, 3200);
   }
 
-  // Ascolta i cambiamenti in tempo reale sul nodo 'matches'
-  onValue(matchesRef, (snapshot) => {
+  // Ascolta i match fissi
+  onValue(ref(db, 'matches'), (snapshot) => {
     matchesData = snapshot.val() || {};
     renderCalendar();
     setConnected(true);
     showToast('🔥 Dati aggiornati in tempo reale', 'inf');
   }, (error) => {
-    console.error('Errore Firebase:', error);
+    console.error('Errore lettura matches:', error);
     setConnected(false);
-    showToast('Errore di connessione a Firebase: ' + error.message, 'err');
-    document.getElementById('calendar').innerHTML = `<p style="color:var(--text-2);font-size:0.85rem;padding:0.5rem 0;">Impossibile caricare le partite. Verifica la connessione.</p>`;
+    showToast('Errore di connessione a Firebase', 'err');
+    document.getElementById('calendar').innerHTML = `<p style="color:var(--text-2);font-size:0.85rem;padding:0.5rem 0;">Impossibile caricare le partite.</p>`;
+  });
+
+  // Ascolta i risultati live
+  onValue(ref(db, 'liveResults'), (snapshot) => {
+    liveResultsData = snapshot.val() || {};
+    renderCalendar(); // ri-renderizza con goal e stato aggiornati
+  }, (error) => {
+    console.error('Errore lettura liveResults:', error);
+    // Non mostriamo toast per evitare spam, ma possiamo gestirlo silenziosamente
   });
 </script>
 </body>
