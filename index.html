@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>Nievo Cup – Live Risultati</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -10,7 +10,7 @@
 
   <style>
     /* ===========================
-       CSS VARIABLES (identico al tuo)
+       CSS VARIABLES
     =========================== */
     :root {
       --bg:           #0b0f17;
@@ -83,15 +83,15 @@
     .wrap {
       position: relative;
       z-index: 1;
-      max-width: 900px;
+      max-width: 1000px;
       margin: 0 auto;
-      padding: 0 1.5rem 4rem;
+      padding: 0 1rem 3rem;
     }
 
     header {
-      padding: 1.625rem 0 1.25rem;
+      padding: 1.2rem 0 1rem;
       border-bottom: 1px solid var(--border);
-      margin-bottom: 2rem;
+      margin-bottom: 1.8rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -101,29 +101,29 @@
     .brand {
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 0.8rem;
     }
     .brand-logo {
-      width: 52px;
-      height: 52px;
+      width: 48px;
+      height: 48px;
       background: linear-gradient(135deg, var(--accent) 0%, var(--accent-l) 100%);
       border-radius: 14px;
       display: grid;
       place-items: center;
       font-size: 26px;
       flex-shrink: 0;
-      box-shadow: 0 0 24px rgba(124,58,237,0.35);
+      box-shadow: 0 0 20px rgba(124,58,237,0.35);
     }
     .brand-name {
       font-family: 'Bebas Neue', sans-serif;
-      font-size: 2rem;
+      font-size: 1.8rem;
       letter-spacing: 0.1em;
       color: var(--text);
       line-height: 1;
     }
     .brand-sub {
       font-family: 'Rajdhani', sans-serif;
-      font-size: 0.72rem;
+      font-size: 0.65rem;
       font-weight: 600;
       letter-spacing: 0.2em;
       text-transform: uppercase;
@@ -141,12 +141,12 @@
       display: flex;
       align-items: center;
       gap: 0.4rem;
-      padding: 0.35rem 0.875rem;
+      padding: 0.3rem 0.8rem;
       border-radius: 999px;
       background: var(--bg-card);
       border: 1px solid var(--border-m);
       font-family: 'Rajdhani', sans-serif;
-      font-size: 0.72rem;
+      font-size: 0.65rem;
       font-weight: 600;
       letter-spacing: 0.1em;
       text-transform: uppercase;
@@ -167,12 +167,12 @@
       display: flex;
       align-items: center;
       gap: 0.4rem;
-      padding: 0.35rem 0.875rem;
+      padding: 0.3rem 0.8rem;
       border-radius: 999px;
       background: var(--live-bg);
       border: 1px solid var(--live-bdr);
       font-family: 'Rajdhani', sans-serif;
-      font-size: 0.72rem;
+      font-size: 0.65rem;
       font-weight: 700;
       letter-spacing: 0.15em;
       text-transform: uppercase;
@@ -188,7 +188,7 @@
 
     .section-lbl {
       font-family: 'Rajdhani', sans-serif;
-      font-size: 0.68rem;
+      font-size: 0.7rem;
       font-weight: 700;
       letter-spacing: 0.22em;
       text-transform: uppercase;
@@ -196,7 +196,7 @@
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      margin-bottom: 1.375rem;
+      margin-bottom: 1.2rem;
     }
     .section-lbl::after {
       content: '';
@@ -205,17 +205,17 @@
       background: var(--border);
     }
 
-    .day-group { margin-bottom: 2.25rem; }
+    .day-group { margin-bottom: 2rem; }
     .day-hdr {
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      padding: 0.28rem 0.875rem;
+      padding: 0.2rem 0.8rem;
       background: rgba(124,58,237,0.10);
       border: 1px solid rgba(124,58,237,0.18);
       border-radius: 6px;
       font-family: 'Rajdhani', sans-serif;
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       font-weight: 700;
       letter-spacing: 0.12em;
       text-transform: uppercase;
@@ -223,33 +223,69 @@
       margin-bottom: 1rem;
     }
 
+    /* CARD MATCH – stile base + interattività */
     .match-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 1.25rem 1.375rem 1.125rem;
-      margin-bottom: 0.625rem;
-      transition: border-color .2s ease, transform .15s ease;
+      border-radius: 20px;
+      padding: 1rem 1rem;
+      margin-bottom: 0.85rem;
+      transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+      cursor: pointer;
+      will-change: transform;
     }
-    .match-card:hover { border-color: var(--border-m); transform: translateY(-1px); }
+    .match-card:hover {
+      border-color: var(--border-m);
+      transform: translateY(-2px);
+    }
     .match-card.is-live {
       border-color: var(--live-bdr);
       background: linear-gradient(135deg, var(--bg-card) 0%, rgba(34,197,94,0.04) 100%);
     }
     .match-card.is-finished { border-color: rgba(124,58,237,0.15); }
 
+    /* Stato espanso */
+    .match-card.expanded {
+      padding: 1.5rem 1.2rem 1.2rem;
+      background: var(--bg-card2);
+      border-color: var(--accent);
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+    }
+    .match-card.expanded .team-logo {
+      width: 90px;
+      height: 90px;
+      padding: 10px;
+      transition: all 0.3s ease;
+    }
+    .match-card.expanded .t-name {
+      font-size: 1.2rem;
+    }
+    .match-card.expanded .score-n {
+      font-size: 3rem;
+    }
+    .match-card.expanded .score-sep {
+      font-size: 2.4rem;
+    }
+    .match-card.expanded .scorers-wrap {
+      margin-top: 1.2rem;
+      padding-top: 1rem;
+    }
+
+    /* Card top meta */
     .card-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 1.125rem;
+      margin-bottom: 0.8rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
     }
     .match-meta {
       display: flex;
       align-items: center;
       gap: 0.5rem;
       font-family: 'Rajdhani', sans-serif;
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       font-weight: 600;
       letter-spacing: 0.06em;
       color: var(--text-2);
@@ -258,48 +294,54 @@
 
     .badge {
       font-family: 'Rajdhani', sans-serif;
-      font-size: 0.65rem;
+      font-size: 0.6rem;
       font-weight: 700;
       letter-spacing: 0.18em;
       text-transform: uppercase;
-      padding: 0.22rem 0.7rem;
+      padding: 0.2rem 0.6rem;
       border-radius: 999px;
     }
     .b-sched  { background: rgba(148,163,184,0.08); color: var(--text-2); border: 1px solid rgba(148,163,184,0.18); }
-    .b-live   { background: var(--live-bg); color: var(--live); border: 1px solid var(--live-bdr);
-                animation: glow-live 2s ease infinite; }
+    .b-live   { background: var(--live-bg); color: var(--live); border: 1px solid var(--live-bdr); }
     .b-fin    { background: rgba(124,58,237,0.12); color: var(--accent-l); border: 1px solid rgba(124,58,237,0.22); }
-    @keyframes glow-live {
-      0%,100%{box-shadow:0 0 0 rgba(34,197,94,0);}
-      50%{box-shadow:0 0 12px rgba(34,197,94,0.22);}
-    }
 
+    /* Score row */
     .score-row {
       display: grid;
       grid-template-columns: 1fr auto 1fr;
       align-items: center;
       gap: 1rem;
     }
-    .team-blk { display: flex; flex-direction: column; gap: 0.25rem; }
-    .team-blk.away { align-items: flex-end; }
+    .team-blk {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      text-align: center;
+    }
+    .team-blk.away {
+      align-items: center;
+    }
 
-    /* Stile per i loghi delle squadre */
     .team-logo {
-      width: 48px;
-      height: 48px;
+      width: 70px;
+      height: 70px;
       object-fit: contain;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-      background: rgba(0,0,0,0.2);
-      border-radius: 12px;
-      padding: 4px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 18px;
+      padding: 8px;
+      transition: all 0.3s ease;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
     }
 
     .t-name {
       font-family: 'Rajdhani', sans-serif;
-      font-size: 1.05rem;
+      font-size: 1rem;
       font-weight: 700;
       letter-spacing: 0.02em;
       color: var(--text);
+      max-width: 130px;
+      word-break: break-word;
     }
 
     .score-ctr {
@@ -309,58 +351,68 @@
       font-family: 'Bebas Neue', sans-serif;
       letter-spacing: 0.05em;
     }
-    .score-n   { font-size: 2.4rem; color: var(--text); line-height: 1; min-width: 1.1em; text-align: center; }
-    .score-sep { font-size: 1.8rem; color: var(--text-3); }
+    .score-n {
+      font-size: 2.5rem;
+      color: var(--text);
+      line-height: 1;
+      min-width: 1.2em;
+      text-align: center;
+    }
+    .score-sep {
+      font-size: 2rem;
+      color: var(--text-3);
+    }
 
+    /* Scorers */
     .scorers-wrap {
-      margin-top: 1rem;
-      padding-top: 0.875rem;
+      margin-top: 0.8rem;
+      padding-top: 0.7rem;
       border-top: 1px solid var(--border);
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 0.5rem;
+      transition: all 0.2s;
     }
-    .sc-col { display: flex; flex-direction: column; gap: 0.18rem; }
+    .sc-col { display: flex; flex-direction: column; gap: 0.2rem; }
     .sc-col.right { align-items: flex-end; }
 
     .sc-item {
       display: inline-flex;
       align-items: center;
       gap: 0.3rem;
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       color: var(--text-2);
       font-family: 'Exo 2', sans-serif;
       font-weight: 400;
     }
     .sc-ball { color: var(--accent-l); font-size: 0.65rem; }
-    .sc-empty { font-size: 0.68rem; color: var(--text-3); font-style: italic; }
+    .sc-empty { font-size: 0.65rem; color: var(--text-3); font-style: italic; }
 
     footer {
       text-align: center;
-      padding: 2rem 0 1rem;
+      padding: 1.5rem 0 0.5rem;
       font-family: 'Rajdhani', sans-serif;
-      font-size: 0.72rem;
+      font-size: 0.65rem;
       font-weight: 500;
       letter-spacing: 0.1em;
       color: var(--text-3);
       border-top: 1px solid var(--border);
-      margin-top: 3rem;
+      margin-top: 2rem;
     }
 
     #toast {
       position: fixed;
-      bottom: 1.75rem;
-      right: 1.75rem;
+      bottom: 1rem;
+      right: 1rem;
       z-index: 9999;
       pointer-events: none;
-      min-width: 220px;
-      max-width: 320px;
-      padding: 0.875rem 1.125rem;
+      min-width: 200px;
+      max-width: 280px;
+      padding: 0.7rem 1rem;
       border-radius: 12px;
       background: var(--bg-card2);
       border: 1px solid var(--border-m);
-      font-family: 'Exo 2', sans-serif;
-      font-size: 0.825rem;
+      font-size: 0.75rem;
       color: var(--text);
       transform: translateY(90px);
       opacity: 0;
@@ -370,9 +422,27 @@
     #toast.t-err { border-color: var(--red-bdr); }
     #toast.t-inf { border-color: var(--border-a); }
 
-    @media (max-width: 600px) {
-      .brand-name { font-size: 1.5rem; }
-      .team-logo { width: 36px; height: 36px; }
+    /* Mobile fine tuning */
+    @media (max-width: 650px) {
+      .wrap { padding: 0 0.8rem 2rem; }
+      .brand-name { font-size: 1.4rem; }
+      .brand-logo { width: 40px; height: 40px; font-size: 22px; }
+      .team-logo { width: 55px; height: 55px; padding: 6px; border-radius: 14px; }
+      .match-card.expanded .team-logo { width: 75px; height: 75px; }
+      .t-name { font-size: 0.85rem; max-width: 100px; }
+      .score-n { font-size: 2rem; }
+      .score-sep { font-size: 1.6rem; }
+      .match-card { padding: 0.8rem; }
+      .match-card.expanded { padding: 1.2rem; }
+      .card-top { margin-bottom: 0.5rem; }
+    }
+
+    @media (max-width: 480px) {
+      .score-row { gap: 0.5rem; }
+      .team-logo { width: 48px; height: 48px; }
+      .match-card.expanded .team-logo { width: 65px; height: 65px; }
+      .t-name { font-size: 0.75rem; max-width: 85px; }
+      .score-n { font-size: 1.7rem; }
     }
   </style>
 </head>
@@ -436,18 +506,14 @@
   let matchesData = {};
   let liveResultsData = {};
 
-  // ------------------------------------------------------------------
-  // Mappa i nomi delle squadre (come sono nel DB) ai file PNG
-  // ------------------------------------------------------------------
+  // Mappa nomi squadre -> file png
   function getLogoUrl(teamName) {
     if (!teamName) return '';
-    // Normalizza: minuscolo, toglie accenti, spazi e trattini diventano underscore
     let slug = teamName.toLowerCase()
       .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
       .replace(/[^a-z0-9]+/g, '_')
       .replace(/^_|_$/g, '');
     
-    // Eccezioni per nomi che non corrispondono esattamente dopo la normalizzazione
     const exceptions = {
       'bv_smba': 'bv_samba',
       'skoop_poke': 'skoop',
@@ -455,13 +521,10 @@
       'the_pippierate': 'pippierate',
       'hellade_val_borago': 'hellade',
       'under_vr': 'under',
-      'fat_boy_campeones': 'fatboy',        // se presente nel DB (ma nei match c'è solo "Campeones")
       'team_santa_follia': 'team_santa_follia',
       'san_mexico': 'san_mexico'
     };
     if (exceptions[slug]) slug = exceptions[slug];
-    
-    // Percorso relativo alla root del sito (funziona sia su GitHub Pages che in locale)
     return `assets/images/loghi_squadre/${slug}.png`;
   }
 
@@ -492,6 +555,20 @@
       const timeA = a.time || '00:00';
       const timeB = b.time || '00:00';
       return timeA.localeCompare(timeB);
+    });
+  }
+
+  // Aggiunge event listener per espansione/compressione su tutti i match-card
+  function bindExpandEvents() {
+    const cards = document.querySelectorAll('.match-card');
+    cards.forEach(card => {
+      // Rimuovi vecchi listener per evitare duplicati (usando una classe o proprietà)
+      if (card._expandHandler) card.removeEventListener('click', card._expandHandler);
+      const handler = () => {
+        card.classList.toggle('expanded');
+      };
+      card.addEventListener('click', handler);
+      card._expandHandler = handler;
     });
   }
 
@@ -536,7 +613,7 @@
           : '<div class="sc-empty">—</div>';
 
         html += `
-          <div class="match-card${cls}">
+          <div class="match-card${cls}" data-match-id="${match.id}">
             <div class="card-top">
               <div class="match-meta">
                 <span>⏱ ${esc(match.time || '--:--')}</span>
@@ -570,6 +647,8 @@
       html += `</div>`;
     }
     container.innerHTML = html;
+    // Dopo aver inserito i nuovi elementi, riattacca gli eventi di espansione
+    bindExpandEvents();
   }
 
   function setConnected(ok) {
@@ -596,7 +675,7 @@
     toastTimer = setTimeout(() => { el.className = ''; }, 3200);
   }
 
-  // Ascolta i match fissi
+  // Listener match fissi
   onValue(ref(db, 'matches'), (snapshot) => {
     matchesData = snapshot.val() || {};
     renderCalendar();
@@ -609,7 +688,7 @@
     document.getElementById('calendar').innerHTML = `<p style="color:var(--text-2);font-size:0.85rem;padding:0.5rem 0;">Impossibile caricare le partite.</p>`;
   });
 
-  // Ascolta i risultati live
+  // Listener risultati live
   onValue(ref(db, 'liveResults'), (snapshot) => {
     liveResultsData = snapshot.val() || {};
     renderCalendar();
