@@ -10,7 +10,7 @@
 
   <style>
     /* ===========================
-       CSS VARIABLES
+       CSS VARIABLES (identico all'originale)
     =========================== */
     :root {
       --bg:           #0b0f17;
@@ -342,7 +342,7 @@
       margin-top: 3rem;
     }
 
-    /* Toast (solo per errori) */
+    /* Toast */
     #toast {
       position: fixed;
       bottom: 1.75rem;
@@ -376,7 +376,6 @@
 <div id="bg-fx" aria-hidden="true"></div>
 
 <div class="wrap">
-  <!-- HEADER -->
   <header>
     <div class="brand">
       <div class="brand-logo">⚽</div>
@@ -397,13 +396,10 @@
     </div>
   </header>
 
-  <!-- CALENDARIO PUBBLICO -->
   <section>
     <div class="section-lbl">⚽ Calendario Partite</div>
     <div id="calendar">
-      <p style="color:var(--text-2);font-size:0.85rem;padding:0.5rem 0;">
-        Caricamento in corso…
-      </p>
+      <p style="color:var(--text-2);font-size:0.85rem;padding:0.5rem 0;">Caricamento in corso…</p>
     </div>
   </section>
 
@@ -412,196 +408,167 @@
   </footer>
 </div>
 
-<!-- Toast notification (solo per errori Firebase) -->
 <div id="toast"></div>
 
-<!-- =======================================
-     JAVASCRIPT (solo pubblico, nessun admin)
-======================================= -->
 <script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
-// ─────────────────────────────────────────
-// MATCH DEFINITIONS
-// ─────────────────────────────────────────
-const MATCHES = [
-  { id:'m1', round:'Giornata 1', home:{ name:'Aquile Nere',  emoji:'🦅' }, away:{ name:'Falchi Rossi', emoji:'🔴' }, date:'2025-06-05', time:'17:00' },
-  { id:'m2', round:'Giornata 1', home:{ name:'Lupi Grigi',   emoji:'🐺' }, away:{ name:'Tigri Dorate', emoji:'🐯' }, date:'2025-06-05', time:'19:30' },
-  { id:'m3', round:'Giornata 2', home:{ name:'Aquile Nere',  emoji:'🦅' }, away:{ name:'Lupi Grigi',   emoji:'🐺' }, date:'2025-06-07', time:'16:00' },
-  { id:'m4', round:'Giornata 2', home:{ name:'Falchi Rossi', emoji:'🔴' }, away:{ name:'Tigri Dorate', emoji:'🐯' }, date:'2025-06-07', time:'18:30' },
-  { id:'m5', round:'Giornata 3', home:{ name:'Tigri Dorate', emoji:'🐯' }, away:{ name:'Aquile Nere',  emoji:'🦅' }, date:'2025-06-09', time:'17:30' },
-  { id:'m6', round:'Giornata 3', home:{ name:'Falchi Rossi', emoji:'🔴' }, away:{ name:'Lupi Grigi',   emoji:'🐺' }, date:'2025-06-09', time:'20:00' },
-  { id:'m7', round:'Semifinali', home:{ name:'Semi 1A', emoji:'⚔️' }, away:{ name:'Semi 1B', emoji:'⚔️' }, date:'2025-06-12', time:'18:00' },
-  { id:'m8', round:'Semifinali', home:{ name:'Semi 2A', emoji:'⚔️' }, away:{ name:'Semi 2B', emoji:'⚔️' }, date:'2025-06-12', time:'20:30' },
-  { id:'m9', round:'🏆 Finale',  home:{ name:'Finalista 1', emoji:'🏆' }, away:{ name:'Finalista 2', emoji:'🏆' }, date:'2025-06-14', time:'20:00' },
-];
+  const firebaseConfig = {
+    apiKey: "AIzaSyB0LUxAWKVUIhXYRb2T2JOT3ypiX9q_5Ck",
+    authDomain: "nievo-fcc94.firebaseapp.com",
+    databaseURL: "https://nievo-fcc94-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "nievo-fcc94",
+    storageBucket: "nievo-fcc94.firebasestorage.app",
+    messagingSenderId: "497831212426",
+    appId: "1:497831212426:web:357e8c37b249042c53c473",
+    measurementId: "G-ZERXCC9LH8"
+  };
 
-let db       = null;
-let liveData = {};
-
-// Firebase imports
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
-
-const firebaseConfig = {
-  apiKey: "AIzaSyB0LUxAWKVUIhXYRb2T2JOT3ypiX9q_5Ck",
-  authDomain: "nievo-fcc94.firebaseapp.com",
-  projectId: "nievo-fcc94",
-  storageBucket: "nievo-fcc94.firebasestorage.app",
-  messagingSenderId: "497831212426",
-  appId: "1:497831212426:web:357e8c37b249042c53c473",
-  measurementId: "G-ZERXCC9LH8",
-  databaseURL: "https://nievo-fcc94-default-rtdb.europe-west1.firebasedatabase.app/"
-};
-
-// Connessione badge
-function setConnected (on) {
-  const badge = document.getElementById('fb-badge');
-  const dot   = document.getElementById('fb-dot');
-  const lbl   = document.getElementById('fb-lbl');
-  if (on) {
-    badge.classList.add('ok');
-    dot.style.background = 'var(--live)';
-    lbl.textContent = 'Firebase connesso';
-  } else {
-    badge.classList.remove('ok');
-    dot.style.background = 'var(--text-3)';
-    lbl.textContent = 'Non connesso';
-  }
-}
-
-// Listener realtime
-function startListener () {
-  if (!db) return;
-  const rootRef = ref(db, 'nievoCupDemo/results');
-  onValue(rootRef, (snap) => {
-    liveData = snap.val() || {};
-    renderCalendar();
-  }, (err) => {
-    showToast('Errore Firebase: ' + err.message, 'err');
-    console.error(err);
-  });
-}
-
-// Helpers
-function getState (id) {
-  const d = liveData[id];
-  if (!d) return { scorersHome: [], scorersAway: [], status: 'In programma' };
-  const scorersHome = toArray(d.scorersHome);
-  const scorersAway = toArray(d.scorersAway);
-  return { scorersHome, scorersAway, status: d.status || 'In programma' };
-}
-
-function toArray (val) {
-  if (!val) return [];
-  if (Array.isArray(val)) return val;
-  if (typeof val === 'object') return Object.values(val);
-  return [];
-}
-
-// Rendering calendario
-function renderCalendar () {
-  const cal = document.getElementById('calendar');
-  const grouped = {};
-  for (const m of MATCHES) {
-    if (!grouped[m.date]) grouped[m.date] = [];
-    grouped[m.date].push(m);
-  }
-
-  let html = '';
-  for (const date of Object.keys(grouped).sort()) {
-    const ms = grouped[date];
-    const round = ms[0].round;
-    html += `
-      <div class="day-group">
-        <div class="day-hdr">📅 ${fmtDate(date)} &nbsp;·&nbsp; ${round}</div>
-        ${ms.map(renderCard).join('')}
-      </div>`;
-  }
-  cal.innerHTML = html;
-}
-
-function renderCard (m) {
-  const st   = getState(m.id);
-  const sh   = st.scorersHome.length;
-  const sa   = st.scorersAway.length;
-  const cls  = st.status === 'Live'   ? ' is-live'
-             : st.status === 'Finita' ? ' is-finished' : '';
-
-  const badgeHtml =
-    st.status === 'Live'   ? '<span class="badge b-live">● LIVE</span>'
-  : st.status === 'Finita' ? '<span class="badge b-fin">✔ Finita</span>'
-  :                          '<span class="badge b-sched">In programma</span>';
-
-  const hList = st.scorersHome.length
-    ? st.scorersHome.map(s => `<div class="sc-item"><span class="sc-ball">⚽</span>${esc(s)}</div>`).join('')
-    : '<div class="sc-empty">—</div>';
-
-  const aList = st.scorersAway.length
-    ? st.scorersAway.map(s => `<div class="sc-item">${esc(s)}<span class="sc-ball" style="margin-left:.25rem">⚽</span></div>`).join('')
-    : '<div class="sc-empty">—</div>';
-
-  return `
-    <div class="match-card${cls}">
-      <div class="card-top">
-        <div class="match-meta">
-          <span>⏱ ${m.time}</span>
-          <span class="meta-dot">·</span>
-          <span>${m.id.toUpperCase()}</span>
-        </div>
-        ${badgeHtml}
-      </div>
-
-      <div class="score-row">
-        <div class="team-blk">
-          <div class="t-emoji">${m.home.emoji}</div>
-          <div class="t-name">${m.home.name}</div>
-        </div>
-        <div class="score-ctr">
-          <span class="score-n">${sh}</span>
-          <span class="score-sep">:</span>
-          <span class="score-n">${sa}</span>
-        </div>
-        <div class="team-blk away">
-          <div class="t-emoji">${m.away.emoji}</div>
-          <div class="t-name">${m.away.name}</div>
-        </div>
-      </div>
-
-      <div class="scorers-wrap">
-        <div class="sc-col">${hList}</div>
-        <div class="sc-col right">${aList}</div>
-      </div>
-    </div>`;
-}
-
-// Utilities
-function esc (s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function fmtDate (str) {
-  const d = new Date(str + 'T12:00:00');
-  return d.toLocaleDateString('it-IT', {
-    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
-  });
-}
-
-// Toast (solo per errori)
-let toastTimer = null;
-function showToast (msg, type = 'inf') {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className   = `show t-${type}`;
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { el.className = ''; }, 3200);
-}
-
-// Avvio automatico
-(function initFirebase() {
   const app = initializeApp(firebaseConfig);
-  db = getDatabase(app);
-  setConnected(true);
-  startListener();
-  showToast('🔥 Connesso in tempo reale', 'inf');
-})();
+  const db = getDatabase(app);
+  const matchesRef = ref(db, 'matches');
 
+  let matchesData = {}; // oggetto { id: { ... } }
+
+  // Helper: trasforma in array sicuro
+  function toArray(val) {
+    if (!val) return [];
+    if (Array.isArray(val)) return val;
+    if (typeof val === 'object') return Object.values(val);
+    return [];
+  }
+
+  function esc(s) {
+    if (!s) return '';
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function fmtDate(dateStr) {
+    if (!dateStr) return 'Data non specificata';
+    const d = new Date(dateStr + 'T12:00:00');
+    return d.toLocaleDateString('it-IT', {
+      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+    });
+  }
+
+  // Renderizza il calendario basandosi sui dati in matchesData
+  function renderCalendar() {
+    const container = document.getElementById('calendar');
+    const matchesArray = Object.values(matchesData);
+    
+    if (matchesArray.length === 0) {
+      container.innerHTML = `<p style="color:var(--text-2);font-size:0.85rem;padding:0.5rem 0;">Nessuna partita disponibile nel database.</p>`;
+      return;
+    }
+
+    // Raggruppa per data (usa il campo "date" di ogni match)
+    const grouped = {};
+    for (const match of matchesArray) {
+      const date = match.date || '2025-01-01';
+      if (!grouped[date]) grouped[date] = [];
+      grouped[date].push(match);
+    }
+
+    let html = '';
+    for (const date of Object.keys(grouped).sort()) {
+      const matchesOnDate = grouped[date];
+      // Usa il round del primo match del giorno (se presente)
+      const round = matchesOnDate[0]?.round || '';
+      html += `
+        <div class="day-group">
+          <div class="day-hdr">📅 ${fmtDate(date)} &nbsp;·&nbsp; ${esc(round)}</div>
+      `;
+      for (const m of matchesOnDate) {
+        const homeScore = toArray(m.scorersHome).length;
+        const awayScore = toArray(m.scorersAway).length;
+        const status = m.status || 'In programma';
+        const cls = status === 'Live' ? ' is-live' : (status === 'Finita' ? ' is-finished' : '');
+        const badgeHtml = status === 'Live' ? '<span class="badge b-live">● LIVE</span>'
+                         : status === 'Finita' ? '<span class="badge b-fin">✔ Finita</span>'
+                         : '<span class="badge b-sched">In programma</span>';
+        
+        const hList = toArray(m.scorersHome).length
+          ? toArray(m.scorersHome).map(s => `<div class="sc-item"><span class="sc-ball">⚽</span>${esc(s)}</div>`).join('')
+          : '<div class="sc-empty">—</div>';
+        const aList = toArray(m.scorersAway).length
+          ? toArray(m.scorersAway).map(s => `<div class="sc-item">${esc(s)}<span class="sc-ball" style="margin-left:.25rem">⚽</span></div>`).join('')
+          : '<div class="sc-empty">—</div>';
+
+        html += `
+          <div class="match-card${cls}">
+            <div class="card-top">
+              <div class="match-meta">
+                <span>⏱ ${esc(m.time || '--:--')}</span>
+                <span class="meta-dot">·</span>
+                <span>${esc(m.id?.toUpperCase() || '?')}</span>
+              </div>
+              ${badgeHtml}
+            </div>
+            <div class="score-row">
+              <div class="team-blk">
+                <div class="t-emoji">${esc(m.home?.emoji || '🏠')}</div>
+                <div class="t-name">${esc(m.home?.name || 'Casa')}</div>
+              </div>
+              <div class="score-ctr">
+                <span class="score-n">${homeScore}</span>
+                <span class="score-sep">:</span>
+                <span class="score-n">${awayScore}</span>
+              </div>
+              <div class="team-blk away">
+                <div class="t-emoji">${esc(m.away?.emoji || '✈️')}</div>
+                <div class="t-name">${esc(m.away?.name || 'Trasferta')}</div>
+              </div>
+            </div>
+            <div class="scorers-wrap">
+              <div class="sc-col">${hList}</div>
+              <div class="sc-col right">${aList}</div>
+            </div>
+          </div>
+        `;
+      }
+      html += `</div>`;
+    }
+    container.innerHTML = html;
+  }
+
+  // Aggiorna badge connessione
+  function setConnected(ok) {
+    const badge = document.getElementById('fb-badge');
+    const dot = document.getElementById('fb-dot');
+    const lbl = document.getElementById('fb-lbl');
+    if (ok) {
+      badge.classList.add('ok');
+      dot.style.background = 'var(--live)';
+      lbl.textContent = 'Firebase connesso';
+    } else {
+      badge.classList.remove('ok');
+      dot.style.background = 'var(--text-3)';
+      lbl.textContent = 'Non connesso';
+    }
+  }
+
+  let toastTimer = null;
+  function showToast(msg, type = 'inf') {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = `show t-${type}`;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { el.className = ''; }, 3200);
+  }
+
+  // Ascolta i cambiamenti in tempo reale sul nodo 'matches'
+  onValue(matchesRef, (snapshot) => {
+    matchesData = snapshot.val() || {};
+    renderCalendar();
+    setConnected(true);
+    showToast('🔥 Dati aggiornati in tempo reale', 'inf');
+  }, (error) => {
+    console.error('Errore Firebase:', error);
+    setConnected(false);
+    showToast('Errore di connessione a Firebase: ' + error.message, 'err');
+    document.getElementById('calendar').innerHTML = `<p style="color:var(--text-2);font-size:0.85rem;padding:0.5rem 0;">Impossibile caricare le partite. Verifica la connessione.</p>`;
+  });
 </script>
 </body>
 </html>

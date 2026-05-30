@@ -54,7 +54,6 @@
       padding: 1.5rem;
     }
 
-    /* Sfondo animato (stesso del sito pubblico) */
     #bg-fx {
       position: fixed;
       inset: 0;
@@ -88,10 +87,9 @@
       position: relative;
       z-index: 1;
       width: 100%;
-      max-width: 520px;
+      max-width: 560px;
     }
 
-    /* Header */
     header {
       margin-bottom: 2rem;
       display: flex;
@@ -190,13 +188,11 @@
     }
     @keyframes pulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.35;transform:scale(.75);} }
 
-    /* Admin Panel */
     .admin-panel {
       background: var(--bg-card);
       border: 1px solid var(--border-a);
       border-radius: 24px;
       padding: 1.6rem;
-      backdrop-filter: blur(2px);
     }
 
     .adm-hdr {
@@ -215,7 +211,6 @@
       display: grid;
       place-items: center;
       font-size: 20px;
-      flex-shrink: 0;
     }
     .adm-title {
       font-family: 'Bebas Neue', sans-serif;
@@ -233,7 +228,6 @@
       font-weight: 600;
     }
 
-    /* Form controls */
     .fg { margin-bottom: 1.25rem; }
     .fl {
       display: block;
@@ -246,7 +240,7 @@
       margin-bottom: 0.5rem;
     }
 
-    select, input[type="text"] {
+    select, input[type="text"], input[type="date"] {
       width: 100%;
       background: var(--bg-input);
       border: 1px solid var(--border-m);
@@ -256,18 +250,13 @@
       font-family: 'Exo 2', sans-serif;
       font-size: 0.9rem;
       outline: none;
-      transition: border-color .18s;
-      -webkit-appearance: none;
-      appearance: none;
     }
     select {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 1rem center;
-      padding-right: 2.5rem;
-      cursor: pointer;
     }
-    select option { background: #101621; }
     select:focus, input:focus { border-color: var(--accent); }
 
     .team-tog {
@@ -277,32 +266,21 @@
       margin-top: 0.2rem;
     }
     .tog-btn {
-      padding: 0.6rem 0.5rem;
+      padding: 0.6rem;
       border: 1px solid var(--border-m);
       border-radius: 40px;
       background: var(--bg-input);
       color: var(--text-2);
       font-family: 'Rajdhani', sans-serif;
-      font-size: 0.85rem;
       font-weight: 600;
-      letter-spacing: 0.04em;
       cursor: pointer;
-      transition: all .2s;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      transition: all 0.2s;
       text-align: center;
     }
     .tog-btn.active {
       border-color: var(--accent);
       background: rgba(124,58,237,0.2);
       color: var(--text);
-      box-shadow: 0 0 6px rgba(124,58,237,0.3);
-    }
-    .tog-btn:hover:not(.active) {
-      border-color: var(--border-a);
-      color: var(--text);
-      background: rgba(124,58,237,0.08);
     }
 
     .score-box {
@@ -312,63 +290,27 @@
       padding: 1.2rem;
       text-align: center;
       margin-bottom: 1.5rem;
-      transition: all 0.1s;
     }
-    .sb-match { 
-      font-size: 0.8rem; 
-      color: var(--accent-l); 
-      margin-bottom: 0.65rem;
-      font-family: 'Rajdhani', sans-serif; 
-      font-weight: 600; 
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-    .sb-score { 
-      font-family: 'Bebas Neue', sans-serif; 
-      font-size: 2.8rem; 
-      color: var(--text); 
-      letter-spacing: 0.12em;
-      background: linear-gradient(135deg, #fff, var(--accent-l));
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      text-shadow: 0 0 12px rgba(124,58,237,0.3);
-    }
-    .sb-status { 
-      font-size: 0.68rem; 
-      color: var(--live); 
-      margin-top: 0.5rem;
-      font-family: 'Rajdhani', sans-serif; 
-      font-weight: 700; 
-      letter-spacing: 0.12em; 
-      text-transform: uppercase; 
-    }
+    .sb-match { font-size: 0.8rem; color: var(--accent-l); margin-bottom: 0.65rem; font-weight: 600; text-transform: uppercase; }
+    .sb-score { font-family: 'Bebas Neue', sans-serif; font-size: 2.8rem; color: var(--text); letter-spacing: 0.12em; }
+    .sb-status { font-size: 0.68rem; color: var(--live); margin-top: 0.5rem; font-weight: 700; text-transform: uppercase; }
 
     .btn {
       width: 100%;
-      padding: 0.7rem 1rem;
+      padding: 0.7rem;
       border-radius: 40px;
       border: 1px solid transparent;
       font-family: 'Rajdhani', sans-serif;
-      font-size: 0.85rem;
       font-weight: 700;
-      letter-spacing: 0.08em;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: 0.2s;
     }
     .btn + .btn { margin-top: 0.55rem; }
-
-    .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
-    .btn-primary:hover { background: var(--accent-h); transform: translateY(-2px); box-shadow: 0 5px 12px rgba(124,58,237,0.3); }
-
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-h); transform: translateY(-2px); }
     .btn-amber { background: var(--amber-bg); color: #fbbf24; border-color: var(--amber-bdr); }
-    .btn-amber:hover { background: rgba(245,158,11,0.25); transform: translateY(-1px); }
-
     .btn-red { background: var(--red-bg); color: #f87171; border-color: var(--red-bdr); }
-    .btn-red:hover { background: rgba(239,68,68,0.2); transform: translateY(-1px); }
-
-    .btn-ghost { background: transparent; color: var(--text-2); border-color: var(--border-m); font-size: 0.78rem; }
-    .btn-ghost:hover { background: var(--bg-input); color: var(--text); border-color: var(--border-a); }
+    .btn-ghost { background: transparent; color: var(--text-2); border-color: var(--border-m); }
 
     hr.div { border: none; border-top: 1px solid var(--border); margin: 1.4rem 0; }
 
@@ -377,8 +319,6 @@
       padding: 1.8rem 0 0.5rem;
       font-family: 'Rajdhani', sans-serif;
       font-size: 0.7rem;
-      font-weight: 500;
-      letter-spacing: 0.1em;
       color: var(--text-3);
       border-top: 1px solid var(--border);
       margin-top: 2rem;
@@ -391,23 +331,18 @@
       z-index: 9999;
       pointer-events: none;
       min-width: 220px;
-      max-width: 320px;
       padding: 0.9rem 1.2rem;
       border-radius: 16px;
       background: var(--bg-card2);
       border: 1px solid var(--border-m);
-      font-family: 'Exo 2', sans-serif;
       font-size: 0.85rem;
-      color: var(--text);
       transform: translateY(90px);
       opacity: 0;
-      transition: transform .3s ease, opacity .3s ease;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+      transition: 0.3s;
     }
     #toast.show { transform: translateY(0); opacity: 1; }
     #toast.t-ok  { border-left: 4px solid var(--live); }
     #toast.t-err { border-left: 4px solid var(--red); }
-    #toast.t-inf { border-left: 4px solid var(--accent); }
   </style>
 </head>
 <body>
@@ -415,8 +350,6 @@
 <div id="bg-fx" aria-hidden="true"></div>
 
 <div class="wrap">
-
-  <!-- Header -->
   <header>
     <div class="brand">
       <div class="brand-logo">⚽</div>
@@ -437,9 +370,7 @@
     </div>
   </header>
 
-  <!-- ADMIN DASHBOARD CORE -->
   <div class="admin-panel">
-
     <div class="adm-hdr">
       <div class="adm-ico">🛠️</div>
       <div>
@@ -448,7 +379,6 @@
       </div>
     </div>
 
-    <!-- Match selector -->
     <div class="fg">
       <label class="fl" for="adm-match">📋 SELEZIONA PARTITA</label>
       <select id="adm-match">
@@ -456,14 +386,12 @@
       </select>
     </div>
 
-    <!-- Score preview -->
     <div class="score-box">
       <div class="sb-match" id="adm-mlbl">⚡ Nessuna partita selezionata</div>
       <div class="sb-score" id="adm-score">0 : 0</div>
       <div class="sb-status" id="adm-stato">–</div>
     </div>
 
-    <!-- Status selector -->
     <div class="fg">
       <label class="fl" for="adm-status">⏱ STATO PARTITA</label>
       <select id="adm-status">
@@ -475,7 +403,6 @@
 
     <hr class="div" />
 
-    <!-- Team selector -->
     <div class="fg">
       <label class="fl">⚡ SQUADRA MARCATRICE</label>
       <div class="team-tog">
@@ -484,10 +411,9 @@
       </div>
     </div>
 
-    <!-- Scorer name -->
     <div class="fg">
       <label class="fl" for="scorer-in">👤 NOME MARCATORE</label>
-      <input type="text" id="scorer-in" placeholder="Es. M. Rossi, L. Esposito, Autogol" autocomplete="off" />
+      <input type="text" id="scorer-in" placeholder="Es. M. Rossi, Autogol" autocomplete="off" />
     </div>
 
     <button class="btn btn-primary" id="addGoalBtn">⚽ AGGIUNGI GOAL</button>
@@ -496,55 +422,47 @@
     <hr class="div" />
 
     <button class="btn btn-red" id="resetMatchBtn">🔄 RESET PARTITA</button>
-    <button class="btn btn-ghost" id="initAllBtn">📡 INIZIALIZZA TUTTE LE PARTITE</button>
-
+    
+    <!-- Sezione per creare nuove partite (opzionale ma comoda) -->
+    <hr class="div" />
+    <div class="adm-sub" style="margin-bottom: 1rem;">➕ CREA NUOVA PARTITA</div>
+    <div class="fg"><input type="text" id="newMatchId" placeholder="ID (es. m61)" /></div>
+    <div class="fg"><input type="date" id="newMatchDate" /></div>
+    <div class="fg"><input type="text" id="newMatchTime" placeholder="Orario (es. 20:10)" /></div>
+    <div class="fg"><input type="text" id="newHomeName" placeholder="Squadra casa" /></div>
+    <div class="fg"><input type="text" id="newAwayName" placeholder="Squadra trasferta" /></div>
+    <button class="btn btn-primary" id="createMatchBtn">➕ CREA</button>
   </div>
 
-  <footer>
-    Nievo Cup &nbsp;·&nbsp; Pannello Amministrazione &nbsp;·&nbsp; Firebase Realtime DB
-  </footer>
+  <footer>Nievo Cup · Pannello Amministrazione · Firebase Realtime DB</footer>
 </div>
 
 <div id="toast"></div>
 
 <script type="module">
-  // ------------------------------ FIREBASE IMPORTS ---------------------------------
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-  import { getDatabase, ref, onValue, set as fbSet } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+  import { getDatabase, ref, onValue, set, get } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
   import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
-  // Configurazione Firebase (uguale a index.html e admin)
   const firebaseConfig = {
     apiKey: "AIzaSyB0LUxAWKVUIhXYRb2T2JOT3ypiX9q_5Ck",
     authDomain: "nievo-fcc94.firebaseapp.com",
+    databaseURL: "https://nievo-fcc94-default-rtdb.europe-west1.firebasedatabase.app",
     projectId: "nievo-fcc94",
     storageBucket: "nievo-fcc94.firebasestorage.app",
     messagingSenderId: "497831212426",
     appId: "1:497831212426:web:357e8c37b249042c53c473",
-    measurementId: "G-ZERXCC9LH8",
-    databaseURL: "https://nievo-fcc94-default-rtdb.europe-west1.firebasedatabase.app/"
+    measurementId: "G-ZERXCC9LH8"
   };
 
-  // ----------------------------- MATCH DATABASE SCHEMA ------------------------------
-  const MATCHES = [
-    { id:'m1', round:'Giornata 1', home:{ name:'Aquile Nere',  emoji:'🦅' }, away:{ name:'Falchi Rossi', emoji:'🔴' }, date:'2025-06-05', time:'17:00' },
-    { id:'m2', round:'Giornata 1', home:{ name:'Lupi Grigi',   emoji:'🐺' }, away:{ name:'Tigri Dorate', emoji:'🐯' }, date:'2025-06-05', time:'19:30' },
-    { id:'m3', round:'Giornata 2', home:{ name:'Aquile Nere',  emoji:'🦅' }, away:{ name:'Lupi Grigi',   emoji:'🐺' }, date:'2025-06-07', time:'16:00' },
-    { id:'m4', round:'Giornata 2', home:{ name:'Falchi Rossi', emoji:'🔴' }, away:{ name:'Tigri Dorate', emoji:'🐯' }, date:'2025-06-07', time:'18:30' },
-    { id:'m5', round:'Giornata 3', home:{ name:'Tigri Dorate', emoji:'🐯' }, away:{ name:'Aquile Nere',  emoji:'🦅' }, date:'2025-06-09', time:'17:30' },
-    { id:'m6', round:'Giornata 3', home:{ name:'Falchi Rossi', emoji:'🔴' }, away:{ name:'Lupi Grigi',   emoji:'🐺' }, date:'2025-06-09', time:'20:00' },
-    { id:'m7', round:'Semifinali', home:{ name:'Semi 1A', emoji:'⚔️' }, away:{ name:'Semi 1B', emoji:'⚔️' }, date:'2025-06-12', time:'18:00' },
-    { id:'m8', round:'Semifinali', home:{ name:'Semi 2A', emoji:'⚔️' }, away:{ name:'Semi 2B', emoji:'⚔️' }, date:'2025-06-12', time:'20:30' },
-    { id:'m9', round:'🏆 Finale',  home:{ name:'Finalista 1', emoji:'🏆' }, away:{ name:'Finalista 2', emoji:'🏆' }, date:'2025-06-14', time:'20:00' },
-  ];
-
-  // Variabili globali del modulo
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
   let db = null;
-  let liveData = {};
+  let liveData = {};      // tutti i match letti dal nodo 'matches'
   let selMatchId = '';
-  let selTeam = 'home';      // 'home' o 'away'
+  let selTeam = 'home';
 
-  // ----------------------------- UTILITIES -----------------------------------------
+  // Helper
   function toArray(val) {
     if (!val) return [];
     if (Array.isArray(val)) return val;
@@ -564,8 +482,8 @@
 
   async function writeMatch(matchId, data) {
     if (!db) throw new Error('DB non connesso');
-    const matchRef = ref(db, `nievoCupDemo/results/${matchId}`);
-    await fbSet(matchRef, { ...data, updatedAt: Date.now() });
+    const matchRef = ref(db, `matches/${matchId}`);
+    await set(matchRef, { ...data, updatedAt: Date.now() });
   }
 
   function setConnected(on) {
@@ -583,24 +501,26 @@
     }
   }
 
-  let toastTimer = null;
   function showToast(msg, type = 'inf') {
     const el = document.getElementById('toast');
     el.textContent = msg;
     el.className = `show t-${type}`;
-    if (toastTimer) clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => { el.className = ''; }, 3200);
+    setTimeout(() => el.className = '', 3200);
   }
 
-  // ----------------------------- UI UPDATE & RENDER ---------------------------------
   function updateAdminPreview() {
-    if (!selMatchId) return;
-    const match = MATCHES.find(m => m.id === selMatchId);
-    if (!match) return;
+    if (!selMatchId || !liveData[selMatchId]) {
+      document.getElementById('adm-mlbl').innerHTML = '⚡ Nessuna partita selezionata';
+      document.getElementById('adm-score').innerHTML = '— : —';
+      document.getElementById('adm-stato').innerHTML = '–';
+      return;
+    }
+    const match = liveData[selMatchId];
     const st = getState(selMatchId);
-    document.getElementById('adm-mlbl').innerHTML = `${match.home.name}  VS  ${match.away.name}`;
+    document.getElementById('adm-mlbl').innerHTML = `${match.home?.name || '?'}  VS  ${match.away?.name || '?'}`;
     document.getElementById('adm-score').innerHTML = `${st.scorersHome.length} : ${st.scorersAway.length}`;
     document.getElementById('adm-stato').innerHTML = st.status === 'Live' ? '🔴 LIVE' : (st.status === 'Finita' ? '🏁 FINITA' : '⚪ IN PROGRAMMA');
+    
     const statusSelect = document.getElementById('adm-status');
     for (let i = 0; i < statusSelect.options.length; i++) {
       if (statusSelect.options[i].value === st.status) {
@@ -608,43 +528,56 @@
         break;
       }
     }
+    // Aggiorna i bottoni squadra con i nomi reali
+    document.getElementById('btn-h').innerHTML = `🏠 ${match.home?.name || 'Casa'}`;
+    document.getElementById('btn-a').innerHTML = `✈️ ${match.away?.name || 'Trasferta'}`;
   }
 
   function populateAdminSelect() {
     const sel = document.getElementById('adm-match');
+    const matchesArray = Object.values(liveData);
+    if (matchesArray.length === 0) {
+      sel.innerHTML = '<option value="">— Nessuna partita —</option>';
+      return;
+    }
     sel.innerHTML = '<option value="">— Seleziona partita —</option>';
-    MATCHES.forEach(m => {
+    matchesArray.forEach(m => {
       const opt = document.createElement('option');
       opt.value = m.id;
-      opt.textContent = `${m.id.toUpperCase()} · ${m.home.name} vs ${m.away.name}`;
+      opt.textContent = `${m.id?.toUpperCase()} · ${m.home?.name} vs ${m.away?.name} (${m.date})`;
       sel.appendChild(opt);
     });
-    sel.value = selMatchId;
+    if (selMatchId) sel.value = selMatchId;
   }
 
-  function updateTeamButtonLabels() {
-    const match = MATCHES.find(m => m.id === selMatchId);
-    if (match) {
-      document.getElementById('btn-h').innerHTML = `🏠 ${match.home.name}`;
-      document.getElementById('btn-a').innerHTML = `✈️ ${match.away.name}`;
-    } else {
-      document.getElementById('btn-h').innerHTML = '🏠 Casa';
-      document.getElementById('btn-a').innerHTML = '✈️ Trasferta';
-    }
+  // Listener in tempo reale sul nodo 'matches'
+  function startListener() {
+    if (!db) return;
+    const matchesRef = ref(db, 'matches');
+    onValue(matchesRef, (snapshot) => {
+      liveData = snapshot.val() || {};
+      populateAdminSelect();
+      if (selMatchId && liveData[selMatchId]) {
+        updateAdminPreview();
+      } else if (Object.keys(liveData).length > 0) {
+        // Seleziona automaticamente la prima partita se nessuna era selezionata
+        const firstId = Object.keys(liveData)[0];
+        document.getElementById('adm-match').value = firstId;
+        selMatchId = firstId;
+        updateAdminPreview();
+      } else {
+        updateAdminPreview();  // mostra placeholder
+      }
+    }, (err) => {
+      console.error('Firebase read error:', err);
+      showToast('Errore di lettura: ' + err.message, 'err');
+    });
   }
 
-  function needsMatchAndDb() {
-    if (!db) { showToast('Database non connesso', 'err'); return false; }
-    if (!selMatchId) { showToast('Seleziona una partita', 'err'); return false; }
-    return true;
-  }
-
-  // ----------------------------- EVENT HANDLERS (globali per HTML) -----------------
+  // Eventi UI
   window.onMatchChange = function() {
-    const select = document.getElementById('adm-match');
-    selMatchId = select.value;
-    if (selMatchId) {
-      updateTeamButtonLabels();
+    selMatchId = document.getElementById('adm-match').value;
+    if (selMatchId && liveData[selMatchId]) {
       updateAdminPreview();
     } else {
       document.getElementById('adm-mlbl').innerHTML = '⚡ Nessuna partita selezionata';
@@ -655,48 +588,40 @@
 
   window.pickTeam = function(team) {
     selTeam = team;
-    const btnHome = document.getElementById('btn-h');
-    const btnAway = document.getElementById('btn-a');
+    const btnH = document.getElementById('btn-h');
+    const btnA = document.getElementById('btn-a');
     if (team === 'home') {
-      btnHome.classList.add('active');
-      btnAway.classList.remove('active');
+      btnH.classList.add('active');
+      btnA.classList.remove('active');
     } else {
-      btnAway.classList.add('active');
-      btnHome.classList.remove('active');
+      btnA.classList.add('active');
+      btnH.classList.remove('active');
     }
   };
 
   window.addGoal = async function() {
-    if (!needsMatchAndDb()) return;
-    const inputEl = document.getElementById('scorer-in');
-    const scorerName = inputEl.value.trim();
-    if (scorerName === '') {
-      showToast('Inserisci il nome del marcatore', 'err');
-      return;
-    }
+    if (!selMatchId) { showToast('Seleziona una partita', 'err'); return; }
+    const scorer = document.getElementById('scorer-in').value.trim();
+    if (!scorer) { showToast('Inserisci il nome del marcatore', 'err'); return; }
     const st = getState(selMatchId);
     const newState = {
       scorersHome: [...st.scorersHome],
       scorersAway: [...st.scorersAway],
       status: st.status
     };
-    if (selTeam === 'home') newState.scorersHome.push(scorerName);
-    else newState.scorersAway.push(scorerName);
-    
-    // Se era "In programma" ed è il primo goal, passa automaticamente a Live
+    if (selTeam === 'home') newState.scorersHome.push(scorer);
+    else newState.scorersAway.push(scorer);
     if (newState.status === 'In programma' && (newState.scorersHome.length + newState.scorersAway.length) === 1) {
       newState.status = 'Live';
     }
     await writeMatch(selMatchId, newState);
-    const match = MATCHES.find(m => m.id === selMatchId);
-    const teamLabel = selTeam === 'home' ? match.home.name : match.away.name;
-    showToast(`⚽ GOAL! ${scorerName} (${teamLabel})`, 'ok');
-    inputEl.value = '';
-    inputEl.focus();
+    showToast(`⚽ Goal di ${scorer} aggiunto`, 'ok');
+    document.getElementById('scorer-in').value = '';
+    document.getElementById('scorer-in').focus();
   };
 
   window.undoGoal = async function() {
-    if (!needsMatchAndDb()) return;
+    if (!selMatchId) { showToast('Seleziona una partita', 'err'); return; }
     const st = getState(selMatchId);
     const hArr = [...st.scorersHome];
     const aArr = [...st.scorersAway];
@@ -706,93 +631,83 @@
     } else if (selTeam === 'away' && aArr.length > 0) {
       removed = aArr.pop();
     } else {
-      const teamDisplay = selTeam === 'home' ? document.getElementById('btn-h').innerHTML : document.getElementById('btn-a').innerHTML;
-      showToast(`Nessun goal da annullare per ${teamDisplay}`, 'err');
+      showToast('Nessun goal da annullare per questa squadra', 'err');
       return;
     }
     await writeMatch(selMatchId, { scorersHome: hArr, scorersAway: aArr, status: st.status });
-    showToast(`↩️ Annullato goal di "${removed}"`, 'inf');
+    showToast(`↩️ Annullato goal di ${removed}`, 'inf');
   };
 
   window.saveStatus = async function() {
-    if (!needsMatchAndDb()) return;
+    if (!selMatchId) { showToast('Seleziona una partita', 'err'); return; }
     const newStatus = document.getElementById('adm-status').value;
     const st = getState(selMatchId);
     await writeMatch(selMatchId, { scorersHome: st.scorersHome, scorersAway: st.scorersAway, status: newStatus });
-    showToast(`Stato aggiornato → ${newStatus === 'Live' ? '🔴 LIVE' : (newStatus === 'Finita' ? '🏁 FINITA' : '⚪ In programma')}`, 'ok');
+    showToast(`Stato cambiato in ${newStatus}`, 'ok');
   };
 
   window.resetMatch = async function() {
-    if (!needsMatchAndDb()) return;
-    const confirmReset = confirm('⚠️ ATTENZIONE: Resettare la partita cancellerà tutti i goal. Procedere?');
-    if (!confirmReset) return;
+    if (!selMatchId) { showToast('Seleziona una partita', 'err'); return; }
+    if (!confirm('Resettare la partita cancellerà tutti i goal. Continuare?')) return;
     await writeMatch(selMatchId, { scorersHome: [], scorersAway: [], status: 'In programma' });
-    showToast('🔄 Partita resettata completamente', 'inf');
+    showToast('Partita resettata', 'inf');
   };
 
-  window.initAll = async function() {
-    if (!db) { showToast('Firebase non disponibile', 'err'); return; }
-    let count = 0;
-    for (const m of MATCHES) {
-      if (!liveData[m.id]) {
-        await writeMatch(m.id, { scorersHome: [], scorersAway: [], status: 'In programma' });
-        count++;
-      }
+  window.createMatch = async function() {
+    const id = document.getElementById('newMatchId').value.trim();
+    const date = document.getElementById('newMatchDate').value;
+    const time = document.getElementById('newMatchTime').value.trim();
+    const homeName = document.getElementById('newHomeName').value.trim();
+    const awayName = document.getElementById('newAwayName').value.trim();
+    if (!id || !date || !time || !homeName || !awayName) {
+      showToast('Compila tutti i campi', 'err');
+      return;
     }
-    showToast(`✅ ${count} partite inizializzate su Firebase`, 'ok');
+    if (liveData[id]) {
+      showToast(`Esiste già una partita con ID ${id}`, 'err');
+      return;
+    }
+    const newMatch = {
+      id: id,
+      date: date,
+      time: time,
+      home: { name: homeName, emoji: '⚽' },
+      away: { name: awayName, emoji: '⚽' },
+      scorersHome: [],
+      scorersAway: [],
+      status: 'In programma',
+      round: 'Fase a Gironi'  // default, puoi modificarlo
+    };
+    await writeMatch(id, newMatch);
+    showToast(`Partita ${id} creata`, 'ok');
+    // pulisci form
+    document.getElementById('newMatchId').value = '';
+    document.getElementById('newMatchDate').value = '';
+    document.getElementById('newMatchTime').value = '';
+    document.getElementById('newHomeName').value = '';
+    document.getElementById('newAwayName').value = '';
   };
 
-  // ----------------------------- REALTIME LISTENER ---------------------------------
-  function startRealtimeListener() {
-    if (!db) return;
-    const resultsRef = ref(db, 'nievoCupDemo/results');
-    onValue(resultsRef, (snapshot) => {
-      liveData = snapshot.val() || {};
-      updateAdminPreview();
-    }, (err) => {
-      console.error('Firebase read error:', err);
-      showToast('Errore nel caricamento live: ' + err.message, 'err');
-    });
-  }
-
-  // ----------------------------- AUTH & INIT ---------------------------------------
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-
+  // Auth e init
   onAuthStateChanged(auth, (user) => {
     if (!user) {
-      // Non autenticato -> rimbalzo su admin.html
       window.location.href = 'admin.html';
       return;
     }
-    // Utente autenticato, inizializzo database e UI
-    console.log('✅ Admin autenticato:', user.email);
+    console.log('Admin autenticato:', user.email);
     db = getDatabase(app);
     setConnected(true);
-    populateAdminSelect();
-    startRealtimeListener();
-    showToast('🔥 Connesso a Firebase Realtime Database', 'ok');
-    
-    // Seleziona di default nessuna partita, poi rimuovi eventuali placeholder
-    const matchSelect = document.getElementById('adm-match');
-    if (matchSelect.options.length > 1) matchSelect.value = '';
-    selMatchId = '';
-    updateAdminPreview();   // mostra placeholder
-    updateTeamButtonLabels();
-    
-    // Attacchiamo manualmente gli eventi anche agli elementi per sicurezza,
-    // ma gli onclick sulle funzioni window sono già definiti.
+    startListener();
+    // Collega i bottoni
     document.getElementById('addGoalBtn').onclick = () => window.addGoal();
     document.getElementById('undoGoalBtn').onclick = () => window.undoGoal();
     document.getElementById('resetMatchBtn').onclick = () => window.resetMatch();
-    document.getElementById('initAllBtn').onclick = () => window.initAll();
     document.getElementById('adm-status').onchange = () => window.saveStatus();
     document.getElementById('adm-match').onchange = () => window.onMatchChange();
     document.getElementById('btn-h').onclick = () => window.pickTeam('home');
     document.getElementById('btn-a').onclick = () => window.pickTeam('away');
-    
-    // Focus sul campo nome marcatore
-    document.getElementById('scorer-in').focus();
+    document.getElementById('createMatchBtn').onclick = () => window.createMatch();
+    showToast('🔥 Connesso a Firebase', 'ok');
   });
 </script>
 </body>
