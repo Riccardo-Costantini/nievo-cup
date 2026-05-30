@@ -283,8 +283,18 @@
     .team-blk { display: flex; flex-direction: column; gap: 0.25rem; }
     .team-blk.away { align-items: flex-end; }
 
-    .t-emoji  { font-size: 1.75rem; line-height: 1; }
-    .t-name   {
+    /* Stile per i loghi delle squadre */
+    .team-logo {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+      background: rgba(0,0,0,0.2);
+      border-radius: 12px;
+      padding: 4px;
+    }
+
+    .t-name {
       font-family: 'Rajdhani', sans-serif;
       font-size: 1.05rem;
       font-weight: 700;
@@ -362,6 +372,7 @@
 
     @media (max-width: 600px) {
       .brand-name { font-size: 1.5rem; }
+      .team-logo { width: 36px; height: 36px; }
     }
   </style>
 </head>
@@ -422,9 +433,37 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  // Dati separati
-  let matchesData = {};      // dettagli fissi (nomi, date, orari, emoji)
-  let liveResultsData = {};  // goal e stato
+  let matchesData = {};
+  let liveResultsData = {};
+
+  // ------------------------------------------------------------------
+  // Mappa i nomi delle squadre (come sono nel DB) ai file PNG
+  // ------------------------------------------------------------------
+  function getLogoUrl(teamName) {
+    if (!teamName) return '';
+    // Normalizza: minuscolo, toglie accenti, spazi e trattini diventano underscore
+    let slug = teamName.toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^_|_$/g, '');
+    
+    // Eccezioni per nomi che non corrispondono esattamente dopo la normalizzazione
+    const exceptions = {
+      'bv_smba': 'bv_samba',
+      'skoop_poke': 'skoop',
+      'spyders_fat_boy': 'spyder_nest',
+      'the_pippierate': 'pippierate',
+      'hellade_val_borago': 'hellade',
+      'under_vr': 'under',
+      'fat_boy_campeones': 'fatboy',        // se presente nel DB (ma nei match c'è solo "Campeones")
+      'team_santa_follia': 'team_santa_follia',
+      'san_mexico': 'san_mexico'
+    };
+    if (exceptions[slug]) slug = exceptions[slug];
+    
+    // Percorso relativo alla root del sito (funziona sia su GitHub Pages che in locale)
+    return `assets/images/loghi_squadre/${slug}.png`;
+  }
 
   function toArray(val) {
     if (!val) return [];
@@ -446,7 +485,6 @@
     });
   }
 
-  // Ordine cronologico (data + ora)
   function sortMatchesByDateTime(matchesArray) {
     return [...matchesArray].sort((a, b) => {
       const dateCompare = (a.date || '').localeCompare(b.date || '');
@@ -457,7 +495,6 @@
     });
   }
 
-  // Combina i dati fissi con i risultati live e renderizza
   function renderCalendar() {
     const container = document.getElementById('calendar');
     const matchesArray = Object.values(matchesData);
@@ -467,7 +504,6 @@
       return;
     }
 
-    // Raggruppa per data
     const grouped = {};
     for (const match of matchesArray) {
       const date = match.date || '2025-01-01';
@@ -476,17 +512,12 @@
     }
 
     let html = '';
-    // Ordina le date crescenti
     const sortedDates = Object.keys(grouped).sort();
     for (const date of sortedDates) {
       const matchesOnDate = grouped[date];
-      // Ordina i match di questa data per orario
       const sortedMatches = sortMatchesByDateTime(matchesOnDate);
       const round = sortedMatches[0]?.round || '';
-      html += `
-        <div class="day-group">
-          <div class="day-hdr">📅 ${fmtDate(date)} &nbsp;·&nbsp; ${esc(round)}</div>
-      `;
+      html += `<div class="day-group"><div class="day-hdr">📅 ${fmtDate(date)} &nbsp;·&nbsp; ${esc(round)}</div>`;
       for (const match of sortedMatches) {
         const result = liveResultsData[match.id] || {};
         const scorersHome = toArray(result.scorersHome);
@@ -516,7 +547,7 @@
             </div>
             <div class="score-row">
               <div class="team-blk">
-                <div class="t-emoji">${esc(match.home?.emoji || '🏠')}</div>
+                <img class="team-logo" src="${getLogoUrl(match.home?.name)}" alt="${esc(match.home?.name)}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling?.style?.setProperty('display', 'block');" />
                 <div class="t-name">${esc(match.home?.name || 'Casa')}</div>
               </div>
               <div class="score-ctr">
@@ -525,7 +556,7 @@
                 <span class="score-n">${scorersAway.length}</span>
               </div>
               <div class="team-blk away">
-                <div class="t-emoji">${esc(match.away?.emoji || '✈️')}</div>
+                <img class="team-logo" src="${getLogoUrl(match.away?.name)}" alt="${esc(match.away?.name)}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling?.style?.setProperty('display', 'block');" />
                 <div class="t-name">${esc(match.away?.name || 'Trasferta')}</div>
               </div>
             </div>
@@ -581,10 +612,9 @@
   // Ascolta i risultati live
   onValue(ref(db, 'liveResults'), (snapshot) => {
     liveResultsData = snapshot.val() || {};
-    renderCalendar(); // ri-renderizza con goal e stato aggiornati
+    renderCalendar();
   }, (error) => {
     console.error('Errore lettura liveResults:', error);
-    // Non mostriamo toast per evitare spam, ma possiamo gestirlo silenziosamente
   });
 </script>
 </body>
