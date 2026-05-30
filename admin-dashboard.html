@@ -240,7 +240,7 @@
       margin-bottom: 0.5rem;
     }
 
-    select, input[type="text"], input[type="date"] {
+    select, input[type="text"] {
       width: 100%;
       background: var(--bg-input);
       border: 1px solid var(--border-m);
@@ -423,7 +423,7 @@
 
     <button class="btn btn-red" id="resetMatchBtn">🔄 RESET PARTITA</button>
     
-    <!-- Sezione per creare nuove partite (opzionale ma comoda) -->
+    <!-- Sezione per creare nuove partite (solo se necessario) -->
     <hr class="div" />
     <div class="adm-sub" style="margin-bottom: 1rem;">➕ CREA NUOVA PARTITA</div>
     <div class="fg"><input type="text" id="newMatchId" placeholder="ID (es. m61)" /></div>
@@ -441,7 +441,7 @@
 
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-  import { getDatabase, ref, onValue, set, get } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+  import { getDatabase, ref, onValue, set } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
   import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
   const firebaseConfig = {
@@ -458,7 +458,8 @@
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   let db = null;
-  let liveData = {};      // tutti i match letti dal nodo 'matches'
+  let matchesData = {};      // match fissi dal nodo 'matches'
+  let resultsData = {};      // risultati dinamici dal nodo 'liveResults'
   let selMatchId = '';
   let selTeam = 'home';
 
@@ -470,20 +471,24 @@
     return [];
   }
 
-  function getState(matchId) {
-    const d = liveData[matchId];
-    if (!d) return { scorersHome: [], scorersAway: [], status: 'In programma' };
+  // Ottiene lo stato combinato (match fisso + risultati)
+  function getCombinedState(matchId) {
+    const match = matchesData[matchId];
+    const result = resultsData[matchId] || {};
     return {
-      scorersHome: toArray(d.scorersHome),
-      scorersAway: toArray(d.scorersAway),
-      status: d.status || 'In programma'
+      homeName: match?.home?.name || '?',
+      awayName: match?.away?.name || '?',
+      scorersHome: toArray(result.scorersHome),
+      scorersAway: toArray(result.scorersAway),
+      status: result.status || 'In programma'
     };
   }
 
-  async function writeMatch(matchId, data) {
+  // Scrive solo i risultati (senza toccare i dettagli del match)
+  async function writeResult(matchId, data) {
     if (!db) throw new Error('DB non connesso');
-    const matchRef = ref(db, `matches/${matchId}`);
-    await set(matchRef, { ...data, updatedAt: Date.now() });
+    const resultRef = ref(db, `liveResults/${matchId}`);
+    await set(resultRef, { ...data, updatedAt: Date.now() });
   }
 
   function setConnected(on) {
@@ -509,33 +514,32 @@
   }
 
   function updateAdminPreview() {
-    if (!selMatchId || !liveData[selMatchId]) {
+    if (!selMatchId || !matchesData[selMatchId]) {
       document.getElementById('adm-mlbl').innerHTML = '⚡ Nessuna partita selezionata';
       document.getElementById('adm-score').innerHTML = '— : —';
       document.getElementById('adm-stato').innerHTML = '–';
       return;
     }
-    const match = liveData[selMatchId];
-    const st = getState(selMatchId);
-    document.getElementById('adm-mlbl').innerHTML = `${match.home?.name || '?'}  VS  ${match.away?.name || '?'}`;
-    document.getElementById('adm-score').innerHTML = `${st.scorersHome.length} : ${st.scorersAway.length}`;
-    document.getElementById('adm-stato').innerHTML = st.status === 'Live' ? '🔴 LIVE' : (st.status === 'Finita' ? '🏁 FINITA' : '⚪ IN PROGRAMMA');
+    const state = getCombinedState(selMatchId);
+    document.getElementById('adm-mlbl').innerHTML = `${state.homeName}  VS  ${state.awayName}`;
+    document.getElementById('adm-score').innerHTML = `${state.scorersHome.length} : ${state.scorersAway.length}`;
+    document.getElementById('adm-stato').innerHTML = state.status === 'Live' ? '🔴 LIVE' : (state.status === 'Finita' ? '🏁 FINITA' : '⚪ IN PROGRAMMA');
     
     const statusSelect = document.getElementById('adm-status');
     for (let i = 0; i < statusSelect.options.length; i++) {
-      if (statusSelect.options[i].value === st.status) {
+      if (statusSelect.options[i].value === state.status) {
         statusSelect.selectedIndex = i;
         break;
       }
     }
     // Aggiorna i bottoni squadra con i nomi reali
-    document.getElementById('btn-h').innerHTML = `🏠 ${match.home?.name || 'Casa'}`;
-    document.getElementById('btn-a').innerHTML = `✈️ ${match.away?.name || 'Trasferta'}`;
+    document.getElementById('btn-h').innerHTML = `🏠 ${state.homeName}`;
+    document.getElementById('btn-a').innerHTML = `✈️ ${state.awayName}`;
   }
 
   function populateAdminSelect() {
     const sel = document.getElementById('adm-match');
-    const matchesArray = Object.values(liveData);
+    const matchesArray = Object.values(matchesData);
     if (matchesArray.length === 0) {
       sel.innerHTML = '<option value="">— Nessuna partita —</option>';
       return;
@@ -550,40 +554,43 @@
     if (selMatchId) sel.value = selMatchId;
   }
 
-  // Listener in tempo reale sul nodo 'matches'
-  function startListener() {
+  // Listener per i match fissi
+  function startMatchesListener() {
     if (!db) return;
     const matchesRef = ref(db, 'matches');
     onValue(matchesRef, (snapshot) => {
-      liveData = snapshot.val() || {};
+      matchesData = snapshot.val() || {};
       populateAdminSelect();
-      if (selMatchId && liveData[selMatchId]) {
+      if (selMatchId && matchesData[selMatchId]) {
         updateAdminPreview();
-      } else if (Object.keys(liveData).length > 0) {
-        // Seleziona automaticamente la prima partita se nessuna era selezionata
-        const firstId = Object.keys(liveData)[0];
+      } else if (Object.keys(matchesData).length > 0 && !selMatchId) {
+        const firstId = Object.keys(matchesData)[0];
         document.getElementById('adm-match').value = firstId;
         selMatchId = firstId;
         updateAdminPreview();
-      } else {
-        updateAdminPreview();  // mostra placeholder
       }
     }, (err) => {
-      console.error('Firebase read error:', err);
-      showToast('Errore di lettura: ' + err.message, 'err');
+      console.error('Error reading matches:', err);
+      showToast('Errore nel caricamento delle partite', 'err');
+    });
+  }
+
+  // Listener per i risultati live
+  function startResultsListener() {
+    if (!db) return;
+    const resultsRef = ref(db, 'liveResults');
+    onValue(resultsRef, (snapshot) => {
+      resultsData = snapshot.val() || {};
+      if (selMatchId) updateAdminPreview();
+    }, (err) => {
+      console.error('Error reading results:', err);
     });
   }
 
   // Eventi UI
   window.onMatchChange = function() {
     selMatchId = document.getElementById('adm-match').value;
-    if (selMatchId && liveData[selMatchId]) {
-      updateAdminPreview();
-    } else {
-      document.getElementById('adm-mlbl').innerHTML = '⚡ Nessuna partita selezionata';
-      document.getElementById('adm-score').innerHTML = '— : —';
-      document.getElementById('adm-stato').innerHTML = '–';
-    }
+    updateAdminPreview();
   };
 
   window.pickTeam = function(team) {
@@ -603,18 +610,27 @@
     if (!selMatchId) { showToast('Seleziona una partita', 'err'); return; }
     const scorer = document.getElementById('scorer-in').value.trim();
     if (!scorer) { showToast('Inserisci il nome del marcatore', 'err'); return; }
-    const st = getState(selMatchId);
-    const newState = {
-      scorersHome: [...st.scorersHome],
-      scorersAway: [...st.scorersAway],
-      status: st.status
-    };
-    if (selTeam === 'home') newState.scorersHome.push(scorer);
-    else newState.scorersAway.push(scorer);
-    if (newState.status === 'In programma' && (newState.scorersHome.length + newState.scorersAway.length) === 1) {
-      newState.status = 'Live';
+    
+    const state = getCombinedState(selMatchId);
+    const scorersHome = [...state.scorersHome];
+    const scorersAway = [...state.scorersAway];
+    let newStatus = state.status;
+    
+    if (selTeam === 'home') {
+      scorersHome.push(scorer);
+    } else {
+      scorersAway.push(scorer);
     }
-    await writeMatch(selMatchId, newState);
+    
+    if (newStatus === 'In programma' && (scorersHome.length + scorersAway.length) === 1) {
+      newStatus = 'Live';
+    }
+    
+    await writeResult(selMatchId, {
+      scorersHome: scorersHome,
+      scorersAway: scorersAway,
+      status: newStatus
+    });
     showToast(`⚽ Goal di ${scorer} aggiunto`, 'ok');
     document.getElementById('scorer-in').value = '';
     document.getElementById('scorer-in').focus();
@@ -622,34 +638,48 @@
 
   window.undoGoal = async function() {
     if (!selMatchId) { showToast('Seleziona una partita', 'err'); return; }
-    const st = getState(selMatchId);
-    const hArr = [...st.scorersHome];
-    const aArr = [...st.scorersAway];
+    const state = getCombinedState(selMatchId);
+    const scorersHome = [...state.scorersHome];
+    const scorersAway = [...state.scorersAway];
     let removed = '';
-    if (selTeam === 'home' && hArr.length > 0) {
-      removed = hArr.pop();
-    } else if (selTeam === 'away' && aArr.length > 0) {
-      removed = aArr.pop();
+    
+    if (selTeam === 'home' && scorersHome.length > 0) {
+      removed = scorersHome.pop();
+    } else if (selTeam === 'away' && scorersAway.length > 0) {
+      removed = scorersAway.pop();
     } else {
       showToast('Nessun goal da annullare per questa squadra', 'err');
       return;
     }
-    await writeMatch(selMatchId, { scorersHome: hArr, scorersAway: aArr, status: st.status });
+    
+    await writeResult(selMatchId, {
+      scorersHome: scorersHome,
+      scorersAway: scorersAway,
+      status: state.status
+    });
     showToast(`↩️ Annullato goal di ${removed}`, 'inf');
   };
 
   window.saveStatus = async function() {
     if (!selMatchId) { showToast('Seleziona una partita', 'err'); return; }
     const newStatus = document.getElementById('adm-status').value;
-    const st = getState(selMatchId);
-    await writeMatch(selMatchId, { scorersHome: st.scorersHome, scorersAway: st.scorersAway, status: newStatus });
+    const state = getCombinedState(selMatchId);
+    await writeResult(selMatchId, {
+      scorersHome: state.scorersHome,
+      scorersAway: state.scorersAway,
+      status: newStatus
+    });
     showToast(`Stato cambiato in ${newStatus}`, 'ok');
   };
 
   window.resetMatch = async function() {
     if (!selMatchId) { showToast('Seleziona una partita', 'err'); return; }
     if (!confirm('Resettare la partita cancellerà tutti i goal. Continuare?')) return;
-    await writeMatch(selMatchId, { scorersHome: [], scorersAway: [], status: 'In programma' });
+    await writeResult(selMatchId, {
+      scorersHome: [],
+      scorersAway: [],
+      status: 'In programma'
+    });
     showToast('Partita resettata', 'inf');
   };
 
@@ -663,7 +693,7 @@
       showToast('Compila tutti i campi', 'err');
       return;
     }
-    if (liveData[id]) {
+    if (matchesData[id]) {
       showToast(`Esiste già una partita con ID ${id}`, 'err');
       return;
     }
@@ -673,12 +703,13 @@
       time: time,
       home: { name: homeName, emoji: '⚽' },
       away: { name: awayName, emoji: '⚽' },
-      scorersHome: [],
-      scorersAway: [],
-      status: 'In programma',
-      round: 'Fase a Gironi'  // default, puoi modificarlo
+      round: 'Fase a Gironi',
+      group: '' // opzionale
     };
-    await writeMatch(id, newMatch);
+    const matchRef = ref(db, `matches/${id}`);
+    await set(matchRef, newMatch);
+    // Inizializza anche i risultati vuoti
+    await writeResult(id, { scorersHome: [], scorersAway: [], status: 'In programma' });
     showToast(`Partita ${id} creata`, 'ok');
     // pulisci form
     document.getElementById('newMatchId').value = '';
@@ -697,7 +728,8 @@
     console.log('Admin autenticato:', user.email);
     db = getDatabase(app);
     setConnected(true);
-    startListener();
+    startMatchesListener();
+    startResultsListener();
     // Collega i bottoni
     document.getElementById('addGoalBtn').onclick = () => window.addGoal();
     document.getElementById('undoGoalBtn').onclick = () => window.undoGoal();
