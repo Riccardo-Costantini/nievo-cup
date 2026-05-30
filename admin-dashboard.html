@@ -471,6 +471,12 @@
     return [];
   }
 
+  // Estrae il numero dall'ID (es. "m10" -> 10)
+  function extractMatchNumber(id) {
+    const match = id.match(/m(\d+)/i);
+    return match ? parseInt(match[1], 10) : 0;
+  }
+
   // Ottiene lo stato combinato (match fisso + risultati)
   function getCombinedState(matchId) {
     const match = matchesData[matchId];
@@ -544,6 +550,9 @@
       sel.innerHTML = '<option value="">— Nessuna partita —</option>';
       return;
     }
+    // Ordina per numero estratto dall'ID (m1, m2, ..., m60)
+    matchesArray.sort((a, b) => extractMatchNumber(a.id) - extractMatchNumber(b.id));
+    
     sel.innerHTML = '<option value="">— Seleziona partita —</option>';
     matchesArray.forEach(m => {
       const opt = document.createElement('option');
@@ -564,7 +573,9 @@
       if (selMatchId && matchesData[selMatchId]) {
         updateAdminPreview();
       } else if (Object.keys(matchesData).length > 0 && !selMatchId) {
-        const firstId = Object.keys(matchesData)[0];
+        // Seleziona automaticamente il primo match in ordine (m1)
+        const sortedIds = Object.keys(matchesData).sort((a,b) => extractMatchNumber(a) - extractMatchNumber(b));
+        const firstId = sortedIds[0];
         document.getElementById('adm-match').value = firstId;
         selMatchId = firstId;
         updateAdminPreview();
