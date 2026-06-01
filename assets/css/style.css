@@ -73,10 +73,9 @@ body {
 
 .header {
   display: flex;
-  flex-direction: column;   /* impila verticalmente */
   align-items: center;      /* centra orizzontalmente sia logo che menu */
-  justify-content: center;
-  width: 100%;
+  justify-content: space-evenly;
+  width: 100dvw;
   background: transparent;
   padding: 1rem 1rem 0.5rem 1rem;  /* un po' più di spazio sotto il logo */
   gap: 0.8rem;
@@ -93,18 +92,16 @@ body {
 }
 .logo img {
   height: 8vw;
-  max-height: 48px;  /* limite su desktop */
 }
 .menu {
-  width: auto;
-  gap: 1rem;
-  justify-content: flex-end;
+    display: flex;
+    width: auto;
+    gap: 2rem;
 }
 .voce {
-  font-size: 2dvw;
   white-space: nowrap;
   font-family: 'Bebas Neue', sans-serif;
-  font-size: .82rem;
+  font-size: 2dvw;
   letter-spacing: 0.1em;
   color: var(--text);
   line-height: 1;
@@ -615,6 +612,7 @@ footer {
 
 @media (max-width: 700px) {
     .header{
+        width: auto;
         height: 30vw;
         flex-direction: column;
         margin-top: 5dvw;
