@@ -136,17 +136,24 @@ body.page-calendario {
   background-repeat: no-repeat;
 }
 body.page-calendario {
+  position: relative;
+  background: none; /* rimuovi lo sfondo diretto */
+}
+body.page-calendario::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background-image: url('../images/sfondi/sfondo2.JPG');
   background-size: cover;
-  background-position: center center;
-  background-repeat: no-repeat;
-  /* rimuovi background-attachment: fixed */
+  background-position: center;
+  z-index: -1;
 }
-
 @media (max-width: 700px) {
-  body.page-calendario {
+  body.page-calendario::before {
     background-image: url('../images/sfondi/sfondo_mobile_classifica.webp');
-    /* background-attachment: scroll (default) */
   }
 }
 /* Background FX */
