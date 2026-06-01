@@ -125,43 +125,30 @@ body {
    ===================================================== */
 
 body.page-calendario {
+  background-image: url('../images/sfondi/sfondo2.JPG');
   color: var(--text);
   font-family: 'Exo 2', sans-serif;
   min-height: 100vh;
   overflow-x: hidden;
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
 }
-
-/* Sfondo come <img> reale: evita i bug di background-attachment:fixed su iOS/Android */
-#bg-img-desktop,
-#bg-img-mobile {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-  pointer-events: none;
-}
-
-/* Desktop: copre tutto */
-#bg-img-desktop {
-  object-fit: cover;
-  object-position: center center;
-}
-
-/* Mobile: mostra l'immagine intera, sfondo scuro attorno */
-#bg-img-mobile {
-  object-fit: contain;
-  object-position: center top;
-  background-color: #0b0f17;
-  display: none;
+body.page-calendario {
+  background-image: url('../images/sfondi/sfondo2.JPG');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  /* rimuovi background-attachment: fixed */
 }
 
 @media (max-width: 700px) {
-  #bg-img-desktop { display: none; }
-  #bg-img-mobile  { display: block; }
+  body.page-calendario {
+    background-image: url('../images/sfondi/sfondo_mobile_classifica.webp');
+    /* background-attachment: scroll (default) */
+  }
 }
-
 /* Background FX */
 #bg-fx {
   position: fixed;
@@ -979,16 +966,19 @@ footer.admin-footer {
    UTILITY – classi varie
    ===================================================== */
 
+/* Testo di stato nel calendario (caricamento, errori) */
 .cal-loading {
   color: var(--text-2);
   font-size: 0.85rem;
   padding: 0.5rem 0;
 }
 
+/* Palla goal squadra in trasferta (allineamento) */
 .sc-ball-away {
   margin-left: 0.25rem;
 }
 
+/* Titoletto "Crea nuova partita" nel pannello admin */
 .adm-sub-create {
   margin-bottom: 1rem;
 }
