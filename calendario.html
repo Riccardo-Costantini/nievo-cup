@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="theme-color" content="#0b0f17">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b0f17">
   <title>Nievo Cup – Calendario Live</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -119,19 +121,6 @@
       const timeA = a.time || '00:00';
       const timeB = b.time || '00:00';
       return timeA.localeCompare(timeB);
-    });
-  }
-
-  // Aggiunge event listener per espansione/compressione su tutti i match-card
-  function bindExpandEvents() {
-    const cards = document.querySelectorAll('.match-card');
-    cards.forEach(card => {
-      if (card._expandHandler) card.removeEventListener('click', card._expandHandler);
-      const handler = () => {
-        card.classList.toggle('expanded');
-      };
-      card.addEventListener('click', handler);
-      card._expandHandler = handler;
     });
   }
 
