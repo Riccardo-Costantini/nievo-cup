@@ -73,18 +73,13 @@ body {
 
 .header {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;   /* impila verticalmente */
+  align-items: center;      /* centra orizzontalmente sia logo che menu */
+  justify-content: center;
   width: 100%;
-  position: relative;
-  top: auto;
-  left: auto;
-  z-index: 100;
-  /* Reso trasparente e rimossa la sfocatura per non tagliare l'immagine */
   background: transparent;
-  padding: 0.5rem 1rem;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  padding: 1rem 1rem 0.5rem 1rem;  /* un po' più di spazio sotto il logo */
+  gap: 0.8rem;
 }
 
 /* Opzionale: migliora la leggibilità dei link del menu */
@@ -623,6 +618,8 @@ footer {
     .header{
         height: 30vw;
         flex-direction: column;
+        margin-top: 5dvw;
+        margin-bottom: 10dvw;
     }
     .logo img{
         height:19.7dvw;
@@ -630,11 +627,19 @@ footer {
     }
     .menu{
         display: flex;
-        justify-content: space-around;
+        flex-direction: row;
     }
     .voce{
-        font-size: 3vw;
+        text-align: center;
     }
+    .voce {
+    white-space: normal;
+    text-align: center;
+    font-size: 1.1rem;
+  }
+  .menu {
+    gap: 0.8rem;
+  }
   .wrap {
     padding: 1rem 0.8rem 2rem;  /* niente padding-top extra */
   }
