@@ -7,363 +7,27 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=Exo+2:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
-
-  <style>
-    /* ===========================
-       CSS VARIABLES (identiche al front-end)
-    =========================== */
-    :root {
-      --bg:           #0b0f17;
-      --bg-card:      #101621;
-      --bg-card2:     #141c2b;
-      --bg-input:     #192030;
-      --accent:       #7c3aed;
-      --accent-h:     #6d28d9;
-      --accent-l:     #a78bfa;
-      --accent-x:     #c4b5fd;
-      --accent-glow:  rgba(124,58,237,0.22);
-      --live:         #22c55e;
-      --live-bg:      rgba(34,197,94,0.10);
-      --live-bdr:     rgba(34,197,94,0.32);
-      --text:         #f1f5f9;
-      --text-2:       #94a3b8;
-      --text-3:       #4b5675;
-      --border:       rgba(255,255,255,0.06);
-      --border-m:     rgba(255,255,255,0.11);
-      --border-a:     rgba(124,58,237,0.32);
-      --red:          #ef4444;
-      --red-bg:       rgba(239,68,68,0.12);
-      --red-bdr:      rgba(239,68,68,0.28);
-      --amber:        #f59e0b;
-      --amber-bg:     rgba(245,158,11,0.12);
-      --amber-bdr:    rgba(245,158,11,0.28);
-    }
-
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Exo 2', sans-serif;
-      min-height: 100vh;
-      overflow-x: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1.5rem;
-    }
-
-    #bg-fx {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-    }
-    #bg-fx::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(ellipse 75% 50% at 50% -5%, rgba(124,58,237,0.20) 0%, transparent 65%),
-        radial-gradient(ellipse 40% 30% at 5%  80%, rgba(124,58,237,0.09) 0%, transparent 60%),
-        radial-gradient(ellipse 30% 25% at 95% 15%, rgba(168,85,247,0.07) 0%, transparent 55%);
-    }
-    #bg-fx::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image:
-        repeating-linear-gradient(
-          0deg,
-          rgba(255,255,255,0.012) 0px,
-          rgba(255,255,255,0.012) 1px,
-          transparent 1px,
-          transparent 80px
-        );
-    }
-
-    .wrap {
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      max-width: 560px;
-    }
-
-    header {
-      margin-bottom: 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      flex-wrap: wrap;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid var(--border);
-    }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-    .brand-logo {
-      width: 52px;
-      height: 52px;
-      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-l) 100%);
-      border-radius: 14px;
-      display: grid;
-      place-items: center;
-      font-size: 26px;
-      flex-shrink: 0;
-      box-shadow: 0 0 24px rgba(124,58,237,0.35);
-    }
-    .brand-name {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 2rem;
-      letter-spacing: 0.1em;
-      color: var(--text);
-      line-height: 1;
-    }
-    .brand-sub {
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 0.72rem;
-      font-weight: 600;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--text-3);
-      margin-top: 0.1rem;
-    }
-
-    .hdr-badges {
-      display: flex;
-      align-items: center;
-      gap: 0.625rem;
-      flex-wrap: wrap;
-    }
-    .fb-badge {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      padding: 0.35rem 0.875rem;
-      border-radius: 999px;
-      background: var(--bg-card);
-      border: 1px solid var(--border-m);
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 0.72rem;
-      font-weight: 600;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text-3);
-      transition: border-color 0.4s, color 0.4s;
-    }
-    .fb-badge.ok { border-color: var(--live-bdr); color: var(--live); }
-    .fb-dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: var(--text-3);
-      transition: background 0.4s;
-      flex-shrink: 0;
-    }
-    .fb-badge.ok .fb-dot { background: var(--live); }
-
-    .live-pill {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      padding: 0.35rem 0.875rem;
-      border-radius: 999px;
-      background: var(--live-bg);
-      border: 1px solid var(--live-bdr);
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--live);
-    }
-    .pulse-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--live);
-      animation: pulse 1.4s ease-in-out infinite;
-    }
-    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.35;transform:scale(.75);} }
-
-    .admin-panel {
-      background: var(--bg-card);
-      border: 1px solid var(--border-a);
-      border-radius: 24px;
-      padding: 1.6rem;
-    }
-
-    .adm-hdr {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 1.5rem;
-      padding-bottom: 1.25rem;
-      border-bottom: 1px solid var(--border);
-    }
-    .adm-ico {
-      width: 42px; height: 42px;
-      background: var(--accent-glow);
-      border: 1px solid var(--border-a);
-      border-radius: 12px;
-      display: grid;
-      place-items: center;
-      font-size: 20px;
-    }
-    .adm-title {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 1.2rem;
-      letter-spacing: 0.12em;
-      color: var(--accent-l);
-    }
-    .adm-sub {
-      font-size: 0.68rem;
-      color: var(--text-3);
-      margin-top: 0.2rem;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      font-family: 'Rajdhani', sans-serif;
-      font-weight: 600;
-    }
-
-    .fg { margin-bottom: 1.25rem; }
-    .fl {
-      display: block;
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 0.65rem;
-      font-weight: 700;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--text-3);
-      margin-bottom: 0.5rem;
-    }
-
-    select, input[type="text"] {
-      width: 100%;
-      background: var(--bg-input);
-      border: 1px solid var(--border-m);
-      border-radius: 12px;
-      color: var(--text);
-      padding: 0.7rem 1rem;
-      font-family: 'Exo 2', sans-serif;
-      font-size: 0.9rem;
-      outline: none;
-    }
-    select {
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 1rem center;
-    }
-    select:focus, input:focus { border-color: var(--accent); }
-
-    .team-tog {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.6rem;
-      margin-top: 0.2rem;
-    }
-    .tog-btn {
-      padding: 0.6rem;
-      border: 1px solid var(--border-m);
-      border-radius: 40px;
-      background: var(--bg-input);
-      color: var(--text-2);
-      font-family: 'Rajdhani', sans-serif;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      text-align: center;
-    }
-    .tog-btn.active {
-      border-color: var(--accent);
-      background: rgba(124,58,237,0.2);
-      color: var(--text);
-    }
-
-    .score-box {
-      background: var(--bg-input);
-      border: 1px solid var(--border-a);
-      border-radius: 20px;
-      padding: 1.2rem;
-      text-align: center;
-      margin-bottom: 1.5rem;
-    }
-    .sb-match { font-size: 0.8rem; color: var(--accent-l); margin-bottom: 0.65rem; font-weight: 600; text-transform: uppercase; }
-    .sb-score { font-family: 'Bebas Neue', sans-serif; font-size: 2.8rem; color: var(--text); letter-spacing: 0.12em; }
-    .sb-status { font-size: 0.68rem; color: var(--live); margin-top: 0.5rem; font-weight: 700; text-transform: uppercase; }
-
-    .btn {
-      width: 100%;
-      padding: 0.7rem;
-      border-radius: 40px;
-      border: 1px solid transparent;
-      font-family: 'Rajdhani', sans-serif;
-      font-weight: 700;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-    .btn + .btn { margin-top: 0.55rem; }
-    .btn-primary { background: var(--accent); color: #fff; }
-    .btn-primary:hover { background: var(--accent-h); transform: translateY(-2px); }
-    .btn-amber { background: var(--amber-bg); color: #fbbf24; border-color: var(--amber-bdr); }
-    .btn-red { background: var(--red-bg); color: #f87171; border-color: var(--red-bdr); }
-    .btn-ghost { background: transparent; color: var(--text-2); border-color: var(--border-m); }
-
-    hr.div { border: none; border-top: 1px solid var(--border); margin: 1.4rem 0; }
-
-    footer {
-      text-align: center;
-      padding: 1.8rem 0 0.5rem;
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 0.7rem;
-      color: var(--text-3);
-      border-top: 1px solid var(--border);
-      margin-top: 2rem;
-    }
-
-    #toast {
-      position: fixed;
-      bottom: 1.75rem;
-      right: 1.75rem;
-      z-index: 9999;
-      pointer-events: none;
-      min-width: 220px;
-      padding: 0.9rem 1.2rem;
-      border-radius: 16px;
-      background: var(--bg-card2);
-      border: 1px solid var(--border-m);
-      font-size: 0.85rem;
-      transform: translateY(90px);
-      opacity: 0;
-      transition: 0.3s;
-    }
-    #toast.show { transform: translateY(0); opacity: 1; }
-    #toast.t-ok  { border-left: 4px solid var(--live); }
-    #toast.t-err { border-left: 4px solid var(--red); }
-  </style>
+  <link rel="stylesheet" href="assets/css/style.css">
 </head>
-<body>
+<body class="page-admin">
 
 <div id="bg-fx" aria-hidden="true"></div>
 
-<div class="wrap">
-  <header>
+<div class="wrap-admin">
+  <header class="admin-hdr-bar">
     <div class="brand">
-      <div class="brand-logo">⚽</div>
+      <div class="brand-logo-admin">⚽</div>
       <div>
-        <div class="brand-name">NIEVO CUP</div>
-        <div class="brand-sub">Admin Panel</div>
+        <div class="brand-name-admin">NIEVO CUP</div>
+        <div class="brand-sub-admin">Admin Panel</div>
       </div>
     </div>
     <div class="hdr-badges">
-      <div class="fb-badge" id="fb-badge">
+      <div class="fb-badge" id="fb-badge" class="fb-badge-admin">
         <div class="fb-dot" id="fb-dot"></div>
         <span id="fb-lbl">Non connesso</span>
       </div>
-      <div class="live-pill">
+      <div class="live-pill-admin">
         <div class="pulse-dot"></div>
         Real-time
       </div>
@@ -425,7 +89,7 @@
     
     <!-- Sezione per creare nuove partite (solo se necessario) -->
     <hr class="div" />
-    <div class="adm-sub" style="margin-bottom: 1rem;">➕ CREA NUOVA PARTITA</div>
+    <div class="adm-sub adm-sub-create">➕ CREA NUOVA PARTITA</div>
     <div class="fg"><input type="text" id="newMatchId" placeholder="ID (es. m61)" /></div>
     <div class="fg"><input type="date" id="newMatchDate" /></div>
     <div class="fg"><input type="text" id="newMatchTime" placeholder="Orario (es. 20:10)" /></div>
@@ -434,10 +98,10 @@
     <button class="btn btn-primary" id="createMatchBtn">➕ CREA</button>
   </div>
 
-  <footer>Nievo Cup · Pannello Amministrazione · Firebase Realtime DB</footer>
+  <footer class="admin-footer">Nievo Cup · Pannello Amministrazione · Firebase Realtime DB</footer>
 </div>
 
-<div id="toast"></div>
+<div id="toast" class="admin-toast"></div>
 
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
@@ -515,8 +179,8 @@
   function showToast(msg, type = 'inf') {
     const el = document.getElementById('toast');
     el.textContent = msg;
-    el.className = `show t-${type}`;
-    setTimeout(() => el.className = '', 3200);
+    el.className = `admin-toast show t-${type}`;
+    setTimeout(() => el.className = 'admin-toast', 3200);
   }
 
   function updateAdminPreview() {
