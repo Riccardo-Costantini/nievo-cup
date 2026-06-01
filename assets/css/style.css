@@ -75,7 +75,7 @@ body {
   display: flex;
   align-items: center;      /* centra orizzontalmente sia logo che menu */
   justify-content: space-evenly;
-  width: 100dvw;
+  width: 100%;
   background: transparent;
   padding: 1rem 1rem 0.5rem 1rem;  /* un po' più di spazio sotto il logo */
   gap: 0.8rem;
@@ -107,14 +107,166 @@ body {
   line-height: 1;
 }
 
-#hero {
-  width: 100%;
+.hero-wrapper {
+  background-image: url('../images/sfondi/sfondo1.webp');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  /* Se vuoi un effetto parallax o fisso, usa background-attachment: fixed; */
 }
 
+/* L'header deve restare trasparente (già lo è) */
+.header {
+  background: transparent; /* già così */
+}
+
+/* Hero senza sfondo (lo eredita dal wrapper) */
+#hero {
+  /* niente background-image */
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+}
+
+/* Overlay scuro per leggibilità (opzionale) */
+#hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+#hero h1 {
+  position: relative;
+  z-index: 2;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 5vw;
+  letter-spacing: 0.08em;
+  color: white;
+  text-shadow: 0 0 20px rgba(0,0,0,0.7);
+}
 #hero img {
   display: block;
   width: 100%;
 }
+
+
+/* =====================================================
+   INDEX – SPONSOR (MARQUEE)
+   ===================================================== */
+
+#sponsor {
+  background-color: #000000;  /* mantieni il tuo colore */
+  padding: 2rem 0;
+  text-align: center;
+}
+
+#sponsor h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 5vw;
+  letter-spacing: 0.08em;
+  color: white;
+  text-shadow: 0 0 20px rgba(0,0,0,0.7);
+  margin-bottom: 1.5rem;
+}
+
+/* Contenitore della marquee (con overflow nascosto) */
+.marquee-container {
+  overflow-x: hidden;
+  white-space: nowrap;
+  width: 100%;
+  position: relative;
+}
+
+/* Contenitore flessibile che scorre */
+#immagini-sponsor {
+  display: inline-flex;   /* importante per avere larghezza totale dinamica */
+  gap: 7rem;              /* spazio tra i loghi */
+  align-items: center;
+  animation: scrollSponsor 10s linear infinite;
+  /* Se vuoi che si fermi al passaggio del mouse: */
+  transition: animation-play-state 0.2s;
+}
+
+/* Singole immagini – mantieni le altezze originali (inline-style) ma uniformale se vuoi */
+#immagini-sponsor img {
+  flex-shrink: 0;
+  display: block;
+  object-fit: contain;
+}
+/* Contenitore di ogni logo (opzionale, ma utile per centrare) */
+.logo-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  /* larghezza automatica in base all'immagine */
+  width: auto;
+  min-width: 80px; /* evita che diventino troppo piccoli */
+}
+
+/* Tutte le immagini con la stessa altezza, larghezza proporzionale */
+#immagini-sponsor img {
+  height: 30dvh;      /* altezza uniforme */
+  width: auto;        /* larghezza automatica proporzionale */
+  max-width: 200px;   /* evita che rettangolari enormi rompano il layout */
+  object-fit: contain;  /* mantiene le proporzioni senza tagli */
+  flex-shrink: 0;
+}
+
+/* Tablet */
+@media (max-width: 900px) {
+    #immagini-sponsor{
+        gap: 4em;
+    }
+  #immagini-sponsor img {
+    height: 10dvh;
+    max-width: 150px;
+  }
+}
+
+/* Smartphone */
+@media (max-width: 700px) {
+    #immagini-sponsor{
+        gap: 2.5em;
+    }
+  #immagini-sponsor img {
+    height: 15dvh;
+    max-width: 220px;
+  }
+}
+
+/* Smartphone piccoli */
+@media (max-width: 480px) {
+    #immagini-sponsor{
+        gap: 2em;
+    }
+  #immagini-sponsor img {
+    height: 10dvh;
+    max-width: 150px;
+  }
+}
+/* Animazione di scorrimento */
+@keyframes scrollSponsor {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    /* Sconsiglia di usare -100% se il contenuto non è duplicato, ma funziona se la larghezza del contenitore è minore di quella della marquee */
+    transform: translateX(-50%);
+  }
+}
+
+/* Per far sì che l'animazione sia continua anche quando il contenuto è più lungo dello schermo,
+   si può duplicare il set di immagini in HTML (opzionale, ma più fluido). 
+   Se noti che lo scrolling si interrompe, aggiungi questo secondo set: */
+
 
 
 /* =====================================================
@@ -123,7 +275,7 @@ body {
 
 body.page-calendario {
     background-color: #0b0f17;
-    background-image: url('../images/sfondi/sfondo2.JPG');
+    background-image: url('../images/sfondi/sfondo2.webp');
     color: var(--text);
     font-family: 'Exo 2', sans-serif;
     min-height: 100vh;
@@ -144,7 +296,7 @@ body.page-calendario::before {
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: url('../images/sfondi/sfondo2.JPG');
+  background-image: url('../images/sfondi/sfondo2.webp');
   background-size: cover;
   background-position: center;
   z-index: -1;
