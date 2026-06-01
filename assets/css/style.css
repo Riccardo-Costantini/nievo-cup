@@ -137,7 +137,7 @@ body.page-calendario {
 }
 @media (max-width: 700px) {
     body.page-calendario {
-        background-image: url('../images/sfondi/sfondo_mobile_classifica.png');
+        background-image: url('../images/sfondi/sfondo_mobile_classifica.webp');
     }
 }
 /* Background FX */
