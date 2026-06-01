@@ -125,6 +125,7 @@ body {
   /* niente background-image */
   min-height: 80vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
@@ -151,10 +152,36 @@ body {
   color: white;
   text-shadow: 0 0 20px rgba(0,0,0,0.7);
 }
+#hero h3 {
+  position: relative;
+  z-index: 2;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2vw;
+  letter-spacing: 0.08em;
+  color: white;
+  text-shadow: 0 0 20px rgba(0,0,0,0.7);
+}
 #hero img {
   display: block;
   width: 100%;
 }
+
+/* =====================================================
+   INDEX – INFO
+   ===================================================== */
+#info{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 60dvh;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2vw;
+    letter-spacing: 0.08em;
+    color: white;
+}
+
+
 
 
 /* =====================================================
