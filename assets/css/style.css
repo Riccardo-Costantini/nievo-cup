@@ -385,17 +385,6 @@ border-top: 2px solid #feda00;
   border-bottom: none;
 }
 
-/* Placeholder logo – uso giallo come colore principale */
-.team-logo-mini {
-  width: 50px;
-  height: 50px;
-  object-fit: contain;
-  border-radius: 50%;
-  background-color: #fed80098;   /* sfondo giallo se l'immagine è trasparente */
-  padding: 4px;
-  flex-shrink: 0;
-}
-
 .gironi-footer {
   text-align: center;
   margin-top: 3rem;
@@ -727,12 +716,6 @@ header {
   box-shadow: 0 15px 30px -8px rgba(0,0,0,0.6);
 }
 
-.match-card.expanded .team-logo {
-  width: 130px;
-  height: 130px;
-  padding: 12px;
-}
-
 .match-card.expanded .t-name {
   font-size: 1.4rem;
 }
@@ -810,13 +793,13 @@ header {
 }
 
 .team-logo {
-  width: 14vw;
-  height: 14vw;
-  object-fit: contain;
-  background: rgba(0,0,0,0.15);
-  border-radius: 24px;
-  transition: all 0.3s ease;
-  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+    aspect-ratio: 1/1;
+    width: 8vw;
+    object-fit: contain;
+    background: rgba(0,0,0,0.15);
+    border-radius: 24px;
+    transition: all 0.3s ease;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
 }
 
 .t-name {
@@ -970,8 +953,7 @@ footer {
   .brand-name { font-size: 1.4rem; }
   .brand-logo { width: 40px; height: 40px; font-size: 22px; }
 
-  .team-logo { width: 120px; height: 120px; padding: 4px; border-radius: 18px; }
-  .match-card.expanded .team-logo { width: 90px; height: 90px; }
+  .team-logo { aspect-ratio:1/1; width:22vw; padding: 4px; border-radius: 18px; }
 
   .t-name { font-size: 0.9rem; max-width: 110px; }
   .match-card.expanded .t-name { font-size: 1.1rem; }
@@ -1006,8 +988,6 @@ footer {
 }
 
 @media (max-width: 500px) {
-  .team-logo { width: 120px; height: 120px; padding: 3px; }
-  .match-card.expanded .team-logo { width: 75px; height: 75px; }
   .t-name { font-size: 0.8rem; max-width: 90px; }
   .score-n { font-size: 1.8rem; }
   .score-sep { font-size: 1.5rem; }
