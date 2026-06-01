@@ -795,7 +795,7 @@ footer {
   .brand-name { font-size: 1.4rem; }
   .brand-logo { width: 40px; height: 40px; font-size: 22px; }
 
-  .team-logo { width: 120px; height: 120px; padding: 10px; border-radius: 18px; }
+  .team-logo { width: 120px; height: 120px; padding: 4px; border-radius: 18px; }
   .match-card.expanded .team-logo { width: 90px; height: 90px; }
 
   .t-name { font-size: 0.9rem; max-width: 110px; }
@@ -813,7 +813,7 @@ footer {
 }
 
 @media (max-width: 500px) {
-  .team-logo { width: 120px; height: 120px; padding: 8px; }
+  .team-logo { width: 120px; height: 120px; padding: 3px; }
   .match-card.expanded .team-logo { width: 75px; height: 75px; }
   .t-name { font-size: 0.8rem; max-width: 90px; }
   .score-n { font-size: 1.8rem; }
