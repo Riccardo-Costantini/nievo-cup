@@ -446,11 +446,13 @@ border-top: 2px solid #feda00;
    ===================================================== */
 
 body.page-calendario {
+    background-color: #0b0f17;
     background-image: url('../images/sfondi/sfondo2.webp');
     color: var(--text);
     font-family: 'Exo 2', sans-serif;
     min-height: 100vh;
     overflow-x: hidden;
+    background-attachment: fixed;
     background-size: cover;
     background-position: center center;
     background-repeat: no-repeat;
@@ -459,17 +461,10 @@ body.page-calendario {
   position: relative;
   background: none; /* rimuovi lo sfondo diretto */
 }
-body.page-calendario {
-  position: relative;
-  background: none;
-  min-height: 100vh;
-  color: var(--text);
-  font-family: 'Exo 2', sans-serif;
-  overflow-x: hidden;
-}
+
 body.page-calendario::before {
   content: '';
-  position: absolute;        /* invece di fixed */
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
@@ -477,7 +472,6 @@ body.page-calendario::before {
   background-image: url('../images/sfondi/sfondo2.webp');
   background-size: cover;
   background-position: center;
-  background-repeat: no-repeat;
   z-index: -1;
 }
 @media (max-width: 700px) {
