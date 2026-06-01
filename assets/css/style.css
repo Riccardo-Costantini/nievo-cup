@@ -76,15 +76,20 @@ body {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  position: relative;         /* ← fondamentale */
+  position: relative;
   top: auto;
   left: auto;
   z-index: 100;
-  background: rgba(0, 0, 0, 0.4); /* leggero sfondo per migliorare leggibilità su mobile */
-  backdrop-filter: blur(2px);
+  /* Reso trasparente e rimossa la sfocatura per non tagliare l'immagine */
+  background: transparent;
   padding: 0.5rem 1rem;
   flex-wrap: wrap;
   gap: 0.5rem;
+}
+
+/* Opzionale: migliora la leggibilità dei link del menu */
+.voce a p {
+  text-shadow: 0 0 4px rgba(0,0,0,0.5);
 }
 
 .logo {
