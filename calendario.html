@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>Nievo Cup – Live Risultati</title>
+  <title>Nievo Cup – Calendario Live</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=Exo+2:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
@@ -13,17 +13,16 @@
        CSS VARIABLES
     =========================== */
     :root {
-      --bg:           #0b0f17;
       --bg-card:      #101621;
       --bg-card2:     #141c2b;
       --bg-input:     #192030;
       --accent:       #7c3aed;
       --accent-h:     #6d28d9;
-      --accent-l:     #a78bfa;
+      --accent-l:     white;
       --accent-x:     #c4b5fd;
       --accent-glow:  rgba(124,58,237,0.22);
       --live:         #22c55e;
-      --live-bg:      rgba(34,197,94,0.10);
+      --live-bg:      rgba(34,197,94,0.32);
       --live-bdr:     rgba(34,197,94,0.32);
       --text:         #f1f5f9;
       --text-2:       #94a3b8;
@@ -32,7 +31,7 @@
       --border-m:     rgba(255,255,255,0.11);
       --border-a:     rgba(124,58,237,0.32);
       --red:          #ef4444;
-      --red-bg:       rgba(239,68,68,0.12);
+      --red-bg:       rgba(255, 0, 0, 0.32);
       --red-bdr:      rgba(239,68,68,0.28);
       --amber:        #f59e0b;
       --amber-bg:     rgba(245,158,11,0.12);
@@ -43,11 +42,15 @@
     html { scroll-behavior: smooth; }
 
     body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Exo 2', sans-serif;
-      min-height: 100vh;
-      overflow-x: hidden;
+        background-image: url('assets/images/sfondi/sfondo2.JPG');
+        color: var(--text);
+        font-family: 'Exo 2', sans-serif;
+        min-height: 100vh;
+        overflow-x: hidden;
+        background-attachment: fixed;
+        background-size: cover;
+        background-position: center center;
+        background-repeat: no-repeat;
     }
 
     /* Background FX */
@@ -58,13 +61,14 @@
       z-index: 0;
     }
     #bg-fx::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(ellipse 75% 50% at 50% -5%, rgba(124,58,237,0.20) 0%, transparent 65%),
-        radial-gradient(ellipse 40% 30% at 5%  80%, rgba(124,58,237,0.09) 0%, transparent 60%),
-        radial-gradient(ellipse 30% 25% at 95% 15%, rgba(168,85,247,0.07) 0%, transparent 55%);
+        content: '';
+        position: absolute;
+        inset: 0;
+        background:
+            rgba(11, 15, 23, 0.72),   /* overlay scuro principale */
+            radial-gradient(ellipse 75% 50% at 50% -5%, rgba(124,58,237,0.20) 0%, transparent 65%),
+            radial-gradient(ellipse 40% 30% at 5%  80%, rgba(124,58,237,0.09) 0%, transparent 60%),
+            radial-gradient(ellipse 30% 25% at 95% 15%, rgba(168,85,247,0.07) 0%, transparent 55%);
     }
     #bg-fx::after {
       content: '';
@@ -104,15 +108,14 @@
       gap: 0.8rem;
     }
     .brand-logo {
-      width: 48px;
-      height: 48px;
-      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-l) 100%);
       border-radius: 14px;
       display: grid;
       place-items: center;
       font-size: 26px;
       flex-shrink: 0;
-      box-shadow: 0 0 20px rgba(124,58,237,0.35);
+    }
+    .brand-logo img{
+        height: 8vw;
     }
     .brand-name {
       font-family: 'Bebas Neue', sans-serif;
@@ -211,8 +214,7 @@
       align-items: center;
       gap: 0.5rem;
       padding: 0.2rem 0.8rem;
-      background: rgba(124,58,237,0.10);
-      border: 1px solid rgba(124,58,237,0.18);
+      background: rgba(0, 0, 0, 0.82);
       border-radius: 6px;
       font-family: 'Rajdhani', sans-serif;
       font-size: 0.7rem;
@@ -225,7 +227,7 @@
 
     /* CARD MATCH – stile base + interattività */
     .match-card {
-      background: var(--bg-card);
+      background: rgba(0, 0, 0, 0.523);
       border: 1px solid var(--border);
       border-radius: 24px;
       padding: 1rem 1rem;
@@ -240,9 +242,12 @@
     }
     .match-card.is-live {
       border-color: var(--live-bdr);
-      background: linear-gradient(135deg, var(--bg-card) 0%, rgba(34,197,94,0.04) 100%);
+      background-color: var(--live-bg);
     }
-    .match-card.is-finished { border-color: rgba(124,58,237,0.15); }
+    .match-card.is-finished {
+        border-color: rgba(124,58,237,0.15);
+        background-color: var(--red-bg);
+    }
 
     /* Stato espanso (loghi ancora più grandi) */
     .match-card.expanded {
@@ -300,9 +305,9 @@
       padding: 0.25rem 0.7rem;
       border-radius: 999px;
     }
-    .b-sched  { background: rgba(148,163,184,0.08); color: var(--text-2); border: 1px solid rgba(148,163,184,0.18); }
-    .b-live   { background: var(--live-bg); color: var(--live); border: 1px solid var(--live-bdr); }
-    .b-fin    { background: rgba(124,58,237,0.12); color: var(--accent-l); border: 1px solid rgba(124,58,237,0.22); }
+    .b-sched  { background: rgba(148,163,184); color: var(--accent-l); border: 1px solid rgba(148,163,184,0.18); }
+    .b-live   { background: var(--live-bg); color: var(--accent-l); border: 1px solid var(--live-bdr); }
+    .b-fin    { background: rgba(255, 0, 0); color: var(--accent-l); border: 1px solid rgba(124,58,237,0.22); }
 
     /* Score row */
     .score-row {
@@ -323,12 +328,11 @@
     }
 
     .team-logo {
-      width: 100px;
-      height: 100px;
+      width: 14vw;
+      height: 14vw;
       object-fit: contain;
-      background: rgba(0,0,0,0.35);
+      background: rgba(0,0,0,0.15);
       border-radius: 24px;
-      padding: 12px;
       transition: all 0.3s ease;
       filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
     }
@@ -462,21 +466,8 @@
 <div class="wrap">
   <header>
     <div class="brand">
-      <div class="brand-logo">⚽</div>
-      <div>
-        <div class="brand-name">NIEVO CUP</div>
-        <div class="brand-sub">Live Match Tracker</div>
-      </div>
-    </div>
-    <div class="hdr-badges">
-      <div class="fb-badge" id="fb-badge">
-        <div class="fb-dot" id="fb-dot"></div>
-        <span id="fb-lbl">Non connesso</span>
-      </div>
-      <div class="live-pill">
-        <div class="pulse-dot"></div>
-        Real-time
-      </div>
+    <div class="brand-logo">
+        <img src="assets/images/loghi/logo_nievo_white.png">
     </div>
   </header>
 
@@ -658,20 +649,6 @@
     bindExpandEvents();
   }
 
-  function setConnected(ok) {
-    const badge = document.getElementById('fb-badge');
-    const dot = document.getElementById('fb-dot');
-    const lbl = document.getElementById('fb-lbl');
-    if (ok) {
-      badge.classList.add('ok');
-      dot.style.background = 'var(--live)';
-      lbl.textContent = 'Firebase connesso';
-    } else {
-      badge.classList.remove('ok');
-      dot.style.background = 'var(--text-3)';
-      lbl.textContent = 'Non connesso';
-    }
-  }
 
   let toastTimer = null;
   function showToast(msg, type = 'inf') {
