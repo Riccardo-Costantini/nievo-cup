@@ -103,6 +103,11 @@ body {
 .voce {
   font-size: 2dvw;
   white-space: nowrap;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: .82rem;
+  letter-spacing: 0.1em;
+  color: var(--text);
+  line-height: 1;
 }
 
 #hero {
@@ -610,6 +615,21 @@ footer {
    ===================================================== */
 
 @media (max-width: 700px) {
+    .header{
+        height: 30vw;
+        flex-direction: column;
+    }
+    .logo img{
+        height:19.7dvw;
+        max-height: none;
+    }
+    .menu{
+        display: flex;
+        justify-content: space-around;
+    }
+    .voce{
+        font-size: 3vw;
+    }
   .wrap {
     padding: 1rem 0.8rem 2rem;  /* niente padding-top extra */
   }
