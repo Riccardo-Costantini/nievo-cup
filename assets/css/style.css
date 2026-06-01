@@ -166,25 +166,12 @@ body {
   width: 100%;
 }
 
-/* =====================================================
-   INDEX – INFO
-   ===================================================== */
-#info{
+
+.g{
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 60dvh;
-    font-family: 'Arial', sans-serif;
-    font-size: 2vw;
-    letter-spacing: 0.08em;
-    color: white;
+    gap:5vw;
 }
-
-
-
-
-
 
 /* =====================================================
    INDEX – SPONSOR (MARQUEE)
@@ -194,6 +181,8 @@ body {
   background-color: #000000;  /* mantieni il tuo colore */
   padding: 2rem 0;
   text-align: center;
+  border-top: 2px solid #feda00;
+  border-bottom: 2px solid #feda00;
 }
 
 #sponsor h1 {
@@ -269,6 +258,10 @@ body {
     height: 15dvh;
     max-width: 220px;
   }
+  .g{
+    background-image: none;
+    border-top: none;
+  }
 }
 
 /* Smartphone piccoli */
@@ -295,6 +288,159 @@ body {
 /* Per far sì che l'animazione sia continua anche quando il contenuto è più lungo dello schermo,
    si può duplicare il set di immagini in HTML (opzionale, ma più fluido). 
    Se noti che lo scrolling si interrompe, aggiungi questo secondo set: */
+
+/* =====================================================
+   INDEX – INFO
+   ===================================================== */
+#info{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 75dvh;
+    width: 90vw;
+    font-family: 'Arial', sans-serif;
+    font-size: 1.5vw;
+    letter-spacing: 0.08em;
+    color: white;
+    margin: 0 auto;
+    text-align: center;
+}
+
+
+/* =====================================================
+   INDEX – GIRONI (con colori: nero, grigio #5E646B, giallo #feda00)
+   ===================================================== */
+
+.gironi {
+border-top: 2px solid #feda00;
+  background-image: url("../images/sfondi/sfondo_gironi.webp");
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  padding: 6rem 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: white;
+  text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+}
+
+.gironi-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2.5rem;
+  max-width: 1400px;              /* più largo per schermi grandi */
+  margin: 0 auto;
+  width: 100%;
+}
+
+.girone-card {
+  background: rgba(0, 0, 0, 0.75);  /* nero semitrasparente */
+  backdrop-filter: blur(4px);
+  border-radius: 24px;
+  padding: 1.5rem;
+  border: 1px solid #5E646B;         /* griglio per bordo */
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.girone-card:hover {
+  transform: translateY(-5px);
+  border-color: #feda00;              /* bordo giallo al hover */
+  background: rgba(0, 0, 0, 0.85);
+}
+
+.girone-titolo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2rem;
+  letter-spacing: 0.08em;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 3px solid #feda00;   /* linea gialla sotto il titolo */
+  display: inline-block;
+  width: 100%;
+  color: white;
+}
+
+.squadre-lista {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.squadre-lista li {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-family: 'Rubik', sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid #5E646B;   /* separatore grigio tra squadre */
+  color: white;
+}
+
+.squadre-lista li:last-child {
+  border-bottom: none;
+}
+
+/* Placeholder logo – uso giallo come colore principale */
+.team-logo-mini {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  border-radius: 50%;
+  background-color: #fed80098;   /* sfondo giallo se l'immagine è trasparente */
+  padding: 4px;
+  flex-shrink: 0;
+}
+
+.gironi-footer {
+  text-align: center;
+  margin-top: 3rem;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.8rem;
+  letter-spacing: 0.1em;
+  color: white;
+  text-shadow: 0 0 15px rgba(0,0,0,0.8);
+}
+
+/* Responsive */
+@media (max-width: 700px) {
+  .gironi {
+    background-image: none;
+    padding: 2rem 1rem;
+  }
+  .girone-titolo {
+    font-size: 1.6rem;
+  }
+  .squadre-lista li {
+    font-size: 0.85rem;
+    gap: 0.5rem;
+  }
+  .placeholder-logo {
+    width: 28px;
+    height: 28px;
+  }
+  .gironi-footer {
+    font-size: 1.3rem;
+    margin-top: 2rem;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -845,11 +991,11 @@ footer {
   #hero h3{
     font-size: 4vw;
   }
-  #info{
-    margin:0 auto;
-    width: 88vw;
-  }
-  #info p{
+    #info{
+        width: 80%;
+        height: 55dvh;
+    }
+#info p{
     font-size: 3.5vw;
     font-family: "Rubik", sans-serif;
     font-optical-sizing: auto;
