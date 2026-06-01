@@ -114,7 +114,6 @@ body {
   background-repeat: no-repeat;
   /* Se vuoi un effetto parallax o fisso, usa background-attachment: fixed; */
 }
-
 /* L'header deve restare trasparente (già lo è) */
 .header {
   background: transparent; /* già così */

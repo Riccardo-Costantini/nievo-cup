@@ -1,99 +1,501 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-    <title>Nievo Cup - Home Page</title>
-    <link rel="stylesheet" href="assets/css/style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+Tamil:wght@100..900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="theme-color" content="#000000" />
+  <title>Nievo Cup – Gironi e Classifiche</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=Exo+2:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Rubik:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <style>
+    /* stili specifici per le tabelle classifiche – integrazione responsive */
+    .standings-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .girone-card {
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      border-radius: 28px;
+      padding: 1rem 1rem 1.2rem 1rem;
+      border: 1px solid #5E646B;
+      transition: transform 0.2s, border-color 0.2s;
+      overflow: hidden;
+    }
+
+    .girone-card:hover {
+      transform: translateY(-4px);
+      border-color: #feda00;
+      background: rgba(0, 0, 0, 0.88);
+    }
+
+    .girone-titolo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem;
+      letter-spacing: 0.08em;
+      text-align: center;
+      margin: 0 0 1rem 0;
+      padding-bottom: 0.5rem;
+      border-bottom: 3px solid #feda00;
+      display: inline-block;
+      width: 100%;
+      color: white;
+    }
+
+    /* contenitore tabella scrollabile su mobile */
+    .table-wrapper {
+      overflow-x: auto;
+      border-radius: 20px;
+      margin-top: 0.5rem;
+    }
+
+    .standing-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: 'Rajdhani', 'Exo 2', sans-serif;
+      font-size: 0.85rem;
+      min-width: 480px;
+    }
+
+    .standing-table th {
+      text-align: center;
+      padding: 0.75rem 0.3rem;
+      background: rgba(20, 28, 43, 0.9);
+      color: #feda00;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      font-size: 0.75rem;
+      border-bottom: 1px solid #5E646B;
+    }
+
+    .standing-table td {
+      text-align: center;
+      padding: 0.7rem 0.2rem;
+      border-bottom: 1px solid rgba(94, 100, 107, 0.4);
+      color: #f1f5f9;
+      font-weight: 500;
+    }
+
+    /* colonna squadra più stretta */
+    .standing-table th:first-child,
+    .standing-table td:first-child {
+      width: 28%;
+      text-align: left;
+      padding-left: 0.8rem;
+    }
+
+    /* EVIDENZIAZIONE COLONNA PT */
+    .standing-table th:nth-child(3) {
+      color: #ffea80;
+      text-shadow: 0 0 2px rgba(0,0,0,0.5);
+      border-left: 1px solid rgba(254,218,0,0.3);
+      border-right: 1px solid rgba(254,218,0,0.3);
+    }
+
+    td.pts-cell {
+      font-weight: 800;
+      color: #ffd900;
+      border-left: 1px solid rgba(254,218,0,0.3);
+      border-right: 1px solid rgba(254,218,0,0.3);
+      font-size: 1rem;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+
+    /* BANDA VERDE PER SQUADRE IN LIVE */
+    tr.row-live td:first-child {
+      border-left: 4px solid #22c55e;
+      position: relative;
+      box-shadow: inset -1px 0 0 rgba(34,197,94,0.2);
+    }
+
+    .team-cell {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      justify-content: flex-start;
+      font-weight: 600;
+    }
+
+    .mini-logo {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 40%;
+      padding: 2px;
+      flex-shrink: 0;
+    }
+
+    .team-name {
+      white-space: nowrap;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .empty-msg {
+      text-align: center;
+      padding: 2rem;
+      color: #94a3b8;
+      font-family: 'Rajdhani', sans-serif;
+    }
+
+    .gironi-footer {
+      text-align: center;
+      margin-top: 3rem;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.8rem;
+      letter-spacing: 0.1em;
+      color: white;
+      text-shadow: 0 0 15px rgba(0,0,0,0.8);
+    }
+
+    @media (max-width: 880px) {
+      .standings-grid { grid-template-columns: 1fr; gap: 1.8rem; }
+      .girone-card { margin-bottom: 0.5rem; }
+      .team-cell { gap: 0.4rem; }
+      .team-name { font-size: 0.7rem; white-space: normal; word-break: break-word; line-height: 1.2; }
+      .mini-logo { width: 24px; height: 24px; }
+      .standing-table th, .standing-table td { padding: 0.5rem 0.15rem; font-size: 0.65rem; }
+      .pts-cell { font-size: 0.8rem; }
+      .girone-titolo { font-size: 1.6rem; }
+      .standing-table { min-width: 440px; }
+    }
+
+    @media (max-width: 550px) {
+      .team-name { font-size: .75rem; }
+      .standing-table { min-width: 400px; }
+      .table-wrapper { margin: 0 -0.2rem; }
+      .gironi-footer { font-size: 1.3rem; }
+      .standing-table th:first-child,
+      .standing-table td:first-child { width: 32%; padding-left: 0.5rem; }
+    }
+  </style>
 </head>
 <body>
-    <div class="hero-wrapper g">
-      <div class="header">
-        <div class="logo">
-          <a href="index.html">
-            <img src="assets/images/loghi/logo_nievo_white.png" alt="Logo Nievo Cup">
-          </a>
-        </div>
-        <div class="menu">
-          <div class="voce">
-            <a href="calendario.html"><p>Calendario</p></a>
-          </div>
-          <div class="voce">
-            <a href="gironi.html"><p>Gironi</p></a>
-          </div>
-          <div class="voce">
-            <p>Tabellone</p>
-          </div>
-          <div class="voce">
-            <p>Squadre</p>
-          </div>
-        </div>
-      </div>
-
-      <div id="gironi">
-        <div class="gironi-container" style="width: 90%;">
-            <!-- GIRONE A -->
-            <div class="girone-card">
-            <h2 class="girone-titolo">GIRONE A</h2>
-            <ul class="squadre-lista">
-                <li><img class="team-logo-mini" src="assets/images/loghi_squadre/ztl.png" alt="ZTL"> ZTL</li>
-                <li><img class="team-logo-mini" src="assets/images/loghi_squadre/team_santa_follia.png" alt="TEAM SANTA FOLLIA"> TEAM SANTA FOLLIA</li>
-                <li><img class="team-logo-mini" src="assets/images/loghi_squadre/bootay.png" alt="BOOTAY"> BOOTAY</li>
-                <li><img class="team-logo-mini" src="assets/images/loghi_squadre/carachi_fc.png" alt="CARACHI"> CARACHI</li>
-                <li><img class="team-logo-mini" src="assets/images/loghi_squadre/los_perros.png" alt="LOS PERROS"> LOS PERROS</li>
-                <li><img class="team-logo-mini" src="assets/images/loghi_squadre/hellade.png" alt="HELLADE VAL BORAGO"> HELLADE VAL BORAGO</li>
-            </ul>
-            </div>
-
-            <!-- GIRONE B -->
-            <div class="girone-card">
-            <h2 class="girone-titolo">GIRONE B</h2>
-            <ul class="squadre-lista">
-                <li><img class="team-logo-mini" src="assets/images/loghi_squadre/san_mexico.png" alt="SAN MEXICO"> SAN MEXICO</li>
-                <li><img class="team-logo-mini" src="assets/images/loghi_squadre/mocro_equipe.png" alt="MOCRO EQUIPE"> MOCRO EQUIPE</li>
-                <li><img class="team-logo-mini" src="assets/images/loghi_squadre/skooppoke.png" alt="SKOOP POKE"> SKOOP POKE</li>
-                <li><img class="team-logo-mini" src="assets/images/loghi_squadre/atletico_tavola_calda.png" alt="ATLETICO TAVOLA CALDA"> ATLETICO TAVOLA CALDA</li>
-                <li><img class="team-logo-mini" src="assets/images/loghi_squadre/spartani.png" alt="SPARTANI"> SPARTANI</li>
-                <li><img class="team-logo-mini" src="assets/images/loghi_squadre/under.png" alt="UNDER VR"> UNDER VR</li>
-            </ul>
-            </div>
-
-            <!-- GIRONE C -->
-            <div class="girone-card">
-            <h2 class="girone-titolo">GIRONE C</h2>
-            <ul class="squadre-lista">
-                <li><img class="team-logo-mini" src="assets/images/loghi_squadre/patatanaikos.png" alt="PATATANAIKOS"> PATATANAIKOS</li>
-                <li><img class="team-logo-mini" src="assets/images/loghi_squadre/longobarda.png" alt="LONGOBARDA"> LONGOBARDA</li>
-                <li><img class="team-logo-mini" src="assets/images/loghi_squadre/spyder_nest.png" alt="SPYDERS FAT BOY"> SPYDERS FAT BOY</li>
-                <li><img class="team-logo-mini" src="assets/images/loghi_squadre/campeones.png" alt="CAMPEONES"> CAMPEONES</li>
-                <li><img class="team-logo-mini" src="assets/images/loghi_squadre/amatori_quinzano.png" alt="AMATORI QUINZANO"> AMATORI QUINZANO</li>
-                <li><img class="team-logo-mini" src="assets/images/loghi_squadre/la_selecao.png" alt="LA SELECAO"> LA SELECAO</li>
-            </ul>
-            </div>
-
-            <!-- GIRONE D -->
-            <div class="girone-card">
-            <h2 class="girone-titolo">GIRONE D</h2>
-            <ul class="squadre-lista">
-                <li><img class="team-logo-mini" src="assets/images/loghi_squadre/bovolangeles.png" alt="BOVOLANGELES"> BOVOLANGELES</li>
-                <li><img class="team-logo-mini" src="assets/images/loghi_squadre/hustlers.png" alt="HUSTLERS"> HUSTLERS</li>
-                <li><img class="team-logo-mini" src="assets/images/loghi_squadre/crazy_next_gen.png" alt="CRAZY NEXTGEN"> CRAZY NEXTGEN</li>
-                <li><img class="team-logo-mini" src="assets/images/loghi_squadre/pippierate.png" alt="THE PIPPIERATE"> THE PIPPIERATE</li>
-                <li><img class="team-logo-mini" src="assets/images/loghi_squadre/bv_samba.png" alt="BV-SAMBA"> BV-SAMBA</li>
-                <li><img class="team-logo-mini" src="assets/images/loghi_squadre/dream_team.png" alt="DREAM TEAM"> DREAM TEAM</li>
-            </ul>
-        </div>
+<div class="hero-wrapper g" style="background-image: url('assets/images/sfondi/sfondo_gironi.webp');">
+  <div class="header">
+    <div class="logo">
+      <a href="index.html">
+        <img src="assets/images/loghi/logo_nievo_white.png" alt="Logo Nievo Cup">
+      </a>
     </div>
-    <div class="gironi-footer" style="margin-bottom: 50px;">
-        <p>VERONA GIOCA QUI.</p>
+    <div class="menu">
+      <div class="voce"><a href="calendario.html"><p>Calendario</p></a></div>
+      <div class="voce"><a href="gironi.html"><p>Gironi</p></a></div>
+      <div class="voce"><p>Tabellone</p></div>
+      <div class="voce"><p>Squadre</p></div>
     </div>
+  </div>
+
+  <div id="gironi" style="width: 100%;">
+    <div id="standingsContainer" class="gironi-container" style="width: 90%; margin: 0 auto;">
+      <div class="empty-msg">🔄 Caricamento classifiche in tempo reale...</div>
     </div>
+    <div class="gironi-footer">
+      <p>VERONA GIOCA QUI.</p>
+    </div>
+  </div>
 </div>
+
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyB0LUxAWKVUIhXYRb2T2JOT3ypiX9q_5Ck",
+    authDomain: "nievo-fcc94.firebaseapp.com",
+    databaseURL: "https://nievo-fcc94-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "nievo-fcc94",
+    storageBucket: "nievo-fcc94.firebasestorage.app",
+    messagingSenderId: "497831212426",
+    appId: "1:497831212426:web:357e8c37b249042c53c473",
+    measurementId: "G-ZERXCC9LH8"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // ---------- NORMALIZZAZIONE NOMI (uguale a quella usata per i logo) ----------
+  function normalizeTeamName(name) {
+    if (!name) return '';
+    return name
+      .toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]/g, '');  // toglie spazi, trattini, apostrofi
+  }
+
+  // Mappa dei gironi con i nomi “canonici” (quelli visualizzati e usati come chiavi)
+  const GROUPS_MAP = {
+    "A": ["ZTL", "TEAM SANTA FOLLIA", "BOOTAY", "CARACHI", "LOS PERROS", "HELLADE VAL BORAGO"],
+    "B": ["SAN MEXICO", "MOCRO EQUIPE", "SKOOP POKE", "ATLETICO TAVOLA CALDA", "SPARTANI", "UNDER VR"],
+    "C": ["PATATANAIKOS", "LONGOBARDA", "SPYDERS FAT BOY", "CAMPEONES", "AMATORI QUINZANO", "LA SELECAO"],
+    "D": ["BOVOLANGELES", "HUSTLERS", "CRAZY NEXTGEN", "THE PIPPIERATE", "BV-SAMBA", "DREAM TEAM"]
+  };
+
+  // Costruiamo una mappa nome_normalizzato -> { group, canonicalName }
+  const canonicalMap = new Map();
+  for (const [group, teams] of Object.entries(GROUPS_MAP)) {
+    for (const canon of teams) {
+      const norm = normalizeTeamName(canon);
+      canonicalMap.set(norm, { group, canonicalName: canon });
+    }
+  }
+  // Mappa delle correzioni manuali per i nomi salvati male nel DB
+  // "nome_inviato_dal_db_normalizzato" : "nome_esatto_del_groups_map_normalizzato"
+  const TEAM_ALIASES = {
+    "bvsmba": "bvsamba",          // Corregge l'errore se nel DB manca una 'a'
+    "bvsamba": "bvsamba",         // (Giusto per sicurezza)
+    "hellade": "helladevalborago" // Esempio: se nel DB viene salvato solo come "Hellade"
+    // Aggiungi qui altre eccezioni se ti accorgi che il DB usa nomi diversi!
+  };
+
+  // Dato un nome dal DB, restituisce il nome canonico e il girone
+  function resolveTeam(teamNameRaw) {
+    if (!teamNameRaw) return null;
+    
+    // 1. Normalizziamo il nome in arrivo dal DB
+    let norm = normalizeTeamName(teamNameRaw);
+    
+    // 2. Se questo nome "sbagliato" è tra i nostri alias, lo correggiamo
+    if (TEAM_ALIASES[norm]) {
+      norm = TEAM_ALIASES[norm];
+    }
+    
+    // 3. Cerchiamo la squadra nella mappa ufficiale
+    const entry = canonicalMap.get(norm);
+    return entry || null;
+  }
+
+  function getLogoUrl(teamName) {
+    if (!teamName) return '';
+    let slug = teamName.toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^_|_$/g, '');
+    const exceptions = {
+      'bv_samba': 'bv_samba',
+      'skoop_poke': 'skooppoke',
+      'crazy_nextgen': 'crazy_next_gen',
+      'the_pippierate': 'pippierate',
+      'hellade_val_borago': 'hellade',
+      'under_vr': 'under',
+      'team_santa_follia': 'team_santa_follia',
+      'spyders_fat_boy': 'spyder_nest',
+      'carachi': 'carachi_fc'
+    };
+    if (exceptions[slug]) slug = exceptions[slug];
+    return `assets/images/loghi_squadre/${slug}.png`;
+  }
+
+  function toArray(val) {
+    if (!val) return [];
+    if (Array.isArray(val)) return val;
+    if (typeof val === 'object') return Object.values(val);
+    return [];
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    });
+  }
+
+  let matchesData = {};
+  let liveResultsData = {};
+  let isLoading = true;
+
+  // Squadre che stanno giocando LIVE (banda verde)
+  function getLiveTeamsSet() {
+    const liveCanonical = new Set();
+    for (const matchId of Object.keys(matchesData)) {
+      const match = matchesData[matchId];
+      const result = liveResultsData[matchId] || {};
+      if (result.status === "Live") {
+        const homeRes = resolveTeam(match.home?.name);
+        const awayRes = resolveTeam(match.away?.name);
+        if (homeRes) liveCanonical.add(homeRes.canonicalName);
+        if (awayRes) liveCanonical.add(awayRes.canonicalName);
+      }
+    }
+    return liveCanonical;
+  }
+
+  function computeStandings() {
+    // Inizializza statistiche per ogni squadra canonica
+    const groupStats = { A: {}, B: {}, C: {}, D: {} };
+    for (const [group, teams] of Object.entries(GROUPS_MAP)) {
+      for (const team of teams) {
+        groupStats[group][team] = { PG: 0, V: 0, N: 0, P: 0, GF: 0, GS: 0, DR: 0, Pt: 0 };
+      }
+    }
+
+    function processMatch(match, result) {
+      const homeRaw = match.home?.name;
+      const awayRaw = match.away?.name;
+      if (!homeRaw || !awayRaw) return;
+
+      const homeRes = resolveTeam(homeRaw);
+      const awayRes = resolveTeam(awayRaw);
+      if (!homeRes || !awayRes) return;
+      if (homeRes.group !== awayRes.group) return; // devono essere stesso girone
+
+      const group = homeRes.group;
+      const homeCanon = homeRes.canonicalName;
+      const awayCanon = awayRes.canonicalName;
+
+      const resultData = result || {};
+      const scorersHome = toArray(resultData.scorersHome);
+      const scorersAway = toArray(resultData.scorersAway);
+      const homeGoals = scorersHome.length;
+      const awayGoals = scorersAway.length;
+      const status = resultData.status || "In programma";
+
+      if (status !== "Live" && status !== "Finita") return;
+
+      const homeStat = groupStats[group][homeCanon];
+      const awayStat = groupStats[group][awayCanon];
+      if (!homeStat || !awayStat) return;
+
+      homeStat.PG += 1; awayStat.PG += 1;
+      homeStat.GF += homeGoals; homeStat.GS += awayGoals;
+      awayStat.GF += awayGoals; awayStat.GS += homeGoals;
+
+      if (homeGoals > awayGoals) {
+        homeStat.V += 1; awayStat.P += 1; homeStat.Pt += 3;
+      } else if (homeGoals < awayGoals) {
+        homeStat.P += 1; awayStat.V += 1; awayStat.Pt += 3;
+      } else {
+        homeStat.N += 1; awayStat.N += 1; homeStat.Pt += 1; awayStat.Pt += 1;
+      }
+    }
+
+    for (const matchId of Object.keys(matchesData)) {
+      processMatch(matchesData[matchId], liveResultsData[matchId] || {});
+    }
+
+    // Calcola differenza reti e ordina
+    const sortedGroups = {};
+    for (const group of Object.keys(groupStats)) {
+      const standingsArray = [];
+      for (const [teamName, stats] of Object.entries(groupStats[group])) {
+        stats.DR = stats.GF - stats.GS;
+        standingsArray.push({ team: teamName, ...stats });
+      }
+      standingsArray.sort((a, b) => {
+        if (a.Pt !== b.Pt) return b.Pt - a.Pt;
+        if (a.DR !== b.DR) return b.DR - a.DR;
+        return b.GF - a.GF;
+      });
+      sortedGroups[group] = standingsArray;
+    }
+    return sortedGroups;
+  }
+
+  function renderStandings() {
+    const container = document.getElementById('standingsContainer');
+    if (!container) return;
+
+    if (isLoading && Object.keys(matchesData).length === 0) {
+      container.innerHTML = `<div class="empty-msg">⏳ Caricamento partite e classifiche...</div>`;
+      return;
+    }
+
+    const liveTeams = getLiveTeamsSet();
+    const standings = computeStandings();
+    const groupsOrder = ['A', 'B', 'C', 'D'];
+    let groupsHtml = `<div class="standings-grid">`;
+
+    for (const group of groupsOrder) {
+      const groupStandings = standings[group] || [];
+      if (groupStandings.length === 0) {
+        groupsHtml += `<div class="girone-card"><h2 class="girone-titolo">GIRONE ${group}</h2><div class="empty-msg" style="padding:1rem">Nessuna squadra disponibile</div></div>`;
+        continue;
+      }
+
+      let tableRows = '';
+      for (const row of groupStandings) {
+        const isLive = liveTeams.has(row.team);
+        const rowClass = isLive ? 'row-live' : '';
+        const logoUrl = getLogoUrl(row.team);
+        tableRows += `
+          <tr class="${rowClass}">
+            <td><div class="team-cell"><img class="mini-logo" src="${logoUrl}" alt="${escapeHtml(row.team)}" loading="lazy" onerror="this.style.display='none';"><span class="team-name" title="${escapeHtml(row.team)}">${escapeHtml(row.team)}</span></div></td>
+            <td>${row.PG}</td>
+            <td class="pts-cell">${row.Pt}</td>
+            <td>${row.V}</td>
+            <td>${row.N}</td>
+            <td>${row.P}</td>
+            <td>${row.GF}</td>
+            <td>${row.GS}</td>
+            <td>${row.DR}</td>
+          </tr>
+        `;
+      }
+
+      groupsHtml += `
+        <div class="girone-card">
+          <h2 class="girone-titolo">GIRONE ${group}</h2>
+          <div class="table-wrapper">
+            <table class="standing-table">
+              <thead>
+                <tr><th>SQUADRA</th><th>PG</th><th>Pt</th><th>V</th><th>N</th><th>P</th><th>GF</th><th>GS</th><th>DR</th></tr>
+              </thead>
+              <tbody>${tableRows}</tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+    groupsHtml += `</div>`;
+    container.innerHTML = groupsHtml;
+  }
+
+  let matchesLoaded = false;
+  onValue(ref(db, 'matches'), (snapshot) => {
+    matchesData = snapshot.val() || {};
+    matchesLoaded = true;
+    isLoading = false;
+    renderStandings();
+  }, (error) => {
+    console.error("Errore lettura matches:", error);
+    isLoading = false;
+    renderStandings();
+    const container = document.getElementById('standingsContainer');
+    if (container && Object.keys(matchesData).length === 0) {
+      container.innerHTML = `<div class="empty-msg">⚠️ Errore nel caricamento partite. Controlla connessione Firebase.</div>`;
+    }
+  });
+
+  onValue(ref(db, 'liveResults'), (snapshot) => {
+    liveResultsData = snapshot.val() || {};
+    if (!isLoading) renderStandings();
+  }, (error) => console.error("Errore lettura liveResults:", error));
+
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      if (Object.keys(matchesData).length === 0 && !matchesLoaded) {
+        const container = document.getElementById('standingsContainer');
+        if (container && container.innerHTML.includes("Caricamento classifiche")) {
+          container.innerHTML = `<div class="empty-msg">⏳ Connessione a Firebase... attendi o ricarica</div>`;
+        }
+      }
+    }, 1800);
+  });
+</script>
 </body>
 </html>
