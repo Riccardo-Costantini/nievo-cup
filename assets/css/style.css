@@ -903,30 +903,6 @@ footer {
   margin-top: 2rem;
 }
 
-#toast {
-  position: fixed;
-  bottom: 1rem;
-  right: 1rem;
-  z-index: 9999;
-  pointer-events: none;
-  min-width: 200px;
-  max-width: 280px;
-  padding: 0.7rem 1rem;
-  border-radius: 12px;
-  background: var(--bg-card2);
-  border: 1px solid var(--border-m);
-  font-size: 0.75rem;
-  color: var(--text);
-  transform: translateY(90px);
-  opacity: 0;
-  transition: transform .3s ease, opacity .3s ease;
-}
-
-#toast.show { transform: translateY(0); opacity: 1; }
-#toast.t-err { border-color: var(--red-bdr); }
-#toast.t-inf { border-color: var(--border-a); }
-
-
 /* =====================================================
    CALENDARIO – RESPONSIVE
    ===================================================== */

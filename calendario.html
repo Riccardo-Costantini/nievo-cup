@@ -50,8 +50,6 @@
   </footer>
 </div>
 
-<div id="toast"></div>
-
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
   import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
@@ -84,7 +82,7 @@
     const exceptions = {
       'bv_smba': 'bv_samba',
       'skoop_poke': 'skoop',
-      'spyders_fat_boy': 'spyder_nest',
+      'fat_boy': 'fatboy',
       'the_pippierate': 'pippierate',
       'hellade_val_borago': 'hellade',
       'under_vr': 'under',
@@ -200,29 +198,16 @@
       html += `</div>`;
     }
     container.innerHTML = html;
-    bindExpandEvents();
   }
 
-
-  let toastTimer = null;
-  function showToast(msg, type = 'inf') {
-    const el = document.getElementById('toast');
-    el.textContent = msg;
-    el.className = `show t-${type}`;
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => { el.className = ''; }, 3200);
-  }
 
   // Listener match fissi
   onValue(ref(db, 'matches'), (snapshot) => {
     matchesData = snapshot.val() || {};
     renderCalendar();
-    setConnected(true);
-    showToast('🔥 Dati aggiornati in tempo reale', 'inf');
   }, (error) => {
     console.error('Errore lettura matches:', error);
     setConnected(false);
-    showToast('Errore di connessione a Firebase', 'err');
     document.getElementById('calendar').innerHTML = `<p class="cal-loading">Impossibile caricare le partite.</p>`;
   });
 
