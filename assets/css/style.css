@@ -315,7 +315,7 @@ body {
    ===================================================== */
 
 .gironi {
-border-top: 2px solid #feda00;
+  border-top: 2px solid #feda00;
   background-image: url("../images/sfondi/sfondo_gironi.webp");
   background-size: cover;
   background-position: center center;

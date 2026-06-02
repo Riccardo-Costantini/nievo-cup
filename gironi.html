@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <meta name="theme-color" content="#000000" />
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b0f17">
   <title>Nievo Cup – Gironi e Classifiche</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -11,6 +12,15 @@
   <link rel="stylesheet" href="assets/css/style.css" />
   <link rel="shortcut icon" href="assets/images/loghi/favicon_nievo_cup.ico" type="image/x-icon">
   <style>
+    body.page-partite::before {
+      background-image: url('assets/images/sfondi/sfondo_gironi.webp');
+    }
+    @media (max-width: 700px) {
+      body.page-partite::before {
+        background-image: url('assets/images/sfondi/sfondo_mobile_gironi.jpg');
+      }
+    }
+
     /* stili specifici per le tabelle classifiche – integrazione responsive */
     .standings-grid {
       display: grid;
@@ -183,8 +193,8 @@
     }
   </style>
 </head>
-<body>
-<div class="hero-wrapper g" style="background-image: url('assets/images/sfondi/sfondo_gironi.webp');">
+<body class="page-partite">
+
   <div class="header">
     <div class="logo">
       <a href="index.html">
@@ -199,6 +209,9 @@
     </div>
   </div>
 
+  <div id="bg-fx" aria-hidden="true"></div>
+
+<div class="wrap">
   <div id="gironi" style="width: 100%;">
     <div id="standingsContainer" class="gironi-container" style="width: 90%; margin: 0 auto;">
       <div class="empty-msg">🔄 Caricamento classifiche in tempo reale...</div>
@@ -258,7 +271,7 @@
     "bvsmba": "bvsamba",          // Corregge l'errore se nel DB manca una 'a'
     "bvsamba": "bvsamba",         // (Giusto per sicurezza)
     "hellade": "helladevalborago" // Esempio: se nel DB viene salvato solo come "Hellade"
-    // Aggiungi qui altre eccezioni se ti accorgi che il DB usa nomi diversi!
+    // Aggiungi qui altre eccezioni si ti accorgi che il DB usa nomi diversi!
   };
 
   // Dato un nome dal DB, restituisce il nome canonico e il girone
@@ -444,7 +457,7 @@
             <td>${row.GF}</td>
             <td>${row.GS}</td>
             <td>${row.DR}</td>
-          </tr>
+           </tr>
         `;
       }
 
