@@ -721,7 +721,6 @@ header {
 
 .match-card.is-finished {
   border-color: rgba(124,58,237,0.15);
-  background-color: var(--red-bg);
 }
 
 .match-card.expanded {
