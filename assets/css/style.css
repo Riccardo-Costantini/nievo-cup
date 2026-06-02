@@ -924,7 +924,7 @@ footer {
         max-height: none;
     }
     .logo.l img{
-        height:40dvw;
+        width: 160%;
         max-height: none;
     }
     .menu{
