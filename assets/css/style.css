@@ -924,10 +924,13 @@ footer {
         max-height: none;
     }
     .l{
-      
+      height: 100px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
     .l img{
-
+      height: 70%;
     }
     .menu{
         display: flex;
