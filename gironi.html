@@ -254,7 +254,7 @@
     "A": ["ZTL", "TEAM SANTA FOLLIA", "BOOTAY", "CARACHI", "LOS PERROS", "HELLADE VAL BORAGO"],
     "B": ["SAN MEXICO", "MOCRO EQUIPE", "SKOOP POKE", "ATLETICO TAVOLA CALDA", "SPARTANI", "UNDER VR"],
     "C": ["PATATANAIKOS", "LONGOBARDA", "FAT BOY", "CAMPEONES", "AMATORI QUINZANO", "LA SELECAO"],
-    "D": ["BOVOLANGELES", "HUSTLERS", "CRAZY NEXTGEN", "THE PIPPIERATE", "BV-SAMBA", "DREAM TEAM"]
+    "D": ["BOVOLANGELES", "HUSTLERS", "CRAZY NEXTGEN", "THE PIPPIERATE", "BV SMBA", "DREAM TEAM"]
   };
 
   // Costruiamo una mappa nome_normalizzato -> { group, canonicalName }
@@ -268,8 +268,8 @@
   // Mappa delle correzioni manuali per i nomi salvati male nel DB
   // "nome_inviato_dal_db_normalizzato" : "nome_esatto_del_groups_map_normalizzato"
   const TEAM_ALIASES = {
-    "bvsmba": "bvsamba",          // Corregge l'errore se nel DB manca una 'a'
-    "bvsamba": "bvsamba",         // (Giusto per sicurezza)
+    "bvsmba": "bvsmba",          // Corregge l'errore se nel DB manca una 'a'
+    "bvsmba": "bvsmba",         // (Giusto per sicurezza)
     "hellade": "helladevalborago" // Esempio: se nel DB viene salvato solo come "Hellade"
     // Aggiungi qui altre eccezioni si ti accorgi che il DB usa nomi diversi!
   };
@@ -298,7 +298,7 @@
       .replace(/[^a-z0-9]+/g, '_')
       .replace(/^_|_$/g, '');
     const exceptions = {
-      'bv_samba': 'bv_samba',
+      'bv_smba': 'bv_samba',
       'skoop_poke': 'skooppoke',
       'crazy_nextgen': 'crazy_next_gen',
       'the_pippierate': 'pippierate',
