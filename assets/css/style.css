@@ -93,7 +93,7 @@ body {
 .logo img {
   height: 8vw;
 }
-.logo.l img{
+.l img{
   height: 14vw;
 }
 .menu {
@@ -923,7 +923,8 @@ footer {
         height:19.7dvw;
         max-height: none;
     }
-    .logo.l img{
+    .l img{
+        height:24dvw; 
         max-height: none;
     }
     .menu{
