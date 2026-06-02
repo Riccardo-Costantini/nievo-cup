@@ -923,9 +923,11 @@ footer {
         height:19.7dvw;
         max-height: none;
     }
+    .l{
+      
+    }
     .l img{
-        height:24dvw; 
-        max-height: none;
+
     }
     .menu{
         display: flex;
