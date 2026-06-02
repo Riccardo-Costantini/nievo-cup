@@ -438,7 +438,11 @@ body {
 
 
 
-
+#arena img{
+  width: 100%;
+  border-top: 2px solid #feda00;
+  border-bottom: 2px solid #feda00;
+}
 
 
 
