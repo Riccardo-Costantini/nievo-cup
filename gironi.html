@@ -19,7 +19,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=Exo+2:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Rubik:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/style.css" />
-  <link rel="shortcut icon" href="assets/images/loghi/favicon_nievo_cup.ico" type="image/x-icon">
   <style>
     body.page-partite::before {
       background-image: url('assets/images/sfondi/sfondo_gironi.webp');
@@ -207,7 +206,7 @@
   <div class="header">
     <div class="logo">
       <a href="index.html">
-        <img src="assets/images/loghi/logo_nievo_white.png" alt="Logo Nievo Cup">
+        <img loading="lazy" decoding="async" src="assets/images/loghi/logo_nievo_white.png" alt="Logo Nievo Cup">
       </a>
     </div>
     <div class="menu">
@@ -457,7 +456,7 @@
         const logoUrl = getLogoUrl(row.team);
         tableRows += `
           <tr class="${rowClass}">
-            <td><div class="team-cell"><img class="mini-logo" src="${logoUrl}" alt="${escapeHtml(row.team)}" loading="lazy" onerror="this.style.display='none';"><span class="team-name" title="${escapeHtml(row.team)}">${escapeHtml(row.team)}</span></div></td>
+            <td><div class="team-cell"><img loading="lazy" decoding="async" class="mini-logo" src="${logoUrl}" alt="${escapeHtml(row.team)}" loading="lazy" onerror="this.style.display='none';"><span class="team-name" title="${escapeHtml(row.team)}">${escapeHtml(row.team)}</span></div></td>
             <td>${row.PG}</td>
             <td class="pts-cell">${row.Pt}</td>
             <td>${row.V}</td>

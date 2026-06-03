@@ -18,8 +18,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=Exo+2:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/style.css" />
-  <link rel="shortcut icon" href="assets/images/loghi/favicon_nievo_cup.ico" type="image/x-icon">
-
+  
   <style>
     /* ───────────────────────────────────────────
        PAGE BASE
@@ -668,7 +667,7 @@
   <div class="header">
     <div class="logo">
       <a href="index.html">
-        <img src="assets/images/loghi/logo_nievo_white.png" alt="Logo Nievo Cup">
+        <img loading="lazy" decoding="async" src="assets/images/loghi/logo_nievo_white.png" alt="Logo Nievo Cup">
       </a>
     </div>
     <div class="menu">
@@ -766,7 +765,7 @@
         'the_pippierate':'pippierate', 'hellade_val_borago':'hellade', 'under_vr':'under',
         'team_santa_follia':'team_santa_follia', 'fat_boy':'fatboy', 'carachi_fc':'carachi_fc', 'carachi':'carachi_fc'
       };
-      return `assets/images/loghi_squadre/${exc[slug] || slug}.png`;
+      return `assets/images/loghi_squadre/${exc[slug] || slug}.webp`;
     }
 
     function toArray(val) {
@@ -945,8 +944,8 @@
             <div class="team-card">
               <div class="tc-header">
                 <div class="tc-logo-wrap">
-                  <img class="tc-logo" src="${esc(team.logoUrl)}" alt="${esc(team.name)}"
-                       onerror="this.src='assets/images/loghi/logo_nievo_white.png'">
+                  <img loading="lazy" decoding="async" class="tc-logo" src="${esc(team.logoUrl)}" alt="${esc(team.name)}"
+                       onerror="this.src=''">
                 </div>
                 <div class="tc-info">
                   <div class="tc-name">${esc(team.name)}</div>

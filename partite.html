@@ -19,14 +19,13 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=Exo+2:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/style.css"></head>
-  <link rel="shortcut icon" href="assets/images/loghi/favicon_nievo_cup.ico" type="image/x-icon">
-
+  
   <body class="page-partite">
 
   <div class="header">
     <div class="logo">
       <a href="index.html">
-        <img src="assets/images/loghi/logo_nievo_white.png" alt="Logo Nievo Cup">
+        <img loading="lazy" decoding="async" src="assets/images/loghi/logo_nievo_white.png" alt="Logo Nievo Cup">
       </a>
     </div>
     <div class="menu">
@@ -91,7 +90,7 @@
       'san_mexico': 'san_mexico'
     };
     if (exceptions[slug]) slug = exceptions[slug];
-    return `assets/images/loghi_squadre/${slug}.png`;
+    return `assets/images/loghi_squadre/${slug}.webp`;
   }
 
   function toArray(val) {
@@ -176,7 +175,7 @@
             </div>
             <div class="score-row">
               <div class="team-blk">
-                <img class="team-logo" src="${getLogoUrl(match.home?.name)}" alt="${esc(match.home?.name)}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling?.style?.setProperty('display', 'block');" />
+                <img loading="lazy" decoding="async" class="team-logo" src="${getLogoUrl(match.home?.name)}" alt="${esc(match.home?.name)}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling?.style?.setProperty('display', 'block');" />
                 <div class="t-name">${esc(match.home?.name || 'Casa')}</div>
               </div>
               <div class="score-ctr">
@@ -185,7 +184,7 @@
                 <span class="score-n">${scorersAway.length}</span>
               </div>
               <div class="team-blk away">
-                <img class="team-logo" src="${getLogoUrl(match.away?.name)}" alt="${esc(match.away?.name)}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling?.style?.setProperty('display', 'block');" />
+                <img loading="lazy" decoding="async" class="team-logo" src="${getLogoUrl(match.away?.name)}" alt="${esc(match.away?.name)}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling?.style?.setProperty('display', 'block');" />
                 <div class="t-name">${esc(match.away?.name || 'Trasferta')}</div>
               </div>
             </div>
