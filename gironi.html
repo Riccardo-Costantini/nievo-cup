@@ -491,7 +491,7 @@
     renderStandings();
     const container = document.getElementById('standingsContainer');
     if (container && Object.keys(matchesData).length === 0) {
-      container.innerHTML = `<div class="empty-msg">⚠️ Errore nel caricamento partite. Controlla connessione Firebase.</div>`;
+      container.innerHTML = `<div class="empty-msg">⚠️ Errore nel caricamento partite. Controlla connessione.</div>`;
     }
   });
 
@@ -505,7 +505,7 @@
       if (Object.keys(matchesData).length === 0 && !matchesLoaded) {
         const container = document.getElementById('standingsContainer');
         if (container && container.innerHTML.includes("Caricamento classifiche")) {
-          container.innerHTML = `<div class="empty-msg">⏳ Connessione a Firebase... attendi o ricarica</div>`;
+          container.innerHTML = `<div class="empty-msg">⏳ Connessione in corso... attendi o ricarica</div>`;
         }
       }
     }, 1800);

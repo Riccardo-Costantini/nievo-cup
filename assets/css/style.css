@@ -919,7 +919,7 @@ footer {
         margin-bottom: 10dvw;
     }
     .logo img{
-        height:19.7dvw;
+        height:27dvw;
         max-height: none;
     }
     .l{
@@ -941,7 +941,7 @@ footer {
     .voce {
     white-space: normal;
     text-align: center;
-    font-size: 1.1rem;
+    font-size: 1.6rem;
   }
   .menu {
     gap: 0.8rem;
