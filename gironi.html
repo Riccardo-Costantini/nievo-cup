@@ -233,7 +233,7 @@
 
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-  import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+  import { getDatabase, ref, onValue, get } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
   const firebaseConfig = {
     apiKey: "AIzaSyB0LUxAWKVUIhXYRb2T2JOT3ypiX9q_5Ck",
@@ -255,7 +255,7 @@
     return name
       .toLowerCase()
       .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9]/g, '');  // toglie spazi, trattini, apostrofi
+      .replace(/[^a-z0-9]/g, '');
   }
 
   // Mappa dei gironi con i nomi “canonici” (quelli visualizzati e usati come chiavi)
@@ -275,29 +275,16 @@
     }
   }
   // Mappa delle correzioni manuali per i nomi salvati male nel DB
-  // "nome_inviato_dal_db_normalizzato" : "nome_esatto_del_groups_map_normalizzato"
   const TEAM_ALIASES = {
-    "bvsmba": "bvsmba",          // Corregge l'errore se nel DB manca una 'a'
-    "bvsmba": "bvsmba",         // (Giusto per sicurezza)
-    "hellade": "helladevalborago" // Esempio: se nel DB viene salvato solo come "Hellade"
-    // Aggiungi qui altre eccezioni si ti accorgi che il DB usa nomi diversi!
+    "bvsmba": "bvsmba",
+    "hellade": "helladevalborago"
   };
 
-  // Dato un nome dal DB, restituisce il nome canonico e il girone
   function resolveTeam(teamNameRaw) {
     if (!teamNameRaw) return null;
-    
-    // 1. Normalizziamo il nome in arrivo dal DB
     let norm = normalizeTeamName(teamNameRaw);
-    
-    // 2. Se questo nome "sbagliato" è tra i nostri alias, lo correggiamo
-    if (TEAM_ALIASES[norm]) {
-      norm = TEAM_ALIASES[norm];
-    }
-    
-    // 3. Cerchiamo la squadra nella mappa ufficiale
-    const entry = canonicalMap.get(norm);
-    return entry || null;
+    if (TEAM_ALIASES[norm]) norm = TEAM_ALIASES[norm];
+    return canonicalMap.get(norm) || null;
   }
 
   function getLogoUrl(teamName) {
@@ -341,6 +328,8 @@
   let matchesData = {};
   let liveResultsData = {};
   let isLoading = true;
+  let currentLiveListener = null;      // per rimuovere/riattivare il listener in base alla visibilità
+  let lastRenderedLiveHash = "";       // evita re-render inutili
 
   // Squadre che stanno giocando LIVE (banda verde)
   function getLiveTeamsSet() {
@@ -359,7 +348,6 @@
   }
 
   function computeStandings() {
-    // Inizializza statistiche per ogni squadra canonica
     const groupStats = { A: {}, B: {}, C: {}, D: {} };
     for (const [group, teams] of Object.entries(GROUPS_MAP)) {
       for (const team of teams) {
@@ -375,7 +363,7 @@
       const homeRes = resolveTeam(homeRaw);
       const awayRes = resolveTeam(awayRaw);
       if (!homeRes || !awayRes) return;
-      if (homeRes.group !== awayRes.group) return; // devono essere stesso girone
+      if (homeRes.group !== awayRes.group) return;
 
       const group = homeRes.group;
       const homeCanon = homeRes.canonicalName;
@@ -411,7 +399,6 @@
       processMatch(matchesData[matchId], liveResultsData[matchId] || {});
     }
 
-    // Calcola differenza reti e ordina
     const sortedGroups = {};
     for (const group of Object.keys(groupStats)) {
       const standingsArray = [];
@@ -429,7 +416,7 @@
     return sortedGroups;
   }
 
-  function renderStandings() {
+  function renderStandings(force = false) {
     const container = document.getElementById('standingsContainer');
     if (!container) return;
 
@@ -437,6 +424,11 @@
       container.innerHTML = `<div class="empty-msg">⏳ Caricamento partite e classifiche...</div>`;
       return;
     }
+
+    // Evita re-render identici basati su hash dei liveResults
+    const currentHash = JSON.stringify(liveResultsData);
+    if (!force && lastRenderedLiveHash === currentHash) return;
+    lastRenderedLiveHash = currentHash;
 
     const liveTeams = getLiveTeamsSet();
     const standings = computeStandings();
@@ -488,30 +480,70 @@
     container.innerHTML = groupsHtml;
   }
 
-  let matchesLoaded = false;
-  onValue(ref(db, 'matches'), (snapshot) => {
-    matchesData = snapshot.val() || {};
-    matchesLoaded = true;
-    isLoading = false;
-    renderStandings();
-  }, (error) => {
-    console.error("Errore lettura matches:", error);
-    isLoading = false;
-    renderStandings();
-    const container = document.getElementById('standingsContainer');
-    if (container && Object.keys(matchesData).length === 0) {
-      container.innerHTML = `<div class="empty-msg">⚠️ Errore nel caricamento partite. Controlla connessione.</div>`;
-    }
-  });
+  // ----- Ascolto liveResults (con gestione visibilità) -----
+  function attachLiveListener() {
+    if (currentLiveListener) return; // già attivo
+    const liveRef = ref(db, 'liveResults');
+    const handler = (snapshot) => {
+      liveResultsData = snapshot.val() || {};
+      if (!isLoading) renderStandings();
+    };
+    onValue(liveRef, handler, (error) => console.error("Errore liveResults:", error));
+    currentLiveListener = { ref: liveRef, handler };
+  }
 
-  onValue(ref(db, 'liveResults'), (snapshot) => {
-    liveResultsData = snapshot.val() || {};
-    if (!isLoading) renderStandings();
-  }, (error) => console.error("Errore lettura liveResults:", error));
+  function detachLiveListener() {
+    if (currentLiveListener) {
+      // rimuove il listener attivo
+      const { ref, handler } = currentLiveListener;
+      // Per staccare onValue: chiamata con la stessa funzione e poi null? Firebase non ha off() diretto? In realtà sì: ref.off('value', handler)
+      // Ma dobbiamo usare il metodo off del Reference
+      if (ref && handler) {
+        ref.off('value', handler);
+      }
+      currentLiveListener = null;
+    }
+  }
+
+  // Gestione visibilità pagina (risparmio banda in background)
+  function handleVisibilityChange() {
+    if (document.hidden) {
+      detachLiveListener();
+    } else {
+      attachLiveListener();
+      // Forza un refresh appena riattivato
+      if (!isLoading) renderStandings(true);
+    }
+  }
+
+  // ----- Caricamento principale dei matches (UNA TANTUM, risparmio banda) -----
+  async function loadMatches() {
+    const matchesRef = ref(db, 'matches');
+    try {
+      const snapshot = await get(matchesRef);
+      matchesData = snapshot.val() || {};
+      isLoading = false;
+      // appena caricati i match, attacca il listener live (se pagina visibile)
+      if (!document.hidden) attachLiveListener();
+      renderStandings(true);
+    } catch (error) {
+      console.error("Errore caricamento matches:", error);
+      isLoading = false;
+      renderStandings(true);
+      const container = document.getElementById('standingsContainer');
+      if (container && Object.keys(matchesData).length === 0) {
+        container.innerHTML = `<div class="empty-msg">⚠️ Errore nel caricamento partite. Controlla connessione.</div>`;
+      }
+    }
+  }
+
+  // Avvio
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+  loadMatches();
 
   window.addEventListener('load', () => {
     setTimeout(() => {
-      if (Object.keys(matchesData).length === 0 && !matchesLoaded) {
+      if (Object.keys(matchesData).length === 0 && isLoading) {
         const container = document.getElementById('standingsContainer');
         if (container && container.innerHTML.includes("Caricamento classifiche")) {
           container.innerHTML = `<div class="empty-msg">⏳ Connessione in corso... attendi o ricarica</div>`;
