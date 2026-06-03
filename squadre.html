@@ -901,7 +901,7 @@
 
           /* upcoming html */
           let upcomingHtml = '';
-          const upcoming3 = team.upcomingMatches.slice(0, 3);
+          const upcoming3 = team.upcomingMatches.slice(0, 5);
           if (upcoming3.length === 0) {
             upcomingHtml = `<div class="tc-empty">Nessuna partita in programma</div>`;
           } else {
@@ -923,8 +923,8 @@
                 </div>
               `;
             }
-            if (team.upcomingMatches.length > 3) {
-              upcomingHtml += `<div class="tc-empty">+ altre ${team.upcomingMatches.length - 3} partite</div>`;
+            if (team.upcomingMatches.length > 5) {
+              upcomingHtml += `<div class="tc-empty">+ altre ${team.upcomingMatches.length - 5} partite</div>`;
             }
           }
 
@@ -989,8 +989,7 @@
               <div class="tc-upcoming">${upcomingHtml}</div>
 
               <div class="tc-footer">
-                <span>Nievo Cup 2026</span>
-                <span class="tc-footer-live">Live</span>
+              
               </div>
             </div>
           `;
