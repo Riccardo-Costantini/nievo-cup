@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="theme-color" content="#0b0f17" />
+  <title>Nievo Cup – Squadre e statistiche</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=Exo+2:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="shortcut icon" href="assets/images/loghi/favicon_nievo_cup.ico" type="image/x-icon">
+
+  <style>
+    /* ───────────────────────────────────────────
+       PAGE BASE
+    ─────────────────────────────────────────── */
+    :root {
+      --gold: #feda00;
+      --gold-dim: rgba(254,218,0,0.12);
+      --gold-border: rgba(254,218,0,0.25);
+      --card-bg: rgba(8, 12, 22, 0.88);
+      --card-border: rgba(94, 100, 107, 0.35);
+      --purple: #a78bfa;
+      --section-label: #a78bfa;
+    }
+
+    body.page-squadre {
+      background-color: #0b0f17;
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body.page-squadre::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url('assets/images/sfondi/sfondo_squadre.webp');
+      background-size: cover;
+      background-position: center;
+      z-index: -2;
+    }
+
+    body.page-squadre::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(11,15,23,0.55) 0%, rgba(11,15,23,0.78) 100%);
+      z-index: -1;
+    }
+
+    @media (max-width: 700px) {
+      body.page-squadre::before {
+        background-image: url('assets/images/sfondi/sfondo_mobile_squadre.webp');
+      }
+    }
+
+    /* ───────────────────────────────────────────
+       PAGE HEADER / TITLE
+    ─────────────────────────────────────────── */
+    .page-hero {
+      text-align: center;
+      padding: 2.5rem 1rem 1.5rem;
+      position: relative;
+    }
+
+    .page-hero-label {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.4rem;
+    }
+
+    .page-hero-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2.8rem, 8vw, 5.5rem);
+      letter-spacing: 0.08em;
+      color: white;
+      line-height: 1;
+      text-shadow: 0 0 60px rgba(254,218,0,0.18);
+    }
+
+    .page-hero-sub {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.85rem;
+      color: var(--text-2);
+      margin-top: 0.5rem;
+      letter-spacing: 0.06em;
+    }
+
+    .page-hero-line {
+      display: block;
+      width: 60px;
+      height: 2px;
+      background: var(--gold);
+      margin: 1rem auto 0;
+    }
+
+    /* ───────────────────────────────────────────
+       FILTER BAR
+    ─────────────────────────────────────────── */
+    .filter-bar {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      padding: 0.75rem 1rem 1.5rem;
+    }
+
+    .filter-btn {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      padding: 0.42rem 1.2rem;
+      border-radius: 999px;
+      border: 1px solid var(--card-border);
+      background: rgba(255,255,255,0.04);
+      color: var(--text-2);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .filter-btn.active,
+    .filter-btn:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: var(--gold-dim);
+    }
+
+    /* ───────────────────────────────────────────
+       WRAP
+    ─────────────────────────────────────────── */
+    .wrap-squadre {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 0 1.5rem 4rem;
+    }
+
+    /* ───────────────────────────────────────────
+       GROUP LABEL
+    ─────────────────────────────────────────── */
+    .group-section {
+      margin-bottom: 3.5rem;
+    }
+
+    .group-heading {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.4rem;
+    }
+
+    .group-heading-badge {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2.5rem;
+      line-height: 1;
+      color: var(--gold);
+      letter-spacing: 0.06em;
+    }
+
+    .group-heading-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, rgba(254,218,0,0.4), transparent);
+    }
+
+    .group-heading-count {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-3);
+    }
+
+    /* ───────────────────────────────────────────
+       TEAMS GRID
+    ─────────────────────────────────────────── */
+    .teams-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1.6rem;
+    }
+
+    /* ───────────────────────────────────────────
+       TEAM CARD
+    ─────────────────────────────────────────── */
+    .team-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+      position: relative;
+    }
+
+    .team-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      opacity: 0;
+      transition: opacity 0.22s;
+    }
+
+    .team-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(254,218,0,0.45);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 30px rgba(254,218,0,0.06);
+    }
+
+    .team-card:hover::before {
+      opacity: 1;
+    }
+
+    /* ── CARD HEADER ── */
+    .tc-header {
+      display: flex;
+      align-items: center;
+      gap: 1.1rem;
+      padding: 1.25rem 1.25rem 1rem;
+    }
+
+    .tc-logo-wrap {
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .tc-logo {
+      width: 68px;
+      height: 68px;
+      object-fit: contain;
+      border-radius: 16px;
+      background: rgba(0,0,0,0.5);
+      padding: 6px;
+      display: block;
+    }
+
+    .tc-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .tc-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.65rem;
+      letter-spacing: 0.05em;
+      color: white;
+      line-height: 1.1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tc-group-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #0b0f17;
+      background: var(--gold);
+      padding: 0.18rem 0.7rem;
+      border-radius: 999px;
+      margin-top: 0.35rem;
+    }
+
+    /* ── STATS ROW ── */
+    .tc-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      background: rgba(0,0,0,0.4);
+      border-top: 1px solid rgba(94,100,107,0.2);
+      border-bottom: 1px solid rgba(94,100,107,0.2);
+    }
+
+    .tc-stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 0.7rem 0.3rem;
+      position: relative;
+    }
+
+    .tc-stat + .tc-stat::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 20%; bottom: 20%;
+      width: 1px;
+      background: rgba(94,100,107,0.3);
+    }
+
+    .tc-stat-val {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.55rem;
+      color: var(--gold);
+      line-height: 1;
+    }
+
+    .tc-stat-label {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #64748b;
+      margin-top: 0.15rem;
+    }
+
+    /* ── HIGHLIGHTS ROW ── */
+    .tc-highlights {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      padding: 0.8rem 1.1rem;
+      border-bottom: 1px solid rgba(94,100,107,0.18);
+    }
+
+    .tc-hl {
+      text-align: center;
+      padding: 0.3rem 0.5rem;
+      position: relative;
+    }
+
+    .tc-hl + .tc-hl::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 15%; bottom: 15%;
+      width: 1px;
+      background: rgba(94,100,107,0.25);
+    }
+
+    .tc-hl-icon {
+      font-size: 1rem;
+      line-height: 1;
+      margin-bottom: 0.2rem;
+    }
+
+    .tc-hl-val {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.2rem;
+      color: white;
+      line-height: 1;
+    }
+
+    .tc-hl-val.gold { color: var(--gold); }
+
+    .tc-hl-label {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #4b5675;
+      margin-top: 0.1rem;
+    }
+
+    /* ── SECTION LABEL ── */
+    .tc-section-label {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--purple);
+      padding: 0.7rem 1.1rem 0.3rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .tc-section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(167,139,250,0.15);
+    }
+
+    /* ── SCORERS ── */
+    .tc-scorers {
+      padding: 0 1.1rem 0.6rem;
+    }
+
+    .tc-scorer-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.28rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      gap: 0.5rem;
+    }
+
+    .tc-scorer-row:last-child {
+      border-bottom: none;
+    }
+
+    .tc-scorer-rank {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 0.85rem;
+      color: #4b5675;
+      width: 16px;
+      flex-shrink: 0;
+    }
+
+    .tc-scorer-name {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text);
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tc-scorer-goals {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1rem;
+      color: var(--gold);
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      flex-shrink: 0;
+    }
+
+    .tc-scorer-goals span {
+      font-size: 0.65rem;
+      opacity: 0.7;
+    }
+
+    /* progress bar */
+    .tc-scorer-bar-wrap {
+      width: 50px;
+      height: 3px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 999px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .tc-scorer-bar {
+      height: 100%;
+      background: linear-gradient(to right, var(--gold), #ff9f00);
+      border-radius: 999px;
+      transition: width 0.6s ease;
+    }
+
+    /* ── UPCOMING ── */
+    .tc-upcoming {
+      padding: 0 1.1rem 1rem;
+    }
+
+    .tc-match {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(94,100,107,0.2);
+      border-radius: 12px;
+      padding: 0.55rem 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .tc-match:last-child { margin-bottom: 0; }
+
+    .tc-match-date {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--text-3);
+      white-space: nowrap;
+      flex-shrink: 0;
+      text-align: center;
+      line-height: 1.3;
+    }
+
+    .tc-match-date strong {
+      display: block;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.1rem;
+      color: var(--text-2);
+      line-height: 1;
+    }
+
+    .tc-match-divider {
+      width: 1px;
+      height: 30px;
+      background: rgba(94,100,107,0.3);
+      flex-shrink: 0;
+    }
+
+    .tc-match-teams {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .tc-match-vs {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: #4b5675;
+      text-transform: uppercase;
+    }
+
+    .tc-match-opponent {
+      font-family: 'Exo 2', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: white;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tc-match-status {
+      flex-shrink: 0;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .tc-match-status.live {
+      color: #22c55e;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .tc-match-status.live::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: #22c55e;
+      border-radius: 50%;
+      animation: livePulse 1.4s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+
+    .tc-match-status.scheduled { color: #4b5675; }
+
+    @keyframes livePulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.8); }
+    }
+
+    /* ── EMPTY / NO DATA ── */
+    .tc-empty {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #4b5675;
+      text-align: center;
+      padding: 0.6rem 0;
+      font-style: italic;
+    }
+
+    /* ── CARD FOOTER ── */
+    .tc-footer {
+      margin-top: auto;
+      padding: 0.5rem 1.1rem;
+      border-top: 1px solid rgba(94,100,107,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #2a3347;
+    }
+
+    .tc-footer-live {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      color: #22c55e;
+    }
+
+    .tc-footer-live::before {
+      content: '';
+      width: 5px;
+      height: 5px;
+      background: #22c55e;
+      border-radius: 50%;
+      animation: livePulse 2s ease-in-out infinite;
+    }
+
+    /* ───────────────────────────────────────────
+       GLOBAL LOADING
+    ─────────────────────────────────────────── */
+    .loading-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 40vh;
+      gap: 1rem;
+    }
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(254,218,0,0.12);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-text {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #4b5675;
+    }
+
+    /* ───────────────────────────────────────────
+       RESPONSIVE
+    ─────────────────────────────────────────── */
+    @media (max-width: 700px) {
+      .wrap-squadre { padding: 0 1rem 3rem; }
+      .teams-grid { grid-template-columns: 1fr; gap: 1.2rem; }
+      .tc-name { font-size: 1.4rem; }
+      .tc-logo { width: 56px; height: 56px; }
+      .tc-highlights { padding: 0.6rem 0.8rem; }
+      .page-hero { padding: 2rem 1rem 1rem; }
+    }
+
+    @media (min-width: 1200px) {
+      .teams-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+  </style>
+</head>
+<body class="page-squadre">
+
+  <!-- HEADER NAV -->
+  <div class="header">
+    <div class="logo">
+      <a href="index.html">
+        <img src="assets/images/loghi/logo_nievo_white.png" alt="Logo Nievo Cup">
+      </a>
+    </div>
+    <div class="menu">
+      <div class="voce"><a href="partite.html"><p>Partite</p></a></div>
+      <div class="voce"><a href="gironi.html"><p>Gironi</p></a></div>
+      <div class="voce" style="display:none;"><p>Tabellone</p></div>
+      <div class="voce"><a href="squadre.html"><p>Squadre</p></a></div>
+    </div>
+  </div>
+
+  <!-- PAGE HERO -->
+  <div class="page-hero">
+    <div class="page-hero-label">Nievo Cup 2026</div>
+    <div class="page-hero-title">Le Squadre</div>
+    <div class="page-hero-sub">24 squadre · 4 gironi · statistiche in tempo reale</div>
+    <span class="page-hero-line"></span>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar" id="filterBar">
+    <button class="filter-btn active" data-group="ALL">Tutti</button>
+    <button class="filter-btn" data-group="A">Girone A</button>
+    <button class="filter-btn" data-group="B">Girone B</button>
+    <button class="filter-btn" data-group="C">Girone C</button>
+    <button class="filter-btn" data-group="D">Girone D</button>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="wrap-squadre">
+    <div id="teamsContainer">
+      <div class="loading-state">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Caricamento statistiche…</div>
+      </div>
+    </div>
+    <footer style="margin-top:2.5rem; text-align:center; color:#2a3347; font-family:'Rajdhani',sans-serif; font-size:0.65rem; letter-spacing:0.15em; text-transform:uppercase;">
+      Nievo Cup · Statistiche aggiornate in tempo reale
+    </footer>
+  </div>
+
+  <!-- FIREBASE + LOGIC -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+    import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB0LUxAWKVUIhXYRb2T2JOT3ypiX9q_5Ck",
+      authDomain: "nievo-fcc94.firebaseapp.com",
+      databaseURL: "https://nievo-fcc94-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "nievo-fcc94",
+      storageBucket: "nievo-fcc94.firebasestorage.app",
+      messagingSenderId: "497831212426",
+      appId: "1:497831212426:web:357e8c37b249042c53c473",
+      measurementId: "G-ZERXCC9LH8"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    let matchesData = {};
+    let liveResultsData = {};
+    let activeFilter = 'ALL';
+
+    /* ── NORMALISATION ── */
+    function normalize(name) {
+      if (!name) return '';
+      return name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, '');
+    }
+
+    const GROUPS_MAP = {
+      "A": ["ZTL","TEAM SANTA FOLLIA","BOOTAY","CARACHI FC","LOS PERROS","HELLADE VAL BORAGO"],
+      "B": ["SAN MEXICO","MOCRO EQUIPE","SKOOP POKE","ATLETICO TAVOLA CALDA","SPARTANI","UNDER VR"],
+      "C": ["PATATANAIKOS","LONGOBARDA","FAT BOY","CAMPEONES","AMATORI QUINZANO","LA SELECAO"],
+      "D": ["BOVOLANGELES","HUSTLERS","CRAZY NEXTGEN","THE PIPPIERATE","BV SMBA","DREAM TEAM"]
+    };
+
+    const canonicalMap = new Map();
+    for (const [group, teams] of Object.entries(GROUPS_MAP))
+      for (const canon of teams)
+        canonicalMap.set(normalize(canon), { group, canonicalName: canon });
+
+    const ALIASES = { "bvsmba": "bvsmba", "hellade": "helladevalborago" };
+
+    function resolveTeam(raw) {
+      if (!raw) return null;
+      let n = normalize(raw);
+      if (ALIASES[n]) n = ALIASES[n];
+      return canonicalMap.get(n) || null;
+    }
+
+    function getLogoUrl(teamName) {
+      let slug = teamName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+      const exc = {
+        'bv_smba':'bv_samba', 'skoop_poke':'skooppoke', 'crazy_nextgen':'crazy_next_gen',
+        'the_pippierate':'pippierate', 'hellade_val_borago':'hellade', 'under_vr':'under',
+        'team_santa_follia':'team_santa_follia', 'fat_boy':'fatboy', 'carachi_fc':'carachi_fc', 'carachi':'carachi_fc'
+      };
+      return `assets/images/loghi_squadre/${exc[slug] || slug}.png`;
+    }
+
+    function toArray(val) {
+      if (!val) return [];
+      if (Array.isArray(val)) return val;
+      if (typeof val === 'object') return Object.values(val);
+      return [];
+    }
+
+    function isPlayed(status) { return status === 'Live' || status === 'Finita'; }
+
+    /* ── COMPUTE STATS ── */
+    function computeStats() {
+      const map = new Map();
+      for (const [group, teams] of Object.entries(GROUPS_MAP))
+        for (const t of teams)
+          map.set(t, {
+            name: t, group,
+            logoUrl: getLogoUrl(t),
+            goalsScored: 0, goalsConceded: 0, matchesPlayed: 0,
+            cleanSheets: 0, bestWinDiff: -Infinity, mostGoalsInMatch: 0,
+            scorers: new Map(), upcomingMatches: []
+          });
+
+      for (const matchId in matchesData) {
+        const match = matchesData[matchId];
+        if (!match.home?.name || !match.away?.name) continue;
+        const hR = resolveTeam(match.home.name);
+        const aR = resolveTeam(match.away.name);
+        if (!hR || !aR) continue;
+
+        const result = liveResultsData[matchId] || {};
+        const status = result.status || 'In programma';
+        const sh = toArray(result.scorersHome);
+        const sa = toArray(result.scorersAway);
+        const hg = sh.length, ag = sa.length;
+
+        if (isPlayed(status)) {
+          // home
+          const hs = map.get(hR.canonicalName);
+          if (hs) {
+            hs.matchesPlayed++; hs.goalsScored += hg; hs.goalsConceded += ag;
+            if (ag === 0) hs.cleanSheets++;
+            if (hg > ag && (hg - ag) > hs.bestWinDiff) hs.bestWinDiff = hg - ag;
+            if (hg > hs.mostGoalsInMatch) hs.mostGoalsInMatch = hg;
+            sh.forEach(s => hs.scorers.set(s, (hs.scorers.get(s) || 0) + 1));
+          }
+          // away
+          const as_ = map.get(aR.canonicalName);
+          if (as_) {
+            as_.matchesPlayed++; as_.goalsScored += ag; as_.goalsConceded += hg;
+            if (hg === 0) as_.cleanSheets++;
+            if (ag > hg && (ag - hg) > as_.bestWinDiff) as_.bestWinDiff = ag - hg;
+            if (ag > as_.mostGoalsInMatch) as_.mostGoalsInMatch = ag;
+            sa.forEach(s => as_.scorers.set(s, (as_.scorers.get(s) || 0) + 1));
+          }
+        }
+
+        const today = new Date().toISOString().slice(0,10);
+        if (match.date && match.date >= today && status !== 'Finita') {
+          const upcomingObj = { date: match.date, time: match.time, homeTeam: match.home.name, awayTeam: match.away.name, status, hg, ag };
+          const hs = map.get(hR.canonicalName);
+          const as_ = map.get(aR.canonicalName);
+          if (hs) hs.upcomingMatches.push(upcomingObj);
+          if (as_) as_.upcomingMatches.push(upcomingObj);
+        }
+      }
+
+      for (const s of map.values()) {
+        s.upcomingMatches.sort((a,b) => (a.date||'').localeCompare(b.date||''));
+        s.sortedScorers = Array.from(s.scorers.entries()).map(([name,goals])=>({name,goals})).sort((a,b)=>b.goals-a.goals);
+        if (s.bestWinDiff === -Infinity) s.bestWinDiff = null;
+        s.avgGoals = s.matchesPlayed > 0 ? (s.goalsScored / s.matchesPlayed).toFixed(1) : '—';
+      }
+      return map;
+    }
+
+    /* ── HTML HELPERS ── */
+    function esc(s) {
+      if (!s) return '';
+      return s.replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+    }
+
+    function fmtDate(ds) {
+      if (!ds) return '?';
+      const d = new Date(ds + 'T12:00:00');
+      const day = d.toLocaleDateString('it-IT',{day:'numeric'});
+      const mon = d.toLocaleDateString('it-IT',{month:'short'}).replace('.','');
+      return `<strong>${day}</strong>${mon}`;
+    }
+
+    /* ── RENDER ── */
+    function renderTeams() {
+      const container = document.getElementById('teamsContainer');
+      if (!container) return;
+      const statsMap = computeStats();
+
+      const grouped = { A:[], B:[], C:[], D:[] };
+      for (const s of statsMap.values()) {
+        if (s.group && grouped[s.group]) grouped[s.group].push(s);
+      }
+      for (const g of Object.keys(grouped)) {
+        grouped[g].sort((a,b) => a.name.localeCompare(b.name));
+      }
+
+      let html = '';
+      const groups = activeFilter === 'ALL' ? ['A','B','C','D'] : [activeFilter];
+
+      for (const g of groups) {
+        const teams = grouped[g] || [];
+        html += `
+          <div class="group-section" data-group="${g}">
+            <div class="group-heading">
+              <div class="group-heading-badge">Girone ${g}</div>
+              <div class="group-heading-line"></div>
+              <div class="group-heading-count">${teams.length} squadre</div>
+            </div>
+            <div class="teams-grid">
+        `;
+
+        for (const team of teams) {
+          const maxGoals = team.sortedScorers.length > 0 ? team.sortedScorers[0].goals : 1;
+
+          /* scorers html */
+          let scorersHtml = '';
+          if (team.sortedScorers.length === 0) {
+            scorersHtml = `<div class="tc-empty">Nessun marcatore registrato</div>`;
+          } else {
+            team.sortedScorers.forEach((s, i) => {
+              const pct = Math.max(8, Math.round((s.goals / maxGoals) * 100));
+              scorersHtml += `
+                <div class="tc-scorer-row">
+                  <div class="tc-scorer-rank">${i + 1}</div>
+                  <div class="tc-scorer-name">${esc(s.name)}</div>
+                  <div class="tc-scorer-bar-wrap"><div class="tc-scorer-bar" style="width:${pct}%"></div></div>
+                  <div class="tc-scorer-goals">${s.goals}<span>⚽</span></div>
+                </div>
+              `;
+            });
+          }
+
+          /* upcoming html */
+          let upcomingHtml = '';
+          const upcoming3 = team.upcomingMatches.slice(0, 3);
+          if (upcoming3.length === 0) {
+            upcomingHtml = `<div class="tc-empty">Nessuna partita in programma</div>`;
+          } else {
+            for (const m of upcoming3) {
+              const opponent = normalize(m.homeTeam) === normalize(team.name) ? m.awayTeam : m.homeTeam;
+              const isLive = m.status === 'Live';
+              const scoreStr = isLive ? `${m.hg}:${m.ag}` : (m.status === 'Finita' ? `${m.hg}:${m.ag}` : m.time || '--:--');
+              const statusClass = isLive ? 'live' : 'scheduled';
+              const statusLabel = isLive ? `${m.hg}:${m.ag}` : (m.status === 'Finita' ? `${m.hg}:${m.ag}` : (m.time || '--:--'));
+              upcomingHtml += `
+                <div class="tc-match">
+                  <div class="tc-match-date">${fmtDate(m.date)}</div>
+                  <div class="tc-match-divider"></div>
+                  <div class="tc-match-teams">
+                    <div class="tc-match-vs">vs</div>
+                    <div class="tc-match-opponent">${esc(opponent)}</div>
+                  </div>
+                  <div class="tc-match-status ${statusClass}">${statusLabel}</div>
+                </div>
+              `;
+            }
+            if (team.upcomingMatches.length > 3) {
+              upcomingHtml += `<div class="tc-empty">+ altre ${team.upcomingMatches.length - 3} partite</div>`;
+            }
+          }
+
+          const bestWin = team.bestWinDiff !== null ? `+${team.bestWinDiff}` : '—';
+          const cs = `${team.cleanSheets}`;
+          const maxG = team.mostGoalsInMatch > 0 ? `${team.mostGoalsInMatch}` : '—';
+
+          html += `
+            <div class="team-card">
+              <div class="tc-header">
+                <div class="tc-logo-wrap">
+                  <img class="tc-logo" src="${esc(team.logoUrl)}" alt="${esc(team.name)}"
+                       onerror="this.src='assets/images/loghi/logo_nievo_white.png'">
+                </div>
+                <div class="tc-info">
+                  <div class="tc-name">${esc(team.name)}</div>
+                  <div class="tc-group-tag">Girone ${team.group}</div>
+                </div>
+              </div>
+
+              <div class="tc-stats">
+                <div class="tc-stat">
+                  <div class="tc-stat-val">${team.matchesPlayed}</div>
+                  <div class="tc-stat-label">PG</div>
+                </div>
+                <div class="tc-stat">
+                  <div class="tc-stat-val">${team.goalsScored}</div>
+                  <div class="tc-stat-label">GF</div>
+                </div>
+                <div class="tc-stat">
+                  <div class="tc-stat-val">${team.goalsConceded}</div>
+                  <div class="tc-stat-label">GS</div>
+                </div>
+                <div class="tc-stat">
+                  <div class="tc-stat-val">${team.avgGoals}</div>
+                  <div class="tc-stat-label">Media</div>
+                </div>
+              </div>
+
+              <div class="tc-highlights">
+                <div class="tc-hl">
+                  <div class="tc-hl-icon"></div>
+                  <div class="tc-hl-val gold">${bestWin}</div>
+                  <div class="tc-hl-label">Miglior vitt.</div>
+                </div>
+                <div class="tc-hl">
+                  <div class="tc-hl-icon"></div>
+                  <div class="tc-hl-val">${cs}</div>
+                  <div class="tc-hl-label">Clean sheet</div>
+                </div>
+                <div class="tc-hl">
+                  <div class="tc-hl-icon"></div>
+                  <div class="tc-hl-val">${maxG}</div>
+                  <div class="tc-hl-label">Max gol</div>
+                </div>
+              </div>
+
+              <div class="tc-section-label">⚽ Marcatori (${team.sortedScorers.length})</div>
+              <div class="tc-scorers">${scorersHtml}</div>
+
+              <div class="tc-section-label">📅 Prossime partite</div>
+              <div class="tc-upcoming">${upcomingHtml}</div>
+
+              <div class="tc-footer">
+                <span>Nievo Cup 2026</span>
+                <span class="tc-footer-live">Live</span>
+              </div>
+            </div>
+          `;
+        }
+
+        html += `</div></div>`; // close teams-grid + group-section
+      }
+
+      container.innerHTML = html;
+    }
+
+    /* ── FILTER BUTTONS ── */
+    document.getElementById('filterBar').addEventListener('click', e => {
+      const btn = e.target.closest('.filter-btn');
+      if (!btn) return;
+      activeFilter = btn.dataset.group;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b === btn));
+      if (matchesLoaded && resultsLoaded) renderTeams();
+    });
+
+    /* ── FIREBASE LISTENERS ── */
+    let matchesLoaded = false, resultsLoaded = false;
+
+    function checkRender() {
+      if (matchesLoaded && resultsLoaded) renderTeams();
+    }
+
+    onValue(ref(db, 'matches'), snap => {
+      matchesData = snap.val() || {};
+      matchesLoaded = true;
+      checkRender();
+    }, err => { console.error(err); matchesLoaded = true; checkRender(); });
+
+    onValue(ref(db, 'liveResults'), snap => {
+      liveResultsData = snap.val() || {};
+      resultsLoaded = true;
+      checkRender();
+    }, err => { console.error(err); resultsLoaded = true; checkRender(); });
+  </script>
+</body>
+</html>

@@ -423,7 +423,7 @@ body {
     height: 28px;
   }
   .gironi-footer {
-    font-size: 1.3rem;
+    font-size: 7vw;
     margin-top: 2rem;
   }
 }
@@ -970,7 +970,7 @@ footer {
     font-size: 10vw;
   }
   #hero h3{
-    font-size: 4vw;
+    font-size: 7vw;
   }
     #info{
         width: 80%;
@@ -1338,3 +1338,10 @@ footer.admin-footer {
 .adm-sub-create {
   margin-bottom: 1rem;
 }
+
+/* =====================================================
+   SQUADRE.HTML
+   ===================================================== */
+
+
+   
