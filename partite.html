@@ -18,10 +18,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=Exo+2:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/css/style.css"></head>
+  <link rel="stylesheet" href="assets/css/style.css">
   <link rel="shortcut icon" href="assets/images/loghi/favicon_nievo_cup.ico" type="image/x-icon">
-
-  <body class="page-partite">
+</head>
+<body class="page-partite">
 
   <div class="header">
     <div class="logo">
@@ -71,6 +71,7 @@
 
   let matchesData = {};
   let liveResultsData = {};
+  let calendarBuilt = false;
 
   // Mappa nomi squadre -> file png
   function getLogoUrl(teamName) {
@@ -165,14 +166,14 @@
           : '<div class="sc-empty">—</div>';
 
         html += `
-          <div class="match-card${cls}" data-match-id="${match.id}">
+          <div class="match-card${cls}" id="match-${match.id}" data-match-id="${match.id}">
             <div class="card-top">
               <div class="match-meta">
                 <span>⏱ ${esc(match.time || '--:--')}</span>
                 <span class="meta-dot">·</span>
                 <span>${esc(match.id?.toUpperCase() || '?')}</span>
               </div>
-              ${badgeHtml}
+              <div id="badge-${match.id}">${badgeHtml}</div>
             </div>
             <div class="score-row">
               <div class="team-blk">
@@ -180,9 +181,9 @@
                 <div class="t-name">${esc(match.home?.name || 'Casa')}</div>
               </div>
               <div class="score-ctr">
-                <span class="score-n">${scorersHome.length}</span>
+                <span class="score-n" id="home-score-${match.id}">${scorersHome.length}</span>
                 <span class="score-sep">:</span>
-                <span class="score-n">${scorersAway.length}</span>
+                <span class="score-n" id="away-score-${match.id}">${scorersAway.length}</span>
               </div>
               <div class="team-blk away">
                 <img class="team-logo" src="${getLogoUrl(match.away?.name)}" alt="${esc(match.away?.name)}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling?.style?.setProperty('display', 'block');" />
@@ -190,8 +191,8 @@
               </div>
             </div>
             <div class="scorers-wrap">
-              <div class="sc-col">${hList}</div>
-              <div class="sc-col right">${aList}</div>
+              <div class="sc-col" id="home-scorers-${match.id}">${hList}</div>
+              <div class="sc-col right" id="away-scorers-${match.id}">${aList}</div>
             </div>
           </div>
         `;
@@ -201,21 +202,62 @@
     container.innerHTML = html;
   }
 
+  function updateLiveScores() {
+    Object.values(matchesData).forEach(match => {
+      const result = liveResultsData[match.id] || {};
+      const scorersHome = toArray(result.scorersHome);
+      const scorersAway = toArray(result.scorersAway);
+      const status = result.status || 'In programma';
 
-  // Listener match fissi
+      const homeScore = document.getElementById(`home-score-${match.id}`);
+      const awayScore = document.getElementById(`away-score-${match.id}`);
+      if (homeScore) homeScore.textContent = scorersHome.length;
+      if (awayScore) awayScore.textContent = scorersAway.length;
+
+      const badge = document.getElementById(`badge-${match.id}`);
+      if (badge) {
+        if (status === 'Live') {
+          badge.innerHTML = '<span class="badge b-live">● LIVE</span>';
+        } else if (status === 'Finita') {
+          badge.innerHTML = '<span class="badge b-fin">✔ Finita</span>';
+        } else {
+          badge.innerHTML = '<span class="badge b-sched">In programma</span>';
+        }
+      }
+
+      const homeScorersDiv = document.getElementById(`home-scorers-${match.id}`);
+      const awayScorersDiv = document.getElementById(`away-scorers-${match.id}`);
+
+      if (homeScorersDiv) {
+        homeScorersDiv.innerHTML = scorersHome.length
+          ? scorersHome.map(s => `<div class="sc-item"><span class="sc-ball">⚽</span>${esc(s)}</div>`).join('')
+          : '<div class="sc-empty">—</div>';
+      }
+
+      if (awayScorersDiv) {
+        awayScorersDiv.innerHTML = scorersAway.length
+          ? scorersAway.map(s => `<div class="sc-item">${esc(s)}<span class="sc-ball sc-ball-away">⚽</span></div>`).join('')
+          : '<div class="sc-empty">—</div>';
+      }
+    });
+  }
+
+  // Listener match fissi (crea il calendario una sola volta)
   onValue(ref(db, 'matches'), (snapshot) => {
     matchesData = snapshot.val() || {};
-    renderCalendar();
+    if (!calendarBuilt) {
+      renderCalendar();
+      calendarBuilt = true;
+    }
   }, (error) => {
     console.error('Errore lettura matches:', error);
-    setConnected(false);
     document.getElementById('calendar').innerHTML = `<p class="cal-loading">Impossibile caricare le partite.</p>`;
   });
 
-  // Listener risultati live
+  // Listener risultati live (aggiornamento selettivo)
   onValue(ref(db, 'liveResults'), (snapshot) => {
     liveResultsData = snapshot.val() || {};
-    renderCalendar();
+    updateLiveScores();
   }, (error) => {
     console.error('Errore lettura liveResults:', error);
   });
