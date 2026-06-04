@@ -1,12 +1,5 @@
 {
   "cleanUrls": true,
-  "rewrites": [
-    { 
-      "source": "/((?!assets/).*)", 
-      "destination": "/404.html", 
-      "missing": [{ "type": "file" }] 
-    }
-  ],
   "headers": [
     {
       "source": "/assets/(.*)\\.(js|css|png|jpg|jpeg|svg|webp|ico|woff2)",
