@@ -1,5 +1,12 @@
 {
   "cleanUrls": true,
+  "redirects": [
+    {
+      "source": "/qr",
+      "destination": "https://nievocup.it/?utm_source=qr&utm_medium=offline&utm_campaign=spalti",
+      "permanent": false
+    }
+  ],
   "headers": [
     {
       "source": "/assets/(.*)\\.(js|css|png|jpg|jpeg|svg|webp|ico|woff2)",
