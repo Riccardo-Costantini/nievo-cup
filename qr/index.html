@@ -66,21 +66,35 @@
   </div>
 
   <script>
-    // destinazione finale (CAMBIA QUI SE VUOI)
-    const targetURL = "https://nievocup.it/?utm_source=qr&utm_medium=offline&utm_campaign=spalti";
+  // Destinazione finale
+  const targetURL = "https://nievocup.it/?utm_source=qr&utm_medium=offline&utm_campaign=spalti";
 
-    // evento analytics (se disponibile)
-    try {
-      gtag('event', 'qr_scan', {
-        event_category: 'engagement',
-        event_label: 'spalti'
-      });
-    } catch (e) {}
-
-    // piccolo delay per far registrare l'evento
-    setTimeout(() => {
+  // Funzione per il reindirizzamento sicuro
+  let redirected = false;
+  function redirect() {
+    if (!redirected) {
+      redirected = true;
       window.location.href = targetURL;
-    }, 1000);
-  </script>
+    }
+  }
+
+  // Imposta un timeout di sicurezza: se GA ci mette troppo o è bloccato da un AdBlock,
+  // reindirizziamo comunque dopo 400ms.
+  const backupTimeout = setTimeout(redirect, 400);
+
+  // Invia l'evento ad Analytics
+  try {
+    gtag('event', 'qr_scan', {
+      event_category: 'engagement',
+      event_label: 'spalti',
+      event_callback: function() {
+        clearTimeout(backupTimeout); // Cancella il timeout di sicurezza
+        redirect();                  // Reindirizza immediatamente
+      }
+    });
+  } catch (e) {
+    redirect(); // Se gtag fallisce o non è definito, reindirizza subito
+  }
+</script>
 </body>
 </html>
