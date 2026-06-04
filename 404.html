@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-LNX14N1XMB"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-LNX14N1XMB');
+  </script>
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="theme-color" content="#0b0f17" />
+  <title>Nievo Cup – Pagina Non Trovata</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=Exo+2:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Rubik:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="shortcut icon" href="assets/images/loghi/favicon_nievo_cup.ico" type="image/x-icon">
+
+  <style>
+    :root {
+      --gold: #feda00;
+      --gold-dim: rgba(254, 218, 0, 0.12);
+      --card-bg: rgba(8, 12, 22, 0.88);
+      --card-border: rgba(94, 100, 107, 0.35);
+    }
+
+    body.page-404 {
+      background-color: #0b0f17;
+      color: #f1f5f9;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    body.page-404::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url('assets/images/sfondi/sfondo_squadre.webp'); /* Riutilizza lo sfondo esistente */
+      background-size: cover;
+      background-position: center;
+      z-index: -2;
+      opacity: 0.4;
+    }
+
+    .error-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      text-align: center;
+      z-index: 1;
+    }
+
+    .error-code {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(6rem, 15vw, 10rem);
+      line-height: 0.8;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+      text-shadow: 0 0 40px rgba(254, 218, 0, 0.3);
+      margin-bottom: 1rem;
+    }
+
+    .error-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      letter-spacing: 0.08em;
+      color: white;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    .error-desc {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: clamp(1rem, 2.5vw, 1.3rem);
+      font-weight: 500;
+      color: #94a3b8;
+      max-width: 600px;
+      margin-bottom: 2.5rem;
+      letter-spacing: 0.05em;
+      line-height: 1.4;
+    }
+
+    .btn-back {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      padding: 0.8rem 2rem;
+      border-radius: 999px;
+      border: 2px solid var(--gold);
+      background: var(--gold-dim);
+      color: var(--gold);
+      text-decoration: none;
+      transition: all 0.2s ease-in-out;
+      box-shadow: 0 4px 15px rgba(254, 218, 0, 0.15);
+    }
+
+    .btn-back:hover {
+      background: var(--gold);
+      color: #0b0f17;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(254, 218, 0, 0.3);
+    }
+
+    .footer-404 {
+      text-align: center;
+      padding: 2rem;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.8rem;
+      letter-spacing: 0.1em;
+      color: white;
+      text-shadow: 0 0 15px rgba(0,0,0,0.8);
+    }
+
+    @media (max-width: 700px) {
+      body.page-404::before {
+        background-image: url('assets/images/sfondi/sfondo_mobile_squadre.webp');
+      }
+      .footer-404 {
+        font-size: 1.3rem;
+      }
+    }
+  </style>
+</head>
+<body class="page-404">
+
+  <!-- HEADER NAV (Identico al resto del sito) -->
+  <div class="header">
+    <div class="logo">
+      <a href="index.html">
+        <img src="assets/images/loghi/logo_nievo_white.png" alt="Logo Nievo Cup">
+      </a>
+    </div>
+    <div class="menu">
+      <div class="voce"><a href="partite.html"><p>Partite</p></a></div>
+      <div class="voce"><a href="gironi.html"><p>Gironi</p></a></div>
+      <div class="voce" style="display:none;"><p>Tabellone</p></div>
+      <div class="voce"><a href="squadre.html"><p>Squadre</p></a></div>
+    </div>
+  </div>
+
+  <div id="bg-fx" aria-hidden="true"></div>
+
+  <!-- ERROR CONTENT -->
+  <div class="error-container">
+    <div class="error-code">404</div>
+    <h1 class="error-title">FISCHIO ARBITRALE: FUORIGIOCO!</h1>
+    <p class="error-desc">
+      La pagina che stavi cercando è fuori dai giochi, ha cambiato casacca o non è mai scesa in campo.
+    </p>
+    <a href="index.html" class="btn-back">⚽ Torna in campo</a>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer-404">
+    <p>VERONA GIOCA QUI.</p>
+  </div>
+
+</body>
+</html>
