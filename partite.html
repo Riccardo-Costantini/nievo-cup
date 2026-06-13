@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-LNX14N1XMB"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-LNX14N1XMB"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
@@ -20,8 +19,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=Exo+2:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="shortcut icon" href="assets/images/loghi/favicon_nievo_cup.ico" type="image/x-icon">
-    <script src="assets/js/navbar.js" defer></script>
-
+  <script src="assets/js/navbar.js" defer></script>
 </head>
 <body class="page-partite">
 
@@ -137,7 +135,9 @@
       const matchesOnDate = grouped[date];
       const sortedMatches = sortMatchesByDateTime(matchesOnDate);
       const round = sortedMatches[0]?.round || '';
-      html += `<div class="day-group"><div class="day-hdr">📅 ${fmtDate(date)} &nbsp;·&nbsp; ${esc(round)}</div>`;
+      
+      // Aggiunto l'id specifico "day-YYYY-MM-DD" per abilitare lo scroll automatico
+      html += `<div class="day-group" id="day-${date}"><div class="day-hdr">📅 ${fmtDate(date)} &nbsp;·&nbsp; ${esc(round)}</div>`;
       for (const match of sortedMatches) {
         const result = liveResultsData[match.id] || {};
         const scorersHome = toArray(result.scorersHome);
@@ -145,8 +145,8 @@
         const status = result.status || 'In programma';
         const cls = status === 'Live' ? ' is-live' : (status === 'Finita' ? ' is-finished' : '');
         const badgeHtml = status === 'Live' ? '<span class="badge b-live">● LIVE</span>'
-                         : status === 'Finita' ? '<span class="badge b-fin">✔ Finita</span>'
-                         : '<span class="badge b-sched">In programma</span>';
+                          : status === 'Finita' ? '<span class="badge b-fin">✔ Finita</span>'
+                          : '<span class="badge b-sched">In programma</span>';
         
         const hList = scorersHome.length
           ? scorersHome.map(s => `<div class="sc-item"><span class="sc-ball">⚽</span>${esc(s)}</div>`).join('')
@@ -190,6 +190,30 @@
       html += `</div>`;
     }
     container.innerHTML = html;
+  }
+
+  // Funzione per scorrere la pagina fino alle partite di oggi
+  function scrollToToday() {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const todayStr = `${yyyy}-${mm}-${dd}`;
+
+    const todayElement = document.getElementById(`day-${todayStr}`);
+    
+    if (todayElement) {
+      setTimeout(() => {
+        const headerOffset = 90; // Mantiene lo spazio per non coprire il titolo con la navbar fissa
+        const elementPosition = todayElement.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+  
+        window.scrollTo({
+           top: offsetPosition,
+           behavior: "smooth"
+        });
+      }, 300); // Ritardo per attendere il completamento del rendering HTML
+    }
   }
 
   function updateLiveScores() {
@@ -238,6 +262,7 @@
     if (!calendarBuilt) {
       renderCalendar();
       calendarBuilt = true;
+      scrollToToday(); // Esegue lo scorrimento automatico alla data odierna
     }
   }, (error) => {
     console.error('Errore lettura matches:', error);
