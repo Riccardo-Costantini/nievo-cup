@@ -104,7 +104,7 @@ body {
 .voce {
   white-space: nowrap;
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 2dvw;
+  font-size: 2.8dvw;
   letter-spacing: 0.1em;
   color: var(--text);
   line-height: 1;
@@ -916,7 +916,7 @@ footer {
         height: 30vw;
         flex-direction: column;
         margin-top: 5dvw;
-        margin-bottom: 10dvw;
+        margin-bottom: 18dvw;
     }
     .logo img{
         height:27dvw;
@@ -1344,4 +1344,41 @@ footer.admin-footer {
    ===================================================== */
 
 
-   
+   /* =====================================================
+   HEADER NAV MENU – EFFETTO GLASSMORPHISM
+   ===================================================== */
+
+/* Isoliamo lo stile delle singole voci nel menu dell'header */
+.header .menu .voce a p {
+  margin: 0;
+  padding: 12px; /* Ridotto leggermente per stare bene su mobile */
+  letter-spacing: 0.5px;
+  color: #ffffff;
+  
+  /* --- EFFETTO VETRO SFOCATO (GLASS) --- */
+  background: rgba(255, 255, 255, 0.03); /* Sfondo semi-trasparente chiarissimo */
+  backdrop-filter: blur(10px);            /* Sfocatura dello sfondo retrostante */
+  -webkit-backdrop-filter: blur(10px);    /* Supporto per Safari */
+  
+  /* Bordino sottile stile "riflesso sul vetro" e angoli arrotondati */
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  
+  /* Transizione fluida per l'animazione al tocco o hover */
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Stato Hover (Mouse su PC) e Active (Tocco su Mobile) */
+.header .menu .voce:hover a p,
+.header .menu .voce a:active p {
+  background: rgba(255, 255, 255, 0.12);       /* Il vetro diventa più opaco/evidente */
+  border-color: rgba(255, 255, 255, 0.35);      /* Il bordo si illumina */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4),    /* Ombra scura per staccarlo dallo sfondo */
+              0 0 10px rgba(255, 255, 255, 0.1);/* Leggerissimo bagliore interno */
+  transform: translateY(-1px);                  /* Micro-sollevamento tridimensionale */
+}
+
+/* Opzionale: Distanziamo leggermente i pulsanti tra di loro se sono troppo attaccati */
+.header .menu {
+  gap: 20px;
+}
