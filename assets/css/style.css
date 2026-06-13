@@ -1380,5 +1380,5 @@ footer.admin-footer {
 
 /* Opzionale: Distanziamo leggermente i pulsanti tra di loro se sono troppo attaccati */
 .header .menu {
-  gap: 20px;
+  gap: 14px;
 }
