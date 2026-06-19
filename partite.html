@@ -113,7 +113,7 @@
     });
   }
 
-  function renderCalendar() {
+function renderCalendar() {
     const container = document.getElementById('calendar');
     const matchesArray = Object.values(matchesData);
     
@@ -130,14 +130,31 @@
     }
 
     let html = '';
+    let playOffHeaderInserted = false; 
     const sortedDates = Object.keys(grouped).sort();
+
     for (const date of sortedDates) {
       const matchesOnDate = grouped[date];
       const sortedMatches = sortMatchesByDateTime(matchesOnDate);
-      const round = sortedMatches[0]?.round || '';
-      
-      // Aggiunto l'id specifico "day-YYYY-MM-DD" per abilitare lo scroll automatico
+      const round = (() => {
+        const firstMatchId = parseInt(sortedMatches[0]?.id?.replace('m', ''));
+        if (firstMatchId >= 61 && firstMatchId <= 66) {
+          return 'Spareggi';
+        }
+        return sortedMatches[0]?.round || '';
+      })();
+
+      // CONTROLLO SPAREGGI: Inserisce il titolone SOPRA il badge della data
+      const firstMatchIdNum = parseInt(sortedMatches[0]?.id?.replace('m', ''));
+      if (firstMatchIdNum >= 61 && firstMatchIdNum <= 66 && !playOffHeaderInserted) {
+        html += `<div class="playoff-title" style="width: 100%; text-align: center; font-family: 'Bebas Neue', sans-serif; font-size: 6rem; margin: 40px 0 10px 0; color: #ffcc00; letter-spacing: 1px;">SPAREGGI</div>`;
+        playOffHeaderInserted = true;
+      }
+
+      // Badge del giorno
       html += `<div class="day-group" id="day-${date}"><div class="day-hdr">📅 ${fmtDate(date)} &nbsp;·&nbsp; ${esc(round)}</div>`;
+      
+      // Ciclo delle card dei match
       for (const match of sortedMatches) {
         const result = liveResultsData[match.id] || {};
         const scorersHome = toArray(result.scorersHome);
@@ -191,7 +208,7 @@
     }
     container.innerHTML = html;
   }
-
+  
   // Funzione per scorrere la pagina fino alle partite di oggi
   function scrollToToday() {
     const today = new Date();
