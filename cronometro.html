@@ -4,22 +4,22 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cronometro</title>
+
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;500&display=swap');
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg:       #0a0a0f;
-    --panel:    #12121a;
-    --border:   #1e1e2e;
-    --green:    #00ff87;
-    --green-dim:#00aa5a;
-    --red:      #ff3c5e;
-    --text:     #c8c8e0;
-    --muted:    #5a5a7a;
-    --mono:     'Share Tech Mono', monospace;
-    --sans:     'Inter', sans-serif;
+    --bg:#0a0a0f;
+    --panel:#12121a;
+    --border:#1e1e2e;
+    --green:#00ff87;
+    --red:#ff3c5e;
+    --text:#c8c8e0;
+    --muted:#5a5a7a;
+    --mono:'Share Tech Mono', monospace;
+    --sans:'Inter', sans-serif;
   }
 
   body {
@@ -31,456 +31,127 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 0;
-    user-select: none;
   }
 
-  /* ── Titolo ── */
   .label {
-    font-family: var(--sans);
     font-size: .7rem;
-    font-weight: 500;
     letter-spacing: .35em;
     text-transform: uppercase;
     color: var(--muted);
     margin-bottom: 2.2rem;
   }
 
-  /* ── Schermo principale ── */
   .face {
     background: var(--panel);
     border: 1px solid var(--border);
     border-radius: 1.6rem;
-    padding: 3rem 3.6rem 2.6rem;
+    padding: 3rem;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2.4rem;
-    box-shadow:
-      0 0 0 1px #ffffff06,
-      0 24px 80px #000000cc,
-      inset 0 1px 0 #ffffff0a;
+    gap: 2rem;
     width: min(88vw, 400px);
   }
 
-  /* ── Display cifre ── */
   .display {
     font-family: var(--mono);
     font-size: clamp(3rem, 14vw, 5rem);
-    letter-spacing: .06em;
     color: var(--green);
-    text-shadow: 0 0 22px #00ff8755, 0 0 60px #00ff8720;
-    transition: color .15s, text-shadow .15s;
-    line-height: 1;
+    transition: opacity .2s;
   }
 
-  .display.running {
-    /* lieve pulsazione verde mentre gira */
-    animation: pulse 1s ease-in-out infinite;
+  .display.hidden {
+    opacity: 0;
+    pointer-events: none;
   }
 
-  @keyframes pulse {
-    0%, 100% { text-shadow: 0 0 22px #00ff8755, 0 0 60px #00ff8720; }
-    50%       { text-shadow: 0 0 34px #00ff87aa, 0 0 80px #00ff8740; }
-  }
-
-  /* flash rosso su STOP */
-  .display.flash-stop {
-    color: var(--red);
-    text-shadow: 0 0 22px #ff3c5e88;
-  }
-
-  /* ── Pulsanti ── */
   .controls {
     display: flex;
     gap: 1rem;
     width: 100%;
   }
 
-  .btn {
+  button {
     flex: 1;
-    font-family: var(--sans);
-    font-size: .82rem;
-    font-weight: 500;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    border: none;
+    padding: .8rem;
     border-radius: .8rem;
-    padding: .85rem .5rem;
-    cursor: pointer;
-    transition: transform .08s, box-shadow .08s, background .1s;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .btn:active { transform: scale(.96); }
-
-  .btn-start {
-    background: var(--green);
-    color: #0a0a0f;
-    box-shadow: 0 0 18px #00ff8740;
-  }
-  .btn-start:hover { box-shadow: 0 0 28px #00ff8770; }
-
-  .btn-stop {
-    background: transparent;
-    color: var(--red);
-    border: 1px solid var(--red);
-    box-shadow: 0 0 10px #ff3c5e20;
-  }
-  .btn-stop:hover { background: #ff3c5e12; box-shadow: 0 0 18px #ff3c5e40; }
-
-  .btn-reset {
-    background: transparent;
-    color: var(--muted);
     border: 1px solid var(--border);
-  }
-  .btn-reset:hover { color: var(--text); border-color: var(--muted); }
-
-  /* ── Giri ── */
-  .laps-wrapper {
-    width: min(88vw, 400px);
-    margin-top: 1.4rem;
-    max-height: 220px;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--border) transparent;
-  }
-
-  .laps-wrapper::-webkit-scrollbar { width: 4px; }
-  .laps-wrapper::-webkit-scrollbar-track { background: transparent; }
-  .laps-wrapper::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-
-  .lap-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: .45rem 0;
-    border-bottom: 1px solid var(--border);
-    font-family: var(--mono);
-    font-size: .82rem;
-    animation: fade-in .2s ease;
-  }
-
-  @keyframes fade-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; } }
-
-  .lap-n  { color: var(--muted); font-family: var(--sans); font-size: .72rem; letter-spacing: .1em; }
-  .lap-t  { color: var(--text); }
-  .lap-d  { color: var(--muted); font-size: .72rem; }
-
-  /* row del giro più veloce / più lento */
-  .lap-row.best  .lap-t { color: var(--green); }
-  .lap-row.worst .lap-t { color: var(--red); }
-
-  /* ── Riga giro + stato ── */
-  .secondary {
-    display: flex;
-    gap: .7rem;
-    width: 100%;
-  }
-
-  .btn-lap {
-    flex: 1;
-    font-family: var(--sans);
-    font-size: .82rem;
-    font-weight: 500;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    border: none;
-    border-radius: .8rem;
-    padding: .7rem .5rem;
-    cursor: pointer;
     background: transparent;
     color: var(--text);
-    border: 1px solid var(--border);
-    transition: transform .08s, background .1s;
-  }
-  .btn-lap:active { transform: scale(.96); }
-  .btn-lap:hover  { background: #ffffff08; }
-
-  .status-dot {
-    display: flex;
-    align-items: center;
-    gap: .45rem;
-    font-size: .72rem;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: var(--muted);
+    cursor: pointer;
   }
 
-  .dot {
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: var(--muted);
-    transition: background .2s;
-  }
-  .dot.on  { background: var(--green); box-shadow: 0 0 8px var(--green); animation: blink 1s step-end infinite; }
-  .dot.off { background: var(--red);   box-shadow: 0 0 8px var(--red); }
+  .btn-start { background: var(--green); color:#000; }
+  .btn-stop { color: var(--red); border-color: var(--red); }
 
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
-
-  /* ── Nota audio ── */
-  .audio-note {
-    font-size: .68rem;
-    color: var(--muted);
-    letter-spacing: .05em;
-    margin-top: .4rem;
-    opacity: .6;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .display.running { animation: none; }
-    .dot.on          { animation: none; }
-  }
 </style>
 </head>
+
 <body>
 
 <p class="label">⏱ Cronometro</p>
 
 <div class="face">
 
-  <!-- Display principale -->
   <div class="display" id="display">00:00.00</div>
 
-  <!-- Stato + Giro -->
-  <div class="secondary">
-    <div class="status-dot">
-      <div class="dot" id="dot"></div>
-      <span id="status-txt">In attesa</span>
-    </div>
-    <button class="btn-lap" id="btn-lap" disabled>Giro</button>
-  </div>
-
-  <!-- Start / Stop / Reset -->
   <div class="controls">
-    <button class="btn btn-start" id="btn-start">Start</button>
-    <button class="btn btn-stop"  id="btn-stop"  disabled>Stop</button>
-    <button class="btn btn-reset" id="btn-reset">Reset</button>
+    <button id="btn-start" class="btn-start">Start</button>
+    <button id="btn-stop" class="btn-stop" disabled>Stop</button>
+    <button id="btn-hide">Hide</button>
   </div>
 
-</div>
-
-<p class="audio-note">🔊 Beep sintetico su Start / Stop</p>
-
-<!-- Lista giri (fuori dalla card) -->
-<div class="laps-wrapper" id="laps-wrapper" style="display:none">
-  <div id="laps-list"></div>
 </div>
 
 <script>
-/* ═══════════════════════════════════════
-   AUDIO FIX 100% CROSS-BROWSER
-════════════════════════════════════════ */
-
-let audioCtx = null;
-
-function getAudio() {
-  if (!audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
-  return audioCtx;
-}
-
-async function unlockAudio() {
-  const ctx = getAudio();
-  if (ctx.state !== "running") {
-    try {
-      await ctx.resume();
-    } catch (e) {}
-  }
-}
-
-function beep(freq1, freq2) {
-  const ctx = getAudio();
-  const now = ctx.currentTime;
-
-  function tone(freq, offset) {
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-
-    osc.type = "square";
-    osc.frequency.value = freq;
-
-    gain.gain.setValueAtTime(0.0001, now + offset);
-    gain.gain.exponentialRampToValueAtTime(0.3, now + offset + 0.01);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + offset + 0.12);
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-
-    osc.start(now + offset);
-    osc.stop(now + offset + 0.2);
-  }
-
-  tone(freq1, 0);
-  tone(freq2, 0.12);
-}
-
-/* ═══════════════════════════════════════
-   CRONOMETRO LOGICA (UGUALE AL TUO)
-════════════════════════════════════════ */
-
 let startTime = 0;
 let elapsed = 0;
 let running = false;
-let rafId = null;
-let laps = [];
-let lapStart = 0;
+let raf;
 
-const display = document.getElementById('display');
-const dot = document.getElementById('dot');
-const statusTxt = document.getElementById('status-txt');
-const btnStart = document.getElementById('btn-start');
-const btnStop = document.getElementById('btn-stop');
-const btnReset = document.getElementById('btn-reset');
-const btnLap = document.getElementById('btn-lap');
-const lapsWrapper = document.getElementById('laps-wrapper');
-const lapsList = document.getElementById('laps-list');
+const display = document.getElementById("display");
+const btnStart = document.getElementById("btn-start");
+const btnStop = document.getElementById("btn-stop");
+const btnHide = document.getElementById("btn-hide");
 
-function formatTime(ms) {
-  const totalCs = Math.floor(ms / 10);
-  const cs = totalCs % 100;
-  const secs = Math.floor(totalCs / 100) % 60;
-  const mins = Math.floor(totalCs / 6000);
-  return `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}.${String(cs).padStart(2,'0')}`;
+function format(ms){
+  const cs = Math.floor(ms/10)%100;
+  const s = Math.floor(ms/1000)%60;
+  const m = Math.floor(ms/60000);
+  return `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}.${String(cs).padStart(2,"0")}`;
 }
 
-function tick() {
-  if (!running) return;
+function tick(){
+  if(!running) return;
   const now = performance.now();
-  const total = elapsed + (now - startTime);
-  display.textContent = formatTime(total);
-  rafId = requestAnimationFrame(tick);
+  display.textContent = format(elapsed + (now - startTime));
+  raf = requestAnimationFrame(tick);
 }
 
-function setStatus(state) {
-  const labels = {
-    idle: 'In attesa',
-    running: 'In esecuzione',
-    stopped: 'Fermato'
-  };
-
-  statusTxt.textContent = labels[state];
-  dot.className = 'dot';
-
-  if (state === 'running') dot.classList.add('on');
-  if (state === 'stopped') dot.classList.add('off');
-}
-
-/* ═════════ START ═════════ */
-async function onStart() {
-  if (running) return;
-
-  await unlockAudio();
-  beep(660, 880);
-
-  startTime = performance.now();
+btnStart.onclick = () => {
+  if(running) return;
   running = true;
-  lapStart = elapsed;
-
-  display.classList.add('running');
-  display.classList.remove('flash-stop');
-
-  setStatus('running');
-
+  startTime = performance.now();
+  raf = requestAnimationFrame(tick);
   btnStart.disabled = true;
   btnStop.disabled = false;
-  btnLap.disabled = false;
+};
 
-  rafId = requestAnimationFrame(tick);
-}
-
-/* ═════════ STOP ═════════ */
-async function onStop() {
-  if (!running) return;
-
-  await unlockAudio();
-  beep(880, 550);
-
+btnStop.onclick = () => {
+  if(!running) return;
+  running = false;
   elapsed += performance.now() - startTime;
-  running = false;
-
-  cancelAnimationFrame(rafId);
-
-  display.classList.remove('running');
-  display.classList.add('flash-stop');
-  setTimeout(() => display.classList.remove('flash-stop'), 300);
-
-  setStatus('stopped');
-
+  cancelAnimationFrame(raf);
   btnStart.disabled = false;
   btnStop.disabled = true;
-  btnLap.disabled = true;
-}
+};
 
-/* RESET */
-function onReset() {
-  running = false;
-  elapsed = 0;
-  laps = [];
-  lapStart = 0;
-
-  display.textContent = '00:00.00';
-  display.classList.remove('running','flash-stop');
-
-  setStatus('idle');
-
-  btnStart.disabled = false;
-  btnStop.disabled = true;
-  btnLap.disabled = true;
-
-  lapsWrapper.style.display = 'none';
-  lapsList.innerHTML = '';
-}
-
-/* LAP */
-function onLap() {
-  if (!running) return;
-
-  const now = performance.now();
-  const total = elapsed + (now - startTime);
-  const lapTime = total - lapStart;
-
-  lapStart = total;
-  laps.push(lapTime);
-
-  renderLaps();
-}
-
-function renderLaps() {
-  if (!laps.length) return;
-
-  lapsWrapper.style.display = 'block';
-  lapsList.innerHTML = '';
-
-  laps.forEach((t, i) => {
-    const row = document.createElement('div');
-    row.className = 'lap-row';
-
-    row.innerHTML = `
-      <span class="lap-n">Giro ${i+1}</span>
-      <span class="lap-t">${formatTime(t)}</span>
-    `;
-
-    lapsList.appendChild(row);
-  });
-}
-
-/* UI */
-btnStart.addEventListener('click', onStart);
-btnStop.addEventListener('click', onStop);
-btnReset.addEventListener('click', onReset);
-btnLap.addEventListener('click', onLap);
-
-document.addEventListener('keydown', (e) => {
-  if (e.code === 'Space') {
-    e.preventDefault();
-    running ? onStop() : onStart();
-  }
-  if (e.code === 'KeyR') onReset();
-  if (e.code === 'KeyL') onLap();
-});
+btnHide.onclick = () => {
+  display.classList.toggle("hidden");
+  btnHide.textContent = display.classList.contains("hidden")
+    ? "Show"
+    : "Hide";
+};
 </script>
 
 </body>
