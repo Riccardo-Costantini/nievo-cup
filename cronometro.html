@@ -57,7 +57,8 @@
     font-family: var(--mono);
     font-size: clamp(3rem, 14vw, 5rem);
     color: var(--green);
-    transition: opacity .2s;
+    line-height: 1;
+    transition: opacity .2s ease;
   }
 
   .display.hidden {
@@ -71,7 +72,7 @@
     width: 100%;
   }
 
-  button {
+  .btn {
     flex: 1;
     padding: .8rem;
     border-radius: .8rem;
@@ -79,6 +80,7 @@
     background: transparent;
     color: var(--text);
     cursor: pointer;
+    font-family: var(--sans);
   }
 
   .btn-start { background: var(--green); color:#000; }
@@ -96,9 +98,10 @@
   <div class="display" id="display">00:00.00</div>
 
   <div class="controls">
-    <button id="btn-start" class="btn-start">Start</button>
-    <button id="btn-stop" class="btn-stop" disabled>Stop</button>
-    <button id="btn-hide">Hide</button>
+    <button class="btn btn-start" id="btn-start">Start</button>
+    <button class="btn btn-stop" id="btn-stop" disabled>Stop</button>
+    <button class="btn" id="btn-reset">Reset</button>
+    <button class="btn" id="btn-hide">Hide</button>
   </div>
 
 </div>
@@ -112,12 +115,50 @@ let raf;
 const display = document.getElementById("display");
 const btnStart = document.getElementById("btn-start");
 const btnStop = document.getElementById("btn-stop");
+const btnReset = document.getElementById("btn-reset");
 const btnHide = document.getElementById("btn-hide");
 
+/* AUDIO (rimane invariato o puoi reinserire il tuo) */
+let audioCtx;
+
+function getAudio(){
+  if(!audioCtx){
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  return audioCtx;
+}
+
+function beep(f1,f2){
+  const ctx = getAudio();
+  const now = ctx.currentTime;
+
+  function tone(f, o){
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type="square";
+    osc.frequency.value=f;
+
+    gain.gain.setValueAtTime(0.0001, now+o);
+    gain.gain.exponentialRampToValueAtTime(0.3, now+o+0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now+o+0.12);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(now+o);
+    osc.stop(now+o+0.2);
+  }
+
+  tone(f1,0);
+  tone(f2,0.12);
+}
+
+/* TIMER */
 function format(ms){
-  const cs = Math.floor(ms/10)%100;
-  const s = Math.floor(ms/1000)%60;
-  const m = Math.floor(ms/60000);
+  const cs=Math.floor(ms/10)%100;
+  const s=Math.floor(ms/1000)%60;
+  const m=Math.floor(ms/60000);
   return `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}.${String(cs).padStart(2,"0")}`;
 }
 
@@ -130,22 +171,44 @@ function tick(){
 
 btnStart.onclick = () => {
   if(running) return;
+  getAudio().resume?.();
+
+  beep(660,880);
+
   running = true;
   startTime = performance.now();
+
   raf = requestAnimationFrame(tick);
+
   btnStart.disabled = true;
   btnStop.disabled = false;
 };
 
 btnStop.onclick = () => {
   if(!running) return;
+
+  beep(880,550);
+
   running = false;
   elapsed += performance.now() - startTime;
+
   cancelAnimationFrame(raf);
+
   btnStart.disabled = false;
   btnStop.disabled = true;
 };
 
+btnReset.onclick = () => {
+  running = false;
+  elapsed = 0;
+  display.textContent = "00:00.00";
+  cancelAnimationFrame(raf);
+
+  btnStart.disabled = false;
+  btnStop.disabled = true;
+};
+
+/* HIDE / SHOW */
 btnHide.onclick = () => {
   display.classList.toggle("hidden");
   btnHide.textContent = display.classList.contains("hidden")
