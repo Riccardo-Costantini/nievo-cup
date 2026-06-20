@@ -269,67 +269,105 @@
 </div>
 
 <script>
-/* ─────────────────────────────────────────
-   Web Audio API — Beep sintetico
-   Nessun file esterno, zero problemi CORS.
-   L'AudioContext viene creato/ripreso
-   dentro l'event handler (requisito Safari).
-─────────────────────────────────────────── */
-let audioCtx = null;
+/* ═══════════════════════════════════════════════════════════
+   AUDIO — Web Audio API, Safari-safe
+   ───────────────────────────────────────────────────────────
+   Problema Safari:
+   1. AudioContext nasce in stato "suspended" su iOS/macOS.
+   2. resume() restituisce una Promise: chiamarla e usare
+      subito il contesto NON funziona — il suono parte
+      mentre il contesto è ancora sospeso.
+   3. setTimeout() per il 2° tono è fuori dal tick del click
+      originale → Safari lo blocca come "non user-initiated".
 
-function getAudioCtx() {
-  if (!audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
-  // Safari (e Chrome dopo inattività) sospendono il contesto.
-  // resume() è obbligatorio prima di usarlo.
-  if (audioCtx.state === 'suspended') {
-    audioCtx.resume();          // asincrono ma avviato nel tick dello stesso click
-  }
-  return audioCtx;
+   Soluzione adottata:
+   • Al primo click QUALSIASI sul documento: crea il contesto
+     e fai await resume() con un nodo silenzioso → "sblocco"
+     garantito dentro l'handler sincrono del touch/click.
+   • I toni multipli vengono schedulati tramite il clock
+     interno di Web Audio (ctx.currentTime + offset) invece
+     di setTimeout → nessun secondo "giro" fuori dall'handler.
+   • audioReady è una Promise che ogni beep attende prima
+     di suonare; se il contesto era già pronto il await
+     risolve immediatamente (microtask, < 1 ms).
+═══════════════════════════════════════════════════════════ */
+
+let audioCtx   = null;
+let audioReady = null;   // Promise che risolve quando ctx è running
+
+function initAudio() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  // Sblocco con un buffer silenzioso di 1 campione.
+  // È l'unico modo certificato su iOS per passare da
+  // "suspended" a "running" dentro un user-gesture handler.
+  audioReady = (async () => {
+    if (audioCtx.state !== 'running') {
+      // Nodo silenzioso: richiede il "permesso" audio al browser
+      const buf = audioCtx.createBuffer(1, 1, audioCtx.sampleRate);
+      const src = audioCtx.createBufferSource();
+      src.buffer = buf;
+      src.connect(audioCtx.destination);
+      src.start(0);
+      await audioCtx.resume();
+    }
+  })();
 }
 
+// Al primo tocco/click sul documento → inizializza e sblocca
+// (lo facciamo PRIMA che l'utente prema Start, così al click
+//  di Start il contesto è già running e il suono è immediato)
+document.addEventListener('pointerdown', initAudio, { once: true });
+document.addEventListener('keydown',     initAudio, { once: true });
+
 /**
- * beep(freq, dur, type, vol)
- * freq  – frequenza Hz     (default 880)
- * dur   – durata secondi   (default 0.08)
- * type  – forma d'onda     ('square' | 'sine' | 'triangle' | 'sawtooth')
- * vol   – volume 0–1       (default 0.35)
+ * Suona un tono.
+ * Tutti i parametri vengono schedulati tramite il clock
+ * Web Audio → nessun setTimeout, Safari-safe.
+ *
+ * @param {number} freq   Frequenza Hz
+ * @param {number} start  Offset in secondi da ctx.currentTime
+ * @param {number} dur    Durata in secondi
+ * @param {string} type   Forma d'onda ('square'|'sine'|...)
+ * @param {number} vol    Volume 0–1
  */
-function beep(freq = 880, dur = 0.08, type = 'square', vol = 0.35) {
+async function playTone(freq, start, dur, type = 'square', vol = 0.30) {
   try {
-    const ctx  = getAudioCtx();
+    if (!audioCtx) initAudio();
+    await audioReady;                       // attende che ctx sia running
+
+    const ctx  = audioCtx;
     const osc  = ctx.createOscillator();
     const gain = ctx.createGain();
-
     osc.connect(gain);
     gain.connect(ctx.destination);
 
-    osc.type      = type;
+    osc.type = type;
     osc.frequency.setValueAtTime(freq, ctx.currentTime);
 
-    // Envelope: attacco istantaneo, decadimento morbido → evita click audio
-    gain.gain.setValueAtTime(vol,  ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+    const t0 = ctx.currentTime + start;
+    gain.gain.setValueAtTime(0.001, t0);
+    gain.gain.linearRampToValueAtTime(vol,   t0 + 0.005);   // attacco 5 ms
+    gain.gain.exponentialRampToValueAtTime(0.001, t0 + dur); // release
 
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + dur);
+    osc.start(t0);
+    osc.stop(t0 + dur + 0.01);
   } catch (e) {
-    // Se per qualsiasi motivo l'audio non è disponibile, ignoriamo silenziosamente.
-    console.warn('Beep non disponibile:', e.message);
+    console.warn('Audio non disponibile:', e.message);
   }
 }
 
 function beepStart() {
-  // Due toni brevi ascendenti → "via!"
-  beep(660, 0.07, 'square', 0.30);
-  setTimeout(() => beep(880, 0.09, 'square', 0.35), 80);
+  // Due toni ascendenti schedulati via Web Audio clock (no setTimeout)
+  playTone(660, 0.00, 0.08, 'square', 0.28);
+  playTone(880, 0.09, 0.10, 'square', 0.33);
 }
 
 function beepStop() {
-  // Tono discendente → "stop"
-  beep(880, 0.07, 'square', 0.30);
-  setTimeout(() => beep(550, 0.12, 'square', 0.30), 80);
+  // Due toni discendenti
+  playTone(880, 0.00, 0.08, 'square', 0.28);
+  playTone(550, 0.09, 0.13, 'square', 0.28);
 }
 
 /* ─────────────────────────────────────────
