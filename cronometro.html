@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cronometro con Beep</title>
+<title>Cronometro FIX</title>
 
 <style>
 body{
@@ -14,114 +14,97 @@ body{
     align-items:center;
     background:#111;
     color:white;
-    font-family:Arial,sans-serif;
+    font-family:Arial;
 }
-
-.container{
-    text-align:center;
-}
-
 #display{
-    font-size:5rem;
-    font-weight:bold;
-    margin-bottom:30px;
+    font-size:4rem;
     font-family:monospace;
+    margin-bottom:20px;
 }
-
 button{
-    padding:15px 30px;
-    font-size:1.2rem;
-    border:none;
-    border-radius:10px;
-    cursor:pointer;
+    padding:15px 25px;
     margin:5px;
+    font-size:1.1rem;
 }
-
-.start{background:#28a745;color:white;}
-.stop{background:#dc3545;color:white;}
-.reset{background:#007bff;color:white;}
 </style>
 </head>
+
 <body>
 
-<div class="container">
+<div style="text-align:center">
     <div id="display">00:00.00</div>
-
-    <button class="start" onclick="startTimer()">START</button>
-    <button class="stop" onclick="stopTimer()">STOP</button>
-    <button class="reset" onclick="resetTimer()">RESET</button>
+    <button onclick="unlockAudio()">🔊 ATTIVA SUONO</button>
+    <button onclick="startTimer()">START</button>
+    <button onclick="stopTimer()">STOP</button>
 </div>
 
 <script>
+let ctx;
+let unlocked = false;
+
+let running = false;
 let startTime = 0;
-let elapsedTime = 0;
-let timerInterval = null;
+let elapsed = 0;
+let interval;
 
-function beep(freq = 800, duration = 120){
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function unlockAudio(){
+    if(unlocked) return;
 
-    const oscillator = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    unlocked = true;
 
-    oscillator.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-
-    oscillator.frequency.value = freq;
-    oscillator.type = "sine";
-
-    oscillator.start();
-
-    gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(
-        0.0001,
-        audioCtx.currentTime + duration / 1000
-    );
-
-    oscillator.stop(audioCtx.currentTime + duration / 1000);
+    beep(800, 100);
 }
 
-function updateDisplay() {
-    const currentTime = Date.now() - startTime + elapsedTime;
+function beep(freq, duration){
+    if(!ctx) return;
 
-    const minutes = Math.floor(currentTime / 60000);
-    const seconds = Math.floor((currentTime % 60000) / 1000);
-    const centiseconds = Math.floor((currentTime % 1000) / 10);
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+
+    o.connect(g);
+    g.connect(ctx.destination);
+
+    o.frequency.value = freq;
+    o.type = "sine";
+
+    g.gain.setValueAtTime(0.2, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration/1000);
+
+    o.start();
+    o.stop(ctx.currentTime + duration/1000);
+}
+
+function update(){
+    let t = Date.now() - startTime + elapsed;
+
+    let m = Math.floor(t/60000);
+    let s = Math.floor((t%60000)/1000);
+    let cs = Math.floor((t%1000)/10);
 
     document.getElementById("display").textContent =
-        `${String(minutes).padStart(2,'0')}:` +
-        `${String(seconds).padStart(2,'0')}.` +
-        `${String(centiseconds).padStart(2,'0')}`;
+    `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${String(cs).padStart(2,'0')}`;
 }
 
-function startTimer() {
-    if (timerInterval) return;
+function startTimer(){
+    if(running) return;
+    if(!unlocked) return alert("Premi prima ATTIVA SUONO");
 
-    beep(1000, 150); // beep start
+    beep(1000,120);
 
+    running = true;
     startTime = Date.now();
-
-    timerInterval = setInterval(updateDisplay, 10);
+    interval = setInterval(update, 10);
 }
 
-function stopTimer() {
-    if (!timerInterval) return;
+function stopTimer(){
+    if(!running) return;
 
-    clearInterval(timerInterval);
-    timerInterval = null;
+    running = false;
+    clearInterval(interval);
+    elapsed += Date.now() - startTime;
 
-    elapsedTime += Date.now() - startTime;
-
-    beep(500, 200); // beep stop
-}
-
-function resetTimer() {
-    clearInterval(timerInterval);
-    timerInterval = null;
-
-    startTime = 0;
-    elapsedTime = 0;
-
-    document.getElementById("display").textContent = "00:00.00";
+    beep(500,200);
 }
 </script>
 
