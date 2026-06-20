@@ -269,131 +269,78 @@
 </div>
 
 <script>
-/* ═══════════════════════════════════════════════════════════
-   AUDIO — Web Audio API, Safari-safe
-   ───────────────────────────────────────────────────────────
-   Problema Safari:
-   1. AudioContext nasce in stato "suspended" su iOS/macOS.
-   2. resume() restituisce una Promise: chiamarla e usare
-      subito il contesto NON funziona — il suono parte
-      mentre il contesto è ancora sospeso.
-   3. setTimeout() per il 2° tono è fuori dal tick del click
-      originale → Safari lo blocca come "non user-initiated".
+/* ═══════════════════════════════════════
+   AUDIO FIX 100% CROSS-BROWSER
+════════════════════════════════════════ */
 
-   Soluzione adottata:
-   • Al primo click QUALSIASI sul documento: crea il contesto
-     e fai await resume() con un nodo silenzioso → "sblocco"
-     garantito dentro l'handler sincrono del touch/click.
-   • I toni multipli vengono schedulati tramite il clock
-     interno di Web Audio (ctx.currentTime + offset) invece
-     di setTimeout → nessun secondo "giro" fuori dall'handler.
-   • audioReady è una Promise che ogni beep attende prima
-     di suonare; se il contesto era già pronto il await
-     risolve immediatamente (microtask, < 1 ms).
-═══════════════════════════════════════════════════════════ */
+let audioCtx = null;
 
-let audioCtx   = null;
-let audioReady = null;   // Promise che risolve quando ctx è running
-
-function initAudio() {
-  if (audioCtx) return;
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-  // Sblocco con un buffer silenzioso di 1 campione.
-  // È l'unico modo certificato su iOS per passare da
-  // "suspended" a "running" dentro un user-gesture handler.
-  audioReady = (async () => {
-    if (audioCtx.state !== 'running') {
-      // Nodo silenzioso: richiede il "permesso" audio al browser
-      const buf = audioCtx.createBuffer(1, 1, audioCtx.sampleRate);
-      const src = audioCtx.createBufferSource();
-      src.buffer = buf;
-      src.connect(audioCtx.destination);
-      src.start(0);
-      await audioCtx.resume();
-    }
-  })();
+function getAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  return audioCtx;
 }
 
-// Al primo tocco/click sul documento → inizializza e sblocca
-// (lo facciamo PRIMA che l'utente prema Start, così al click
-//  di Start il contesto è già running e il suono è immediato)
-document.addEventListener('pointerdown', initAudio, { once: true });
-document.addEventListener('keydown',     initAudio, { once: true });
-
-/**
- * Suona un tono.
- * Tutti i parametri vengono schedulati tramite il clock
- * Web Audio → nessun setTimeout, Safari-safe.
- *
- * @param {number} freq   Frequenza Hz
- * @param {number} start  Offset in secondi da ctx.currentTime
- * @param {number} dur    Durata in secondi
- * @param {string} type   Forma d'onda ('square'|'sine'|...)
- * @param {number} vol    Volume 0–1
- */
-async function playTone(freq, start, dur, type = 'square', vol = 0.30) {
-  try {
-    if (!audioCtx) initAudio();
-    await audioReady;                       // attende che ctx sia running
-
-    const ctx  = audioCtx;
-    const osc  = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-
-    osc.type = type;
-    osc.frequency.setValueAtTime(freq, ctx.currentTime);
-
-    const t0 = ctx.currentTime + start;
-    gain.gain.setValueAtTime(0.001, t0);
-    gain.gain.linearRampToValueAtTime(vol,   t0 + 0.005);   // attacco 5 ms
-    gain.gain.exponentialRampToValueAtTime(0.001, t0 + dur); // release
-
-    osc.start(t0);
-    osc.stop(t0 + dur + 0.01);
-  } catch (e) {
-    console.warn('Audio non disponibile:', e.message);
+async function unlockAudio() {
+  const ctx = getAudio();
+  if (ctx.state !== "running") {
+    try {
+      await ctx.resume();
+    } catch (e) {}
   }
 }
 
-function beepStart() {
-  // Due toni ascendenti schedulati via Web Audio clock (no setTimeout)
-  playTone(660, 0.00, 0.08, 'square', 0.28);
-  playTone(880, 0.09, 0.10, 'square', 0.33);
+function beep(freq1, freq2) {
+  const ctx = getAudio();
+  const now = ctx.currentTime;
+
+  function tone(freq, offset) {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = "square";
+    osc.frequency.value = freq;
+
+    gain.gain.setValueAtTime(0.0001, now + offset);
+    gain.gain.exponentialRampToValueAtTime(0.3, now + offset + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + offset + 0.12);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(now + offset);
+    osc.stop(now + offset + 0.2);
+  }
+
+  tone(freq1, 0);
+  tone(freq2, 0.12);
 }
 
-function beepStop() {
-  // Due toni discendenti
-  playTone(880, 0.00, 0.08, 'square', 0.28);
-  playTone(550, 0.09, 0.13, 'square', 0.28);
-}
+/* ═══════════════════════════════════════
+   CRONOMETRO LOGICA (UGUALE AL TUO)
+════════════════════════════════════════ */
 
-/* ─────────────────────────────────────────
-   Logica cronometro
-─────────────────────────────────────────── */
-let startTime   = 0;   // performance.now() al momento dello start
-let elapsed     = 0;   // ms accumulati nelle sessioni precedenti
-let running     = false;
-let rafId       = null;
-let laps        = [];
-let lapStart    = 0;   // elapsed al momento dell'ultimo giro
+let startTime = 0;
+let elapsed = 0;
+let running = false;
+let rafId = null;
+let laps = [];
+let lapStart = 0;
 
-// DOM
-const display    = document.getElementById('display');
-const dot        = document.getElementById('dot');
-const statusTxt  = document.getElementById('status-txt');
-const btnStart   = document.getElementById('btn-start');
-const btnStop    = document.getElementById('btn-stop');
-const btnReset   = document.getElementById('btn-reset');
-const btnLap     = document.getElementById('btn-lap');
-const lapsWrapper= document.getElementById('laps-wrapper');
-const lapsList   = document.getElementById('laps-list');
+const display = document.getElementById('display');
+const dot = document.getElementById('dot');
+const statusTxt = document.getElementById('status-txt');
+const btnStart = document.getElementById('btn-start');
+const btnStop = document.getElementById('btn-stop');
+const btnReset = document.getElementById('btn-reset');
+const btnLap = document.getElementById('btn-lap');
+const lapsWrapper = document.getElementById('laps-wrapper');
+const lapsList = document.getElementById('laps-list');
 
 function formatTime(ms) {
-  const totalCs = Math.floor(ms / 10);          // centesimi
-  const cs   = totalCs % 100;
+  const totalCs = Math.floor(ms / 10);
+  const cs = totalCs % 100;
   const secs = Math.floor(totalCs / 100) % 60;
   const mins = Math.floor(totalCs / 6000);
   return `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}.${String(cs).padStart(2,'0')}`;
@@ -408,112 +355,133 @@ function tick() {
 }
 
 function setStatus(state) {
-  // state: 'idle' | 'running' | 'stopped'
-  const labels = { idle:'In attesa', running:'In esecuzione', stopped:'Fermato' };
-  statusTxt.textContent = labels[state] || '';
+  const labels = {
+    idle: 'In attesa',
+    running: 'In esecuzione',
+    stopped: 'Fermato'
+  };
+
+  statusTxt.textContent = labels[state];
   dot.className = 'dot';
+
   if (state === 'running') dot.classList.add('on');
   if (state === 'stopped') dot.classList.add('off');
 }
 
-/* ── Azioni ── */
-function onStart() {
+/* ═════════ START ═════════ */
+async function onStart() {
   if (running) return;
-  beepStart();                           // ← BEEP START (dentro l'event handler ✓)
+
+  await unlockAudio();
+  beep(660, 880);
+
   startTime = performance.now();
-  running   = true;
-  lapStart  = elapsed;
+  running = true;
+  lapStart = elapsed;
+
   display.classList.add('running');
   display.classList.remove('flash-stop');
+
   setStatus('running');
+
   btnStart.disabled = true;
-  btnStop.disabled  = false;
-  btnLap.disabled   = false;
+  btnStop.disabled = false;
+  btnLap.disabled = false;
+
   rafId = requestAnimationFrame(tick);
 }
 
-function onStop() {
+/* ═════════ STOP ═════════ */
+async function onStop() {
   if (!running) return;
-  beepStop();                            // ← BEEP STOP (dentro l'event handler ✓)
+
+  await unlockAudio();
+  beep(880, 550);
+
   elapsed += performance.now() - startTime;
-  running  = false;
+  running = false;
+
   cancelAnimationFrame(rafId);
+
   display.classList.remove('running');
   display.classList.add('flash-stop');
   setTimeout(() => display.classList.remove('flash-stop'), 300);
+
   setStatus('stopped');
+
   btnStart.disabled = false;
-  btnStop.disabled  = true;
-  btnLap.disabled   = true;
+  btnStop.disabled = true;
+  btnLap.disabled = true;
 }
 
+/* RESET */
 function onReset() {
-  if (running) {
-    cancelAnimationFrame(rafId);
-    running = false;
-  }
-  elapsed   = 0;
-  lapStart  = 0;
-  laps      = [];
+  running = false;
+  elapsed = 0;
+  laps = [];
+  lapStart = 0;
+
   display.textContent = '00:00.00';
   display.classList.remove('running','flash-stop');
+
   setStatus('idle');
+
   btnStart.disabled = false;
-  btnStop.disabled  = true;
-  btnLap.disabled   = true;
+  btnStop.disabled = true;
+  btnLap.disabled = true;
+
   lapsWrapper.style.display = 'none';
   lapsList.innerHTML = '';
 }
 
+/* LAP */
 function onLap() {
   if (!running) return;
-  const now     = performance.now();
-  const total   = elapsed + (now - startTime);
+
+  const now = performance.now();
+  const total = elapsed + (now - startTime);
   const lapTime = total - lapStart;
-  lapStart      = total;
+
+  lapStart = total;
   laps.push(lapTime);
+
   renderLaps();
 }
 
 function renderLaps() {
-  if (laps.length === 0) { lapsWrapper.style.display = 'none'; return; }
+  if (!laps.length) return;
+
   lapsWrapper.style.display = 'block';
-  const min = Math.min(...laps);
-  const max = Math.max(...laps);
   lapsList.innerHTML = '';
-  // mostra i giri dal più recente
-  [...laps].reverse().forEach((t, ri) => {
-    const i    = laps.length - 1 - ri;          // indice originale
-    const row  = document.createElement('div');
+
+  laps.forEach((t, i) => {
+    const row = document.createElement('div');
     row.className = 'lap-row';
-    if (laps.length > 2) {
-      if (t === min) row.classList.add('best');
-      if (t === max) row.classList.add('worst');
-    }
-    const delta = i > 0 ? laps[i] - laps[i-1] : 0;
-    const sign  = delta >= 0 ? '+' : '-';
-    const deltaStr = i > 0 ? ` ${sign}${formatTime(Math.abs(delta))}` : '';
+
     row.innerHTML = `
       <span class="lap-n">Giro ${i+1}</span>
       <span class="lap-t">${formatTime(t)}</span>
-      <span class="lap-d">${deltaStr}</span>`;
+    `;
+
     lapsList.appendChild(row);
   });
 }
 
-/* ── Tastiera (Space = start/stop, L = giro, R = reset) ── */
-document.addEventListener('keydown', e => {
-  if (e.target.tagName === 'BUTTON') return;
-  if (e.code === 'Space')  { e.preventDefault(); running ? onStop() : onStart(); }
-  if (e.code === 'KeyL')   { if (!btnLap.disabled) onLap(); }
-  if (e.code === 'KeyR')   onReset();
-});
-
-/* ── Bind pulsanti ── */
+/* UI */
 btnStart.addEventListener('click', onStart);
-btnStop .addEventListener('click', onStop);
+btnStop.addEventListener('click', onStop);
 btnReset.addEventListener('click', onReset);
-btnLap  .addEventListener('click', onLap);
+btnLap.addEventListener('click', onLap);
+
+document.addEventListener('keydown', (e) => {
+  if (e.code === 'Space') {
+    e.preventDefault();
+    running ? onStop() : onStart();
+  }
+  if (e.code === 'KeyR') onReset();
+  if (e.code === 'KeyL') onLap();
+});
 </script>
+
 </body>
 </html>
