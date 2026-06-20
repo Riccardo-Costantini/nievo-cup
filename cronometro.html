@@ -3,110 +3,479 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cronometro FIX</title>
-
+<title>Cronometro</title>
 <style>
-body{
-    margin:0;
-    height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background:#111;
-    color:white;
-    font-family:Arial;
-}
-#display{
-    font-size:4rem;
-    font-family:monospace;
-    margin-bottom:20px;
-}
-button{
-    padding:15px 25px;
-    margin:5px;
-    font-size:1.1rem;
-}
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #0a0a0f;
+    --panel:    #12121a;
+    --border:   #1e1e2e;
+    --green:    #00ff87;
+    --green-dim:#00aa5a;
+    --red:      #ff3c5e;
+    --text:     #c8c8e0;
+    --muted:    #5a5a7a;
+    --mono:     'Share Tech Mono', monospace;
+    --sans:     'Inter', sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    user-select: none;
+  }
+
+  /* ── Titolo ── */
+  .label {
+    font-family: var(--sans);
+    font-size: .7rem;
+    font-weight: 500;
+    letter-spacing: .35em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 2.2rem;
+  }
+
+  /* ── Schermo principale ── */
+  .face {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 1.6rem;
+    padding: 3rem 3.6rem 2.6rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2.4rem;
+    box-shadow:
+      0 0 0 1px #ffffff06,
+      0 24px 80px #000000cc,
+      inset 0 1px 0 #ffffff0a;
+    width: min(88vw, 400px);
+  }
+
+  /* ── Display cifre ── */
+  .display {
+    font-family: var(--mono);
+    font-size: clamp(3rem, 14vw, 5rem);
+    letter-spacing: .06em;
+    color: var(--green);
+    text-shadow: 0 0 22px #00ff8755, 0 0 60px #00ff8720;
+    transition: color .15s, text-shadow .15s;
+    line-height: 1;
+  }
+
+  .display.running {
+    /* lieve pulsazione verde mentre gira */
+    animation: pulse 1s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { text-shadow: 0 0 22px #00ff8755, 0 0 60px #00ff8720; }
+    50%       { text-shadow: 0 0 34px #00ff87aa, 0 0 80px #00ff8740; }
+  }
+
+  /* flash rosso su STOP */
+  .display.flash-stop {
+    color: var(--red);
+    text-shadow: 0 0 22px #ff3c5e88;
+  }
+
+  /* ── Pulsanti ── */
+  .controls {
+    display: flex;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  .btn {
+    flex: 1;
+    font-family: var(--sans);
+    font-size: .82rem;
+    font-weight: 500;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    border: none;
+    border-radius: .8rem;
+    padding: .85rem .5rem;
+    cursor: pointer;
+    transition: transform .08s, box-shadow .08s, background .1s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn:active { transform: scale(.96); }
+
+  .btn-start {
+    background: var(--green);
+    color: #0a0a0f;
+    box-shadow: 0 0 18px #00ff8740;
+  }
+  .btn-start:hover { box-shadow: 0 0 28px #00ff8770; }
+
+  .btn-stop {
+    background: transparent;
+    color: var(--red);
+    border: 1px solid var(--red);
+    box-shadow: 0 0 10px #ff3c5e20;
+  }
+  .btn-stop:hover { background: #ff3c5e12; box-shadow: 0 0 18px #ff3c5e40; }
+
+  .btn-reset {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .btn-reset:hover { color: var(--text); border-color: var(--muted); }
+
+  /* ── Giri ── */
+  .laps-wrapper {
+    width: min(88vw, 400px);
+    margin-top: 1.4rem;
+    max-height: 220px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .laps-wrapper::-webkit-scrollbar { width: 4px; }
+  .laps-wrapper::-webkit-scrollbar-track { background: transparent; }
+  .laps-wrapper::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .lap-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: .45rem 0;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: .82rem;
+    animation: fade-in .2s ease;
+  }
+
+  @keyframes fade-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; } }
+
+  .lap-n  { color: var(--muted); font-family: var(--sans); font-size: .72rem; letter-spacing: .1em; }
+  .lap-t  { color: var(--text); }
+  .lap-d  { color: var(--muted); font-size: .72rem; }
+
+  /* row del giro più veloce / più lento */
+  .lap-row.best  .lap-t { color: var(--green); }
+  .lap-row.worst .lap-t { color: var(--red); }
+
+  /* ── Riga giro + stato ── */
+  .secondary {
+    display: flex;
+    gap: .7rem;
+    width: 100%;
+  }
+
+  .btn-lap {
+    flex: 1;
+    font-family: var(--sans);
+    font-size: .82rem;
+    font-weight: 500;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    border: none;
+    border-radius: .8rem;
+    padding: .7rem .5rem;
+    cursor: pointer;
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+    transition: transform .08s, background .1s;
+  }
+  .btn-lap:active { transform: scale(.96); }
+  .btn-lap:hover  { background: #ffffff08; }
+
+  .status-dot {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    font-size: .72rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--muted);
+    transition: background .2s;
+  }
+  .dot.on  { background: var(--green); box-shadow: 0 0 8px var(--green); animation: blink 1s step-end infinite; }
+  .dot.off { background: var(--red);   box-shadow: 0 0 8px var(--red); }
+
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  /* ── Nota audio ── */
+  .audio-note {
+    font-size: .68rem;
+    color: var(--muted);
+    letter-spacing: .05em;
+    margin-top: .4rem;
+    opacity: .6;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .display.running { animation: none; }
+    .dot.on          { animation: none; }
+  }
 </style>
 </head>
-
 <body>
 
-<div style="text-align:center">
-    <div id="display">00:00.00</div>
-    <button onclick="unlockAudio()">🔊 ATTIVA SUONO</button>
-    <button onclick="startTimer()">START</button>
-    <button onclick="stopTimer()">STOP</button>
+<p class="label">⏱ Cronometro</p>
+
+<div class="face">
+
+  <!-- Display principale -->
+  <div class="display" id="display">00:00.00</div>
+
+  <!-- Stato + Giro -->
+  <div class="secondary">
+    <div class="status-dot">
+      <div class="dot" id="dot"></div>
+      <span id="status-txt">In attesa</span>
+    </div>
+    <button class="btn-lap" id="btn-lap" disabled>Giro</button>
+  </div>
+
+  <!-- Start / Stop / Reset -->
+  <div class="controls">
+    <button class="btn btn-start" id="btn-start">Start</button>
+    <button class="btn btn-stop"  id="btn-stop"  disabled>Stop</button>
+    <button class="btn btn-reset" id="btn-reset">Reset</button>
+  </div>
+
+</div>
+
+<p class="audio-note">🔊 Beep sintetico su Start / Stop</p>
+
+<!-- Lista giri (fuori dalla card) -->
+<div class="laps-wrapper" id="laps-wrapper" style="display:none">
+  <div id="laps-list"></div>
 </div>
 
 <script>
-let ctx;
-let unlocked = false;
+/* ─────────────────────────────────────────
+   Web Audio API — Beep sintetico
+   Nessun file esterno, zero problemi CORS.
+   L'AudioContext viene creato/ripreso
+   dentro l'event handler (requisito Safari).
+─────────────────────────────────────────── */
+let audioCtx = null;
 
-let running = false;
-let startTime = 0;
-let elapsed = 0;
-let interval;
-
-function unlockAudio(){
-    if(unlocked) return;
-
-    ctx = new (window.AudioContext || window.webkitAudioContext)();
-    unlocked = true;
-
-    beep(800, 100);
+function getAudioCtx() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  // Safari (e Chrome dopo inattività) sospendono il contesto.
+  // resume() è obbligatorio prima di usarlo.
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();          // asincrono ma avviato nel tick dello stesso click
+  }
+  return audioCtx;
 }
 
-function beep(freq, duration){
-    if(!ctx) return;
+/**
+ * beep(freq, dur, type, vol)
+ * freq  – frequenza Hz     (default 880)
+ * dur   – durata secondi   (default 0.08)
+ * type  – forma d'onda     ('square' | 'sine' | 'triangle' | 'sawtooth')
+ * vol   – volume 0–1       (default 0.35)
+ */
+function beep(freq = 880, dur = 0.08, type = 'square', vol = 0.35) {
+  try {
+    const ctx  = getAudioCtx();
+    const osc  = ctx.createOscillator();
+    const gain = ctx.createGain();
 
-    const o = ctx.createOscillator();
-    const g = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
 
-    o.connect(g);
-    g.connect(ctx.destination);
+    osc.type      = type;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
 
-    o.frequency.value = freq;
-    o.type = "sine";
+    // Envelope: attacco istantaneo, decadimento morbido → evita click audio
+    gain.gain.setValueAtTime(vol,  ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
 
-    g.gain.setValueAtTime(0.2, ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration/1000);
-
-    o.start();
-    o.stop(ctx.currentTime + duration/1000);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + dur);
+  } catch (e) {
+    // Se per qualsiasi motivo l'audio non è disponibile, ignoriamo silenziosamente.
+    console.warn('Beep non disponibile:', e.message);
+  }
 }
 
-function update(){
-    let t = Date.now() - startTime + elapsed;
-
-    let m = Math.floor(t/60000);
-    let s = Math.floor((t%60000)/1000);
-    let cs = Math.floor((t%1000)/10);
-
-    document.getElementById("display").textContent =
-    `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${String(cs).padStart(2,'0')}`;
+function beepStart() {
+  // Due toni brevi ascendenti → "via!"
+  beep(660, 0.07, 'square', 0.30);
+  setTimeout(() => beep(880, 0.09, 'square', 0.35), 80);
 }
 
-function startTimer(){
-    if(running) return;
-    if(!unlocked) return alert("Premi prima ATTIVA SUONO");
-
-    beep(1000,120);
-
-    running = true;
-    startTime = Date.now();
-    interval = setInterval(update, 10);
+function beepStop() {
+  // Tono discendente → "stop"
+  beep(880, 0.07, 'square', 0.30);
+  setTimeout(() => beep(550, 0.12, 'square', 0.30), 80);
 }
 
-function stopTimer(){
-    if(!running) return;
+/* ─────────────────────────────────────────
+   Logica cronometro
+─────────────────────────────────────────── */
+let startTime   = 0;   // performance.now() al momento dello start
+let elapsed     = 0;   // ms accumulati nelle sessioni precedenti
+let running     = false;
+let rafId       = null;
+let laps        = [];
+let lapStart    = 0;   // elapsed al momento dell'ultimo giro
 
+// DOM
+const display    = document.getElementById('display');
+const dot        = document.getElementById('dot');
+const statusTxt  = document.getElementById('status-txt');
+const btnStart   = document.getElementById('btn-start');
+const btnStop    = document.getElementById('btn-stop');
+const btnReset   = document.getElementById('btn-reset');
+const btnLap     = document.getElementById('btn-lap');
+const lapsWrapper= document.getElementById('laps-wrapper');
+const lapsList   = document.getElementById('laps-list');
+
+function formatTime(ms) {
+  const totalCs = Math.floor(ms / 10);          // centesimi
+  const cs   = totalCs % 100;
+  const secs = Math.floor(totalCs / 100) % 60;
+  const mins = Math.floor(totalCs / 6000);
+  return `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}.${String(cs).padStart(2,'0')}`;
+}
+
+function tick() {
+  if (!running) return;
+  const now = performance.now();
+  const total = elapsed + (now - startTime);
+  display.textContent = formatTime(total);
+  rafId = requestAnimationFrame(tick);
+}
+
+function setStatus(state) {
+  // state: 'idle' | 'running' | 'stopped'
+  const labels = { idle:'In attesa', running:'In esecuzione', stopped:'Fermato' };
+  statusTxt.textContent = labels[state] || '';
+  dot.className = 'dot';
+  if (state === 'running') dot.classList.add('on');
+  if (state === 'stopped') dot.classList.add('off');
+}
+
+/* ── Azioni ── */
+function onStart() {
+  if (running) return;
+  beepStart();                           // ← BEEP START (dentro l'event handler ✓)
+  startTime = performance.now();
+  running   = true;
+  lapStart  = elapsed;
+  display.classList.add('running');
+  display.classList.remove('flash-stop');
+  setStatus('running');
+  btnStart.disabled = true;
+  btnStop.disabled  = false;
+  btnLap.disabled   = false;
+  rafId = requestAnimationFrame(tick);
+}
+
+function onStop() {
+  if (!running) return;
+  beepStop();                            // ← BEEP STOP (dentro l'event handler ✓)
+  elapsed += performance.now() - startTime;
+  running  = false;
+  cancelAnimationFrame(rafId);
+  display.classList.remove('running');
+  display.classList.add('flash-stop');
+  setTimeout(() => display.classList.remove('flash-stop'), 300);
+  setStatus('stopped');
+  btnStart.disabled = false;
+  btnStop.disabled  = true;
+  btnLap.disabled   = true;
+}
+
+function onReset() {
+  if (running) {
+    cancelAnimationFrame(rafId);
     running = false;
-    clearInterval(interval);
-    elapsed += Date.now() - startTime;
-
-    beep(500,200);
+  }
+  elapsed   = 0;
+  lapStart  = 0;
+  laps      = [];
+  display.textContent = '00:00.00';
+  display.classList.remove('running','flash-stop');
+  setStatus('idle');
+  btnStart.disabled = false;
+  btnStop.disabled  = true;
+  btnLap.disabled   = true;
+  lapsWrapper.style.display = 'none';
+  lapsList.innerHTML = '';
 }
-</script>
 
+function onLap() {
+  if (!running) return;
+  const now     = performance.now();
+  const total   = elapsed + (now - startTime);
+  const lapTime = total - lapStart;
+  lapStart      = total;
+  laps.push(lapTime);
+  renderLaps();
+}
+
+function renderLaps() {
+  if (laps.length === 0) { lapsWrapper.style.display = 'none'; return; }
+  lapsWrapper.style.display = 'block';
+  const min = Math.min(...laps);
+  const max = Math.max(...laps);
+  lapsList.innerHTML = '';
+  // mostra i giri dal più recente
+  [...laps].reverse().forEach((t, ri) => {
+    const i    = laps.length - 1 - ri;          // indice originale
+    const row  = document.createElement('div');
+    row.className = 'lap-row';
+    if (laps.length > 2) {
+      if (t === min) row.classList.add('best');
+      if (t === max) row.classList.add('worst');
+    }
+    const delta = i > 0 ? laps[i] - laps[i-1] : 0;
+    const sign  = delta >= 0 ? '+' : '-';
+    const deltaStr = i > 0 ? ` ${sign}${formatTime(Math.abs(delta))}` : '';
+    row.innerHTML = `
+      <span class="lap-n">Giro ${i+1}</span>
+      <span class="lap-t">${formatTime(t)}</span>
+      <span class="lap-d">${deltaStr}</span>`;
+    lapsList.appendChild(row);
+  });
+}
+
+/* ── Tastiera (Space = start/stop, L = giro, R = reset) ── */
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'BUTTON') return;
+  if (e.code === 'Space')  { e.preventDefault(); running ? onStop() : onStart(); }
+  if (e.code === 'KeyL')   { if (!btnLap.disabled) onLap(); }
+  if (e.code === 'KeyR')   onReset();
+});
+
+/* ── Bind pulsanti ── */
+btnStart.addEventListener('click', onStart);
+btnStop .addEventListener('click', onStop);
+btnReset.addEventListener('click', onReset);
+btnLap  .addEventListener('click', onLap);
+</script>
 </body>
 </html>
