@@ -137,6 +137,7 @@ function renderCalendar() {
     for (const date of sortedDates) {
       const matchesOnDate = grouped[date];
       const sortedMatches = sortMatchesByDateTime(matchesOnDate);
+      
       const round = (() => {
         const firstMatchId = parseInt(sortedMatches[0]?.id?.replace('m', ''));
         if (firstMatchId >= 61 && firstMatchId <= 66) {
@@ -148,15 +149,25 @@ function renderCalendar() {
         return sortedMatches[0]?.round || '';
       })();
 
-      // CONTROLLO SPAREGGI: Inserisce il titolone SOPRA il badge della data
-      const firstMatchIdNum = parseInt(sortedMatches[0]?.id?.replace('m', ''));
-      if (firstMatchIdNum >= 61 && firstMatchIdNum <= 66 && !playOffHeaderInserted) {
+      // Controlla se nella giornata corrente è presente ALMENO un match delle rispettive fasi
+      const hasPlayOffs = sortedMatches.some(m => {
+        const idNum = parseInt(m.id?.replace('m', ''));
+        return idNum >= 61 && idNum <= 66;
+      });
+
+      const hasOttavi = sortedMatches.some(m => {
+        const idNum = parseInt(m.id?.replace('m', ''));
+        return idNum >= 67 && idNum <= 74;
+      });
+
+      // CONTROLLO SPAREGGI
+      if (hasPlayOffs && !playOffHeaderInserted) {
         html += `<div class="playoff-title" style="width: 100%; text-align: center; font-family: 'Bebas Neue', sans-serif; font-size: 6rem; margin: 40px 0 10px 0; color: #ffcc00; letter-spacing: 1px;">SPAREGGI</div>`;
         playOffHeaderInserted = true;
       }
 
-      // CONTROLLO OTTAVI: Inserisce il titolone SOPRA il badge della data degli ottavi
-      if (firstMatchIdNum >= 67 && firstMatchIdNum <= 74 && !ottaviHeaderInserted) {
+      // CONTROLLO OTTAVI
+      if (hasOttavi && !ottaviHeaderInserted) {
         html += `<div class="playoff-title" style="width: 100%; text-align: center; font-family: 'Bebas Neue', sans-serif; font-size: 6rem; margin: 40px 0 10px 0; color: #ffcc00; letter-spacing: 1px;">OTTAVI</div>`;
         ottaviHeaderInserted = true;
       }
