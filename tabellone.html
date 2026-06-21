@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <meta name="theme-color" content="#0b0f17" />
+    <title>Nievo Cup – Tabellone Fasi Finali</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=Exo+2:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <link rel="shortcut icon" href="assets/images/loghi/favicon_nievo_cup.ico" type="image/x-icon" />
+
+    <style>
+        /* ============================================================
+           TABELLONE – STILI SPECIFICI (basati su style.css)
+           ============================================================ */
+
+        :root {
+            --gold: #feda00;
+            --gold-dim: rgba(254, 218, 0, 0.10);
+            --gold-border: rgba(254, 218, 0, 0.25);
+            --card-bg-bracket: rgba(8, 12, 22, 0.88);
+            --card-border: rgba(94, 100, 107, 0.30);
+            --bracket-line: rgba(254, 218, 0, 0.18);
+        }
+
+        body.page-tabellone {
+            background-color: #0b0f17;
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            font-family: 'Exo 2', sans-serif;
+        }
+
+        body.page-tabellone::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url('assets/images/sfondi/sfondo_tabellone.webp');
+            background-size: cover;
+            background-position: center;
+            z-index: -2;
+        }
+
+        body.page-tabellone::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(11, 15, 23, 0.55) 0%, rgba(11, 15, 23, 0.78) 100%);
+            z-index: -1;
+        }
+
+        @media (max-width: 700px) {
+            body.page-tabellone::before {
+                background-image: url('assets/images/sfondi/sfondo_mobile_tabellone.webp');
+            }
+        }
+
+        /* ---- HEADER ---- */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-evenly;
+            width: 100%;
+            background: transparent;
+            padding: 1rem 1rem 0.5rem 1rem;
+            gap: 0.8rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .logo img {
+            height: 8vw;
+        }
+        .menu {
+            display: flex;
+            gap: 2rem;
+        }
+        .voce {
+            white-space: nowrap;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2.8dvw;
+            letter-spacing: 0.1em;
+            color: var(--text);
+            line-height: 1;
+        }
+        .voce a p {
+            margin: 0;
+            padding: 12px;
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 8px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .voce:hover a p,
+        .voce a:active p {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.35);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 10px rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
+        }
+        .menu {
+            gap: 14px;
+        }
+
+        /* ---- PAGE TITLE ---- */
+        .page-hero {
+            text-align: center;
+            padding: 2rem 1rem 1.2rem;
+            position: relative;
+            z-index: 2;
+        }
+        .page-hero-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(2.6rem, 7vw, 5rem);
+            letter-spacing: 0.08em;
+            color: white;
+            line-height: 1;
+            text-shadow: 0 0 60px rgba(254, 218, 0, 0.15);
+        }
+        .page-hero-sub {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.85rem;
+            color: var(--text-2);
+            margin-top: 0.3rem;
+            letter-spacing: 0.06em;
+        }
+        .page-hero-line {
+            display: block;
+            width: 60px;
+            height: 2px;
+            background: var(--gold);
+            margin: 0.8rem auto 0;
+        }
+
+        /* ---- BRACKET WRAP ---- */
+        .bracket-scroll {
+            overflow-x: auto;
+            overflow-y: visible;
+            padding: 1rem 0.5rem 3rem;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: var(--gold) transparent;
+            position: relative;
+            z-index: 2;
+        }
+        .bracket-scroll::-webkit-scrollbar {
+            height: 6px;
+        }
+        .bracket-scroll::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 8px;
+        }
+        .bracket-scroll::-webkit-scrollbar-thumb {
+            background: var(--gold);
+            border-radius: 8px;
+        }
+
+        .bracket {
+            display: flex;
+            flex-direction: row;
+            align-items: stretch;
+            justify-content: center;
+            gap: 0.6rem;
+            min-width: 1100px;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0.5rem 0.2rem;
+        }
+
+        /* ---- COLUMN ---- */
+        .bracket-col {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            flex: 1 1 0;
+            min-width: 0;
+            gap: 0.4rem;
+            position: relative;
+        }
+        .bracket-col.center-col {
+            flex: 0 0 220px;
+            min-width: 180px;
+            justify-content: center;
+            gap: 1.2rem;
+        }
+
+        .bracket-col-label {
+            text-align: center;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--gold);
+            padding-bottom: 0.4rem;
+            border-bottom: 1px solid var(--gold-border);
+            margin-bottom: 0.3rem;
+            opacity: 0.7;
+        }
+
+        /* ---- MATCH CARD (bracket) ---- */
+        .b-match {
+            background: var(--card-bg-bracket);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 0.5rem 0.6rem;
+            transition: all 0.25s ease;
+            position: relative;
+            min-height: 56px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .b-match:hover {
+            border-color: var(--gold-border);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+        }
+
+        .b-match.is-live {
+            border-color: #22c55e;
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.15);
+            background: rgba(34, 197, 94, 0.08);
+        }
+        .b-match.is-finished {
+            border-color: rgba(124, 58, 237, 0.25);
+        }
+        .b-match.is-final {
+            border-color: var(--gold);
+            border-width: 2px;
+            background: rgba(254, 218, 0, 0.06);
+            box-shadow: 0 0 30px rgba(254, 218, 0, 0.08);
+        }
+        .b-match.is-final-3 {
+            border-color: rgba(167, 139, 250, 0.3);
+        }
+
+        .b-match-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.4rem;
+            padding: 0.1rem 0;
+            font-size: 0.75rem;
+        }
+
+        .b-match-team {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            min-width: 0;
+            flex: 1;
+        }
+        .b-match-team .b-logo {
+            width: 22px;
+            height: 22px;
+            object-fit: contain;
+            flex-shrink: 0;
+            border-radius: 40%;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px;
+        }
+        .b-match-team .b-name {
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            font-size: 0.7rem;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 90px;
+        }
+        .b-match-team .b-name.tbd {
+            color: #4b5675;
+            font-style: italic;
+            font-weight: 400;
+        }
+        .b-match-score {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 0.9rem;
+            color: var(--gold);
+            flex-shrink: 0;
+            min-width: 1.4rem;
+            text-align: center;
+        }
+        .b-match-score.empty {
+            color: #4b5675;
+        }
+
+        .b-match-status {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.5rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #4b5675;
+            text-align: center;
+            padding-top: 0.15rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            margin-top: 0.15rem;
+        }
+        .b-match-status.live {
+            color: #22c55e;
+        }
+        .b-match-status.finished {
+            color: #a78bfa;
+        }
+
+        /* ---- FINALI CENTRO ---- */
+        .final-card {
+            background: var(--card-bg-bracket);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 2px solid var(--gold);
+            border-radius: 20px;
+            padding: 0.8rem 0.6rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 40px rgba(254, 218, 0, 0.06);
+        }
+        .final-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 40px rgba(254, 218, 0, 0.10);
+        }
+        .final-card .final-label {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.55rem;
+            font-weight: 700;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--gold);
+            border-bottom: 1px solid var(--gold-border);
+            padding-bottom: 0.3rem;
+            margin-bottom: 0.4rem;
+        }
+        .final-card .final-label.third {
+            color: #a78bfa;
+            border-color: rgba(167, 139, 250, 0.2);
+        }
+        .final-card .final-teams {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+        .final-card .final-team {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: var(--text);
+            padding: 0.15rem 0;
+        }
+        .final-card .final-team .f-logo {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+            border-radius: 40%;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px;
+        }
+        .final-card .final-team .f-name.tbd {
+            color: #4b5675;
+            font-style: italic;
+            font-weight: 400;
+        }
+        .final-card .final-score {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.2rem;
+            color: var(--gold);
+            margin-top: 0.15rem;
+            letter-spacing: 0.06em;
+        }
+        .final-card .final-score.empty {
+            color: #4b5675;
+        }
+        .final-card .final-status {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.5rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #4b5675;
+            margin-top: 0.2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            padding-top: 0.2rem;
+        }
+        .final-card .final-status.live {
+            color: #22c55e;
+        }
+        .final-card .final-status.finished {
+            color: #a78bfa;
+        }
+
+        /* ---- RESPONSIVE ---- */
+        @media (max-width: 1024px) {
+            .bracket {
+                min-width: 900px;
+                gap: 0.4rem;
+            }
+            .bracket-col.center-col {
+                flex: 0 0 180px;
+                min-width: 150px;
+            }
+            .b-match-team .b-name {
+                font-size: 0.6rem;
+                max-width: 70px;
+            }
+            .b-match-score {
+                font-size: 0.75rem;
+                min-width: 1.2rem;
+            }
+            .b-match {
+                padding: 0.4rem 0.5rem;
+                min-height: 48px;
+            }
+            .b-match-team .b-logo {
+                width: 18px;
+                height: 18px;
+            }
+            .final-card .final-team {
+                font-size: 0.7rem;
+            }
+            .final-card .final-team .f-logo {
+                width: 20px;
+                height: 20px;
+            }
+            .final-card .final-score {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .header {
+                flex-direction: column;
+                padding: 0.5rem 0.5rem 0.3rem;
+                gap: 0.3rem;
+            }
+            .logo img {
+                height: 12vw;
+            }
+            .menu {
+                gap: 0.5rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .voce {
+                font-size: 3.2dvw;
+            }
+            .voce a p {
+                padding: 6px 10px;
+                font-size: 2.8dvw;
+            }
+
+            .bracket {
+                min-width: 720px;
+                gap: 0.3rem;
+                padding: 0.2rem 0.1rem;
+            }
+            .bracket-col.center-col {
+                flex: 0 0 140px;
+                min-width: 120px;
+                gap: 0.6rem;
+            }
+            .b-match-team .b-name {
+                font-size: 0.55rem;
+                max-width: 55px;
+            }
+            .b-match-score {
+                font-size: 0.65rem;
+                min-width: 1rem;
+            }
+            .b-match {
+                padding: 0.3rem 0.4rem;
+                min-height: 40px;
+                border-radius: 10px;
+            }
+            .b-match-team .b-logo {
+                width: 16px;
+                height: 16px;
+            }
+            .b-match-status {
+                font-size: 0.45rem;
+            }
+            .bracket-col-label {
+                font-size: 0.5rem;
+            }
+
+            .final-card {
+                padding: 0.5rem 0.4rem;
+            }
+            .final-card .final-team {
+                font-size: 0.6rem;
+                gap: 0.3rem;
+            }
+            .final-card .final-team .f-logo {
+                width: 16px;
+                height: 16px;
+            }
+            .final-card .final-score {
+                font-size: 0.85rem;
+            }
+            .final-card .final-label {
+                font-size: 0.45rem;
+            }
+
+            .page-hero {
+                padding: 1.2rem 0.5rem 0.8rem;
+            }
+            .page-hero-title {
+                font-size: clamp(2rem, 6vw, 3rem);
+            }
+            .page-hero-sub {
+                font-size: 0.7rem;
+            }
+            .bracket-scroll {
+                padding: 0.5rem 0.2rem 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .bracket {
+                min-width: 580px;
+                gap: 0.2rem;
+            }
+            .bracket-col.center-col {
+                flex: 0 0 110px;
+                min-width: 90px;
+            }
+            .b-match-team .b-name {
+                font-size: 0.45rem;
+                max-width: 40px;
+            }
+            .b-match-score {
+                font-size: 0.55rem;
+                min-width: 0.8rem;
+            }
+            .b-match {
+                padding: 0.2rem 0.3rem;
+                min-height: 34px;
+                border-radius: 8px;
+            }
+            .b-match-team .b-logo {
+                width: 14px;
+                height: 14px;
+            }
+            .b-match-status {
+                font-size: 0.4rem;
+            }
+            .bracket-col-label {
+                font-size: 0.4rem;
+            }
+            .final-card {
+                padding: 0.3rem 0.3rem;
+            }
+            .final-card .final-team {
+                font-size: 0.5rem;
+            }
+            .final-card .final-team .f-logo {
+                width: 14px;
+                height: 14px;
+            }
+            .final-card .final-score {
+                font-size: 0.7rem;
+            }
+            .final-card .final-label {
+                font-size: 0.4rem;
+            }
+        }
+
+        /* ---- LOADING ---- */
+        .loading-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 50vh;
+            gap: 1rem;
+        }
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(254, 218, 0, 0.12);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .loading-text {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: #4b5675;
+        }
+
+        /* ---- FOOTER ---- */
+        .bracket-footer {
+            text-align: center;
+            padding: 1.5rem 0 0.5rem;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.6rem;
+            font-weight: 500;
+            letter-spacing: 0.15em;
+            color: #2a3347;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body class="page-tabellone">
+
+    <!-- ===== HEADER ===== -->
+    <div class="header">
+        <div class="logo">
+            <a href="index.html">
+                <img loading="lazy" decoding="async" src="assets/images/loghi/logo_nievo_white.png" alt="Nievo Cup">
+            </a>
+        </div>
+        <div class="menu">
+            <div class="voce"><a href="partite.html"><p>Partite</p></a></div>
+            <div class="voce"><a href="gironi.html"><p>Gironi</p></a></div>
+            <div class="voce"><a href="tabellone.html"><p>Tabellone</p></a></div>
+            <div class="voce"><a href="squadre.html"><p>Squadre</p></a></div>
+        </div>
+    </div>
+
+    <!-- ===== PAGE TITLE ===== -->
+    <div class="page-hero">
+        <div class="page-hero-title">FASE FINALE</div>
+        <div class="page-hero-sub">Ottavi · Quarti · Semifinali · Finali</div>
+        <span class="page-hero-line"></span>
+    </div>
+
+    <!-- ===== BRACKET ===== -->
+    <div class="bracket-scroll" id="bracketScroll">
+        <div class="bracket" id="bracketContainer">
+            <!-- COL 1 – OTTAVI SINISTRA -->
+            <div class="bracket-col" id="col-ottavi-sx">
+                <div class="bracket-col-label">Ottavi</div>
+                <!-- 4 match slots -->
+            </div>
+
+            <!-- COL 2 – QUARTI SINISTRA -->
+            <div class="bracket-col" id="col-quarti-sx">
+                <div class="bracket-col-label">Quarti</div>
+                <!-- 2 match slots -->
+            </div>
+
+            <!-- COL 3 – SEMIFINALE SINISTRA -->
+            <div class="bracket-col" id="col-semifinale-sx">
+                <div class="bracket-col-label">Semifinale</div>
+                <!-- 1 match slot -->
+            </div>
+
+            <!-- COL 4 – FINALI CENTRO -->
+            <div class="bracket-col center-col" id="col-finali">
+                <!-- Finale 1°/2° e 3°/4° -->
+            </div>
+
+            <!-- COL 5 – SEMIFINALE DESTRA -->
+            <div class="bracket-col" id="col-semifinale-dx">
+                <div class="bracket-col-label">Semifinale</div>
+                <!-- 1 match slot -->
+            </div>
+
+            <!-- COL 6 – QUARTI DESTRA -->
+            <div class="bracket-col" id="col-quarti-dx">
+                <div class="bracket-col-label">Quarti</div>
+                <!-- 2 match slots -->
+            </div>
+
+            <!-- COL 7 – OTTAVI DESTRA -->
+            <div class="bracket-col" id="col-ottavi-dx">
+                <div class="bracket-col-label">Ottavi</div>
+                <!-- 4 match slots -->
+            </div>
+        </div>
+    </div>
+
+    <div class="bracket-footer">
+        Nievo Cup · Tabellone aggiornato in tempo reale
+    </div>
+
+    <!-- ============================================================
+    FIREBASE + LOGICA BRACKET (SENZA PLACEHOLDER CON NOMI)
+    ============================================================ -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+        import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB0LUxAWKVUIhXYRb2T2JOT3ypiX9q_5Ck",
+            authDomain: "nievo-fcc94.firebaseapp.com",
+            databaseURL: "https://nievo-fcc94-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "nievo-fcc94",
+            storageBucket: "nievo-fcc94.firebasestorage.app",
+            messagingSenderId: "497831212426",
+            appId: "1:497831212426:web:357e8c37b249042c53c473",
+            measurementId: "G-ZERXCC9LH8"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // ---- UTILITY ----
+        function toArray(val) {
+            if (!val) return [];
+            if (Array.isArray(val)) return val;
+            if (typeof val === 'object') return Object.values(val);
+            return [];
+        }
+
+        function esc(s) {
+            if (!s) return '';
+            return s.replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' } [m] || m));
+        }
+
+        function getLogoUrl(teamName) {
+            if (!teamName) return '';
+            let slug = teamName.toLowerCase()
+                .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                .replace(/[^a-z0-9]+/g, '_')
+                .replace(/^_|_$/g, '');
+            const exc = {
+                'bv_smba': 'bv_samba',
+                'skoop_poke': 'skooppoke',
+                'crazy_nextgen': 'crazy_next_gen',
+                'the_pippierate': 'pippierate',
+                'hellade_val_borago': 'hellade',
+                'under_vr': 'under',
+                'team_santa_follia': 'team_santa_follia',
+                'fat_boy': 'fatboy',
+                'carachi_fc': 'carachi_fc',
+                'la_selecao': 'la_selecao'
+            };
+            if (exc[slug]) slug = exc[slug];
+            return `assets/images/loghi_squadre/${slug}.webp`;
+        }
+
+        // ---- MAPPATURA OTTAVI (ordine visivo) ----
+        const OTTaviSX = ['m73', 'm68', 'm71', 'm70'];
+        const OTTaviDX = ['m72', 'm67', 'm69', 'm74'];
+
+        const VISUAL_ORDER = {
+            'm73': { home: 'Longobarda', away: 'Bootay' },
+            'm68': { home: 'Under Vr', away: 'Spartani' },
+            'm71': { home: 'Dream Team', away: 'Ztl' },
+            'm70': { home: 'Campeones', away: 'Bv smba' },
+            'm72': { home: 'Team Santa Follia', away: 'San Mexico' },
+            'm67': { home: 'Fat Boy', away: 'La Selecao' },
+            'm69': { home: 'Los Perros', away: 'The Pippierate' },
+            'm74': { home: 'Hustlers', away: 'SkoopPoke' }
+        };
+
+        // ---- STATO ----
+        let matchesData = {};
+        let liveResultsData = {};
+        let loaded = false;
+
+        // ---- FUNZIONI ----
+        function getWinner(match) {
+            if (!match) return null;
+            if (match.status === 'Finita') {
+                if (match.homeGoals > match.awayGoals) return match.home;
+                if (match.awayGoals > match.homeGoals) return match.away;
+                return null;
+            }
+            return null;
+        }
+
+        function getLoser(match) {
+            if (!match) return null;
+            if (match.status === 'Finita') {
+                if (match.homeGoals > match.awayGoals) return match.away;
+                if (match.awayGoals > match.homeGoals) return match.home;
+                return null;
+            }
+            return null;
+        }
+
+        function buildBracket(matches, results) {
+            function buildOttavo(id) {
+                const m = matches[id];
+                if (!m) return null;
+                const vis = VISUAL_ORDER[id] || {};
+                const homeName = vis.home || m.home?.name || 'TBD';
+                const awayName = vis.away || m.away?.name || 'TBD';
+                const r = results[id] || {};
+                const sh = toArray(r.scorersHome);
+                const sa = toArray(r.scorersAway);
+                const status = r.status || 'In programma';
+                return {
+                    id,
+                    home: homeName,
+                    away: awayName,
+                    homeGoals: sh.length,
+                    awayGoals: sa.length,
+                    status,
+                    rawHome: m.home?.name || homeName,
+                    rawAway: m.away?.name || awayName,
+                };
+            }
+
+            const ottaviSX = OTTaviSX.map(id => buildOttavo(id)).filter(Boolean);
+            const ottaviDX = OTTaviDX.map(id => buildOttavo(id)).filter(Boolean);
+
+            function buildComputedMatch(id, winner1, winner2, sourceMatches, label) {
+                // winner1 e winner2 possono essere null (non ancora determinati)
+                return {
+                    id,
+                    home: winner1 || null,
+                    away: winner2 || null,
+                    homeGoals: 0,
+                    awayGoals: 0,
+                    status: 'In programma',
+                    isComputed: true,
+                    label: label || '',
+                    sourceMatches: sourceMatches || [],
+                    rawHome: winner1 || null,
+                    rawAway: winner2 || null,
+                };
+            }
+
+            const w73 = getWinner(ottaviSX[0]);
+            const w68 = getWinner(ottaviSX[1]);
+            const w71 = getWinner(ottaviSX[2]);
+            const w70 = getWinner(ottaviSX[3]);
+            const w72 = getWinner(ottaviDX[0]);
+            const w67 = getWinner(ottaviDX[1]);
+            const w69 = getWinner(ottaviDX[2]);
+            const w74 = getWinner(ottaviDX[3]);
+
+            const q1 = buildComputedMatch('q1', w73, w68, [ottaviSX[0], ottaviSX[1]]);
+            const q2 = buildComputedMatch('q2', w71, w70, [ottaviSX[2], ottaviSX[3]]);
+            const q3 = buildComputedMatch('q3', w72, w67, [ottaviDX[0], ottaviDX[1]]);
+            const q4 = buildComputedMatch('q4', w69, w74, [ottaviDX[2], ottaviDX[3]]);
+
+            const wq1 = getWinner(q1);
+            const wq2 = getWinner(q2);
+            const wq3 = getWinner(q3);
+            const wq4 = getWinner(q4);
+
+            const sf1 = buildComputedMatch('sf1', wq1, wq2, [q1, q2], 'Semifinale');
+            const sf2 = buildComputedMatch('sf2', wq3, wq4, [q3, q4], 'Semifinale');
+
+            const wsf1 = getWinner(sf1);
+            const wsf2 = getWinner(sf2);
+            const loser1 = getLoser(sf1);
+            const loser2 = getLoser(sf2);
+
+            const f1 = buildComputedMatch('f1', wsf1, wsf2, [sf1, sf2], 'Finale 1°/2°');
+            const f2 = buildComputedMatch('f2', loser1, loser2, [sf1, sf2], 'Finale 3°/4°');
+
+            return {
+                ottaviSX,
+                ottaviDX,
+                quartiSX: [q1, q2],
+                quartiDX: [q3, q4],
+                semifinaleSX: sf1,
+                semifinaleDX: sf2,
+                finale1: f1,
+                finale2: f2
+            };
+        }
+
+        // ---- RENDER ----
+        function renderBracket(bracket) {
+            if (!bracket) return;
+
+            const colSX = document.getElementById('col-ottavi-sx');
+            colSX.innerHTML = `<div class="bracket-col-label">Ottavi</div>`;
+            bracket.ottaviSX.forEach(m => colSX.appendChild(createMatchElement(m, 'ottavi')));
+
+            const colQx = document.getElementById('col-quarti-sx');
+            colQx.innerHTML = `<div class="bracket-col-label">Quarti</div>`;
+            bracket.quartiSX.forEach(m => colQx.appendChild(createMatchElement(m, 'quarti')));
+
+            const colSFSX = document.getElementById('col-semifinale-sx');
+            colSFSX.innerHTML = `<div class="bracket-col-label">Semifinale</div>`;
+            colSFSX.appendChild(createMatchElement(bracket.semifinaleSX, 'semifinale'));
+
+            const colFin = document.getElementById('col-finali');
+            colFin.innerHTML = '';
+            colFin.appendChild(createFinalElement(bracket.finale1, 'gold'));
+            colFin.appendChild(createFinalElement(bracket.finale2, 'third'));
+
+            const colSFDX = document.getElementById('col-semifinale-dx');
+            colSFDX.innerHTML = `<div class="bracket-col-label">Semifinale</div>`;
+            colSFDX.appendChild(createMatchElement(bracket.semifinaleDX, 'semifinale'));
+
+            const colQDx = document.getElementById('col-quarti-dx');
+            colQDx.innerHTML = `<div class="bracket-col-label">Quarti</div>`;
+            bracket.quartiDX.forEach(m => colQDx.appendChild(createMatchElement(m, 'quarti')));
+
+            const colDX = document.getElementById('col-ottavi-dx');
+            colDX.innerHTML = `<div class="bracket-col-label">Ottavi</div>`;
+            bracket.ottaviDX.forEach(m => colDX.appendChild(createMatchElement(m, 'ottavi')));
+        }
+
+        // ---- CREA MATCH (OTT, QUARTI, SEMI) ----
+        function createMatchElement(match, round) {
+            const div = document.createElement('div');
+            div.className = 'b-match';
+            if (match.status === 'Live') div.classList.add('is-live');
+            if (match.status === 'Finita') div.classList.add('is-finished');
+
+            let homeDisplay, awayDisplay;
+            let homeIsTBD = false, awayIsTBD = false;
+
+            if (match.isComputed) {
+                // Per i match calcolati: se il vincitore è null, mostriamo "TBD"
+                homeDisplay = match.home !== null ? match.home : 'TBD';
+                awayDisplay = match.away !== null ? match.away : 'TBD';
+                homeIsTBD = match.home === null;
+                awayIsTBD = match.away === null;
+                // Se il match è finito e ha un vincitore, mostriamo il nome reale
+                if (match.status === 'Finita' && match.home !== null && match.away !== null) {
+                    homeDisplay = match.home;
+                    awayDisplay = match.away;
+                    homeIsTBD = false;
+                    awayIsTBD = false;
+                }
+            } else {
+                // Ottavi – nomi sempre noti
+                homeDisplay = match.home || 'TBD';
+                awayDisplay = match.away || 'TBD';
+                homeIsTBD = homeDisplay === 'TBD';
+                awayIsTBD = awayDisplay === 'TBD';
+            }
+
+            const showScore = match.status === 'Finita' || match.status === 'Live';
+            const homeScore = (match.homeGoals !== undefined && match.homeGoals !== null) ? match.homeGoals : '-';
+            const awayScore = (match.awayGoals !== undefined && match.awayGoals !== null) ? match.awayGoals : '-';
+
+            div.innerHTML = `
+                <div class="b-match-row">
+                    <div class="b-match-team">
+                        <img class="b-logo" src="${!homeIsTBD ? getLogoUrl(homeDisplay) : ''}" alt="${esc(homeDisplay)}" loading="lazy" onerror="this.style.display='none'" />
+                        <span class="b-name ${homeIsTBD ? 'tbd' : ''}">${esc(homeDisplay)}</span>
+                    </div>
+                    <span class="b-match-score ${!showScore ? 'empty' : ''}">${showScore ? homeScore : ''}</span>
+                </div>
+                <div class="b-match-row">
+                    <div class="b-match-team">
+                        <img class="b-logo" src="${!awayIsTBD ? getLogoUrl(awayDisplay) : ''}" alt="${esc(awayDisplay)}" loading="lazy" onerror="this.style.display='none'" />
+                        <span class="b-name ${awayIsTBD ? 'tbd' : ''}">${esc(awayDisplay)}</span>
+                    </div>
+                    <span class="b-match-score ${!showScore ? 'empty' : ''}">${showScore ? awayScore : ''}</span>
+                </div>
+                <div class="b-match-status ${match.status === 'Live' ? 'live' : match.status === 'Finita' ? 'finished' : ''}">
+                    ${match.status === 'Live' ? '● LIVE' : match.status === 'Finita' ? '✔ Finita' : 'In programma'}
+                </div>
+            `;
+            return div;
+        }
+
+        // ---- CREA FINALE (CENTRO) ----
+        function createFinalElement(match, type) {
+            const div = document.createElement('div');
+            div.className = 'final-card';
+            if (type === 'gold') div.classList.add('is-final');
+            else div.classList.add('is-final-3');
+
+            let homeDisplay, awayDisplay;
+            let homeIsTBD = false, awayIsTBD = false;
+
+            if (match.isComputed) {
+                homeDisplay = match.home !== null ? match.home : 'TBD';
+                awayDisplay = match.away !== null ? match.away : 'TBD';
+                homeIsTBD = match.home === null;
+                awayIsTBD = match.away === null;
+                if (match.status === 'Finita' && match.home !== null && match.away !== null) {
+                    homeDisplay = match.home;
+                    awayDisplay = match.away;
+                    homeIsTBD = false;
+                    awayIsTBD = false;
+                }
+            } else {
+                homeDisplay = match.home || 'TBD';
+                awayDisplay = match.away || 'TBD';
+                homeIsTBD = homeDisplay === 'TBD';
+                awayIsTBD = awayDisplay === 'TBD';
+            }
+
+            const showScore = match.status === 'Finita' || match.status === 'Live';
+            const homeScore = (match.homeGoals !== undefined && match.homeGoals !== null) ? match.homeGoals : '-';
+            const awayScore = (match.awayGoals !== undefined && match.awayGoals !== null) ? match.awayGoals : '-';
+
+            const labelClass = type === 'gold' ? '' : 'third';
+
+            div.innerHTML = `
+                <div class="final-label ${labelClass}">${match.label || 'Finale'}</div>
+                <div class="final-teams">
+                    <div class="final-team">
+                        <img class="f-logo" src="${!homeIsTBD ? getLogoUrl(homeDisplay) : ''}" alt="${esc(homeDisplay)}" loading="lazy" onerror="this.style.display='none'" />
+                        <span class="f-name ${homeIsTBD ? 'tbd' : ''}">${esc(homeDisplay)}</span>
+                        <span class="final-score ${!showScore ? 'empty' : ''}">${showScore ? homeScore : ''}</span>
+                    </div>
+                    <div class="final-team">
+                        <img class="f-logo" src="${!awayIsTBD ? getLogoUrl(awayDisplay) : ''}" alt="${esc(awayDisplay)}" loading="lazy" onerror="this.style.display='none'" />
+                        <span class="f-name ${awayIsTBD ? 'tbd' : ''}">${esc(awayDisplay)}</span>
+                        <span class="final-score ${!showScore ? 'empty' : ''}">${showScore ? awayScore : ''}</span>
+                    </div>
+                </div>
+                <div class="final-status ${match.status === 'Live' ? 'live' : match.status === 'Finita' ? 'finished' : ''}">
+                    ${match.status === 'Live' ? '● LIVE' : match.status === 'Finita' ? '✔ Finita' : 'In programma'}
+                </div>
+            `;
+            return div;
+        }
+
+        // ---- AGGIORNAMENTO ----
+        function updateBracket() {
+            const bracket = buildBracket(matchesData, liveResultsData);
+            renderBracket(bracket);
+        }
+
+        // ---- FIREBASE LISTENERS ----
+        let matchesLoaded = false;
+        let resultsLoaded = false;
+
+        function checkAndUpdate() {
+            if (matchesLoaded && resultsLoaded) {
+                updateBracket();
+                if (!loaded) {
+                    loaded = true;
+                    const container = document.getElementById('bracketContainer');
+                    if (container) container.style.opacity = '1';
+                }
+            }
+        }
+
+        onValue(ref(db, 'matches'), (snapshot) => {
+            matchesData = snapshot.val() || {};
+            matchesLoaded = true;
+            checkAndUpdate();
+        }, (error) => {
+            console.error('Errore matches:', error);
+            matchesLoaded = true;
+            checkAndUpdate();
+        });
+
+        onValue(ref(db, 'liveResults'), (snapshot) => {
+            liveResultsData = snapshot.val() || {};
+            resultsLoaded = true;
+            checkAndUpdate();
+        }, (error) => {
+            console.error('Errore liveResults:', error);
+            resultsLoaded = true;
+            checkAndUpdate();
+        });
+
+        // ---- INIT ----
+        const container = document.getElementById('bracketContainer');
+        if (container) {
+            container.style.opacity = '0.3';
+            container.style.transition = 'opacity 0.5s';
+        }
+
+        setTimeout(() => {
+            if (!loaded && matchesLoaded && resultsLoaded) {
+                updateBracket();
+                loaded = true;
+                if (container) container.style.opacity = '1';
+            }
+        }, 3000);
+
+        // ---- SCROLL AL CENTRO ----
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const scrollContainer = document.getElementById('bracketScroll');
+                if (scrollContainer) {
+                    const centerCol = document.getElementById('col-finali');
+                    if (centerCol) {
+                        const centerRect = centerCol.getBoundingClientRect();
+                        const containerRect = scrollContainer.getBoundingClientRect();
+                        const scrollLeft = centerRect.left - containerRect.left - containerRect.width / 2 + centerRect.width / 2;
+                        if (scrollLeft > 0) {
+                            scrollContainer.scrollLeft = scrollLeft;
+                        }
+                    }
+                }
+            }, 800);
+        });
+
+        console.log('🏆 Tabellone Nievo Cup – placeholder rimossi, solo TBD');
+    </script>
+
+    <script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>
