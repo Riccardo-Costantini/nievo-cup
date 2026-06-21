@@ -130,7 +130,8 @@ function renderCalendar() {
     }
 
     let html = '';
-    let playOffHeaderInserted = false; 
+    let playOffHeaderInserted = false;
+    let ottaviHeaderInserted = false; 
     const sortedDates = Object.keys(grouped).sort();
 
     for (const date of sortedDates) {
@@ -141,6 +142,9 @@ function renderCalendar() {
         if (firstMatchId >= 61 && firstMatchId <= 66) {
           return 'Spareggi';
         }
+        if (firstMatchId >= 67 && firstMatchId <= 74) {
+          return 'Ottavi di finale';
+        }
         return sortedMatches[0]?.round || '';
       })();
 
@@ -149,6 +153,12 @@ function renderCalendar() {
       if (firstMatchIdNum >= 61 && firstMatchIdNum <= 66 && !playOffHeaderInserted) {
         html += `<div class="playoff-title" style="width: 100%; text-align: center; font-family: 'Bebas Neue', sans-serif; font-size: 6rem; margin: 40px 0 10px 0; color: #ffcc00; letter-spacing: 1px;">SPAREGGI</div>`;
         playOffHeaderInserted = true;
+      }
+
+      // CONTROLLO OTTAVI: Inserisce il titolone SOPRA il badge della data degli ottavi
+      if (firstMatchIdNum >= 67 && firstMatchIdNum <= 74 && !ottaviHeaderInserted) {
+        html += `<div class="playoff-title" style="width: 100%; text-align: center; font-family: 'Bebas Neue', sans-serif; font-size: 6rem; margin: 40px 0 10px 0; color: #ffcc00; letter-spacing: 1px;">OTTAVI</div>`;
+        ottaviHeaderInserted = true;
       }
 
       // Badge del giorno
