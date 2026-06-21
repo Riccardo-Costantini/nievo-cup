@@ -13,9 +13,11 @@
   :root {
     --bg:#0a0a0f;
     --panel:#12121a;
+    --panel-2:#161620;
     --border:#1e1e2e;
     --green:#00ff87;
     --red:#ff3c5e;
+    --gold:#ffd35e;
     --text:#c8c8e0;
     --muted:#5a5a7a;
     --mono:'Share Tech Mono', monospace;
@@ -30,7 +32,18 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
+    padding: 3rem 1rem 4rem;
+  }
+
+  button:focus-visible, input:focus-visible, a:focus-visible {
+    outline: 2px solid var(--green);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pulse { animation: none !important; }
+    .mode-card { transition: none !important; }
   }
 
   .label {
@@ -39,8 +52,25 @@
     text-transform: uppercase;
     color: var(--muted);
     margin-bottom: 2.2rem;
+    text-align: center;
   }
 
+  /* ===== VIEW ROUTER ===== */
+  .view { display: none; width: 100%; flex-direction: column; align-items: center; }
+  .view.active { display: flex; }
+
+  .back-link {
+    align-self: flex-start;
+    margin: 0 auto 1rem;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: .75rem;
+    letter-spacing: .05em;
+    width: min(88vw, 400px);
+  }
+  .back-link:hover { color: var(--text); }
+
+  /* ===== CRONOMETRO (face) — INVARIATO ===== */
   .face {
     background: var(--panel);
     border: 1px solid var(--border);
@@ -66,7 +96,6 @@
     pointer-events: none;
   }
 
-  /* 🔥 BOTTONE GRANDE */
   .btn-main {
     width: 100%;
     padding: 1.2rem;
@@ -82,20 +111,11 @@
     transition: transform .1s, background .2s;
   }
 
-  .btn-main:active {
-    transform: scale(0.97);
-  }
+  .btn-main:active { transform: scale(0.97); }
+  .btn-main.stop { background: var(--red); color: #fff; }
+  .btn-main:disabled { opacity: .4; cursor: not-allowed; }
 
-  .btn-main.stop {
-    background: var(--red);
-    color: #fff;
-  }
-
-  .controls {
-    display: flex;
-    gap: 1rem;
-    width: 100%;
-  }
+  .controls { display: flex; gap: 1rem; width: 100%; }
 
   .btn {
     flex: 1;
@@ -108,133 +128,976 @@
     font-family: var(--sans);
   }
 
+  /* ===== HOME ===== */
+  .mode-grid {
+    display: flex;
+    gap: 1.2rem;
+    width: min(92vw, 640px);
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .mode-card {
+    flex: 1 1 260px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 1.4rem;
+    padding: 2.4rem 1.6rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .6rem;
+    cursor: pointer;
+    color: var(--text);
+    font-family: var(--sans);
+    transition: border-color .2s, transform .1s;
+  }
+  .mode-card:hover, .mode-card:focus-visible { transform: translateY(-2px); }
+  .mode-card--trad:hover, .mode-card--trad:focus-visible { border-color: var(--green); }
+  .mode-card--evo:hover, .mode-card--evo:focus-visible { border-color: var(--gold); }
+  .mode-card__icon { font-size: 2rem; }
+  .mode-card__title {
+    font-family: var(--mono);
+    font-size: 1.1rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+  .mode-card--trad .mode-card__title { color: var(--green); }
+  .mode-card--evo .mode-card__title { color: var(--gold); }
+  .mode-card__desc {
+    font-size: .8rem;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  /* ===== LOGIN ===== */
+  .login-face { gap: 1.4rem; }
+  .login-tabs {
+    display: flex;
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: .8rem;
+    overflow: hidden;
+  }
+  .login-tab {
+    flex: 1;
+    padding: .7rem;
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-family: var(--sans);
+    cursor: pointer;
+    font-size: .85rem;
+  }
+  .login-tab.active { background: var(--panel-2); color: var(--text); }
+  .login-panel { display: none; flex-direction: column; gap: 1rem; width: 100%; }
+  .login-panel.active { display: flex; }
+  .field { display: flex; flex-direction: column; gap: .4rem; width: 100%; }
+  .field label {
+    font-size: .7rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .field input {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: .6rem;
+    padding: .8rem .9rem;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 1rem;
+  }
+  .field-hint { font-size: .7rem; color: var(--muted); }
+  .error-msg { color: var(--red); font-size: .8rem; min-height: 1rem; }
+
+  /* ===== TOPBAR ===== */
+  .topbar {
+    width: min(92vw, 720px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.6rem;
+    font-size: .85rem;
+  }
+  .user-chip { color: var(--text); }
+  .topbar a { color: var(--muted); text-decoration: none; }
+  .topbar a:hover { color: var(--red); }
+
+  /* ===== PLAYER RESULT / LEADERBOARD ===== */
+  .result-card {
+    width: min(88vw, 400px);
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    padding: 1.2rem 1.4rem;
+    margin-top: 1.4rem;
+    font-size: .9rem;
+    line-height: 1.7;
+  }
+  .result-card strong { color: var(--green); font-family: var(--mono); }
+  .points-line { margin-top: .4rem; font-weight: 600; color: var(--gold); }
+
+  .leaderboard-mini { width: min(88vw, 400px); margin-top: 2.4rem; }
+  .leaderboard-mini__title {
+    font-size: .7rem;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: .6rem;
+  }
+  .lb-row {
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+    padding: .5rem .2rem;
+    border-bottom: 1px solid var(--border);
+    font-size: .85rem;
+  }
+  .lb-rank { font-family: var(--mono); color: var(--muted); width: 1.4rem; }
+  .lb-name { flex: 1; }
+  .lb-points { font-family: var(--mono); color: var(--gold); }
+
+  /* ===== ADMIN ===== */
+  .admin-grid {
+    width: min(94vw, 980px);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.4rem;
+  }
+  .panel-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 1.2rem;
+    padding: 1.6rem;
+  }
+  .panel-card h2 {
+    font-size: .8rem;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1rem;
+    font-weight: 500;
+  }
+  .hint { color: var(--muted); font-size: .85rem; margin-bottom: .6rem; }
+  .new-round-form { display: flex; flex-direction: column; gap: .8rem; }
+  .time-inputs { display: flex; align-items: center; gap: .4rem; }
+  .time-inputs input {
+    width: 4rem;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: .5rem;
+    padding: .6rem;
+    color: var(--text);
+    font-family: var(--mono);
+    text-align: center;
+    font-size: 1rem;
+  }
+  .time-inputs span { color: var(--muted); font-family: var(--mono); }
+  .data-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+  .data-table th, .data-table td {
+    text-align: left;
+    padding: .5rem .4rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .data-table th {
+    color: var(--muted);
+    font-weight: 500;
+    font-size: .7rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  .empty-hint { color: var(--muted); font-size: .85rem; padding: .6rem 0; }
+  .history-row {
+    display: flex;
+    gap: 1rem;
+    font-size: .8rem;
+    padding: .4rem 0;
+    border-bottom: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  @keyframes pulseGlow {
+    0% { box-shadow: 0 0 0 0 rgba(0,255,135,.5); background: rgba(0,255,135,.08); }
+    100% { box-shadow: 0 0 0 8px rgba(0,255,135,0); background: transparent; }
+  }
+  .pulse { animation: pulseGlow 1.2s ease-out; }
 </style>
 </head>
 
 <body>
 
-<p class="label">⏱ Cronometro</p>
-
-<div class="face">
-
-  <div class="display" id="display">00:00.00</div>
-
-  <!-- 🔥 UNICO BOTTONE START / STOP -->
-  <button id="btn-main" class="btn-main">START</button>
-
-  <div class="controls">
-    <button class="btn" id="btn-reset">Reset</button>
-    <button class="btn" id="btn-hide">Hide</button>
+<!-- ===================== HOME ===================== -->
+<div class="view active" id="view-home">
+  <p class="label">⏱ Cronometro</p>
+  <div class="mode-grid">
+    <button class="mode-card mode-card--trad" id="go-traditional">
+      <span class="mode-card__icon">⏱</span>
+      <span class="mode-card__title">Tradizionale</span>
+      <span class="mode-card__desc">Il cronometro classico, semplice e diretto.</span>
+    </button>
+    <button class="mode-card mode-card--evo" id="go-evolution">
+      <span class="mode-card__icon">🎯</span>
+      <span class="mode-card__title">Evoluzione</span>
+      <span class="mode-card__desc">Indovina il tempo segreto. Round, punti, classifica.</span>
+    </button>
   </div>
-
 </div>
 
+<!-- ===================== TRADIZIONALE (codice invariato) ===================== -->
+<div class="view" id="view-traditional">
+  <a href="#" class="back-link" id="back-from-traditional">← Home</a>
+  <p class="label">⏱ Cronometro</p>
+
+  <div class="face">
+    <div class="display" id="display">00:00.00</div>
+    <button id="btn-main" class="btn-main">START</button>
+    <div class="controls">
+      <button class="btn" id="btn-reset">Reset</button>
+      <button class="btn" id="btn-hide">Hide</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== LOGIN (evoluzione) ===================== -->
+<div class="view" id="view-login">
+  <a href="#" class="back-link" id="back-from-login">← Home</a>
+  <p class="label">🎯 Evoluzione</p>
+
+  <div class="face login-face">
+    <div class="login-tabs">
+      <button type="button" class="login-tab active" data-tab="player">Giocatore</button>
+      <button type="button" class="login-tab" data-tab="admin">Admin</button>
+    </div>
+
+    <form class="login-panel active" id="form-player-login">
+      <div class="field">
+        <label for="input-username">Nome utente</label>
+        <input type="text" id="input-username" placeholder="es. Marco" autocomplete="off" maxlength="20">
+        <span class="field-hint">Lettere, numeri, spazi, - o _ (max 20 caratteri)</span>
+      </div>
+      <button type="submit" class="btn-main">Entra in gioco</button>
+      <p class="error-msg" id="player-login-error"></p>
+    </form>
+
+    <form class="login-panel" id="form-admin-login">
+      <div class="field">
+        <label for="input-admin-user">Username</label>
+        <input type="text" id="input-admin-user" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="input-admin-pass">Password</label>
+        <input type="password" id="input-admin-pass" autocomplete="off">
+      </div>
+      <button type="submit" class="btn-main">Accedi come admin</button>
+      <p class="error-msg" id="admin-login-error"></p>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== PLAYER (gioco) ===================== -->
+<div class="view" id="view-player">
+  <div class="topbar">
+    <span class="user-chip">👤 <span id="player-name-label"></span></span>
+    <a href="#" id="player-logout">Esci</a>
+  </div>
+
+  <p class="label" id="player-round-label">🎯 In attesa di un round</p>
+
+  <div class="face">
+    <div class="display hidden" id="display-player">••:••.••</div>
+    <button id="btn-main-player" class="btn-main" disabled>ATTENDI</button>
+  </div>
+
+  <div class="result-card" id="player-result-card" style="display:none;"></div>
+
+  <div class="leaderboard-mini">
+    <p class="leaderboard-mini__title">Classifica</p>
+    <div id="player-leaderboard-list"></div>
+  </div>
+</div>
+
+<!-- ===================== ADMIN (dashboard) ===================== -->
+<div class="view" id="view-admin">
+  <div class="topbar">
+    <span class="user-chip">🛠 Admin</span>
+    <a href="#" id="admin-logout">Esci</a>
+  </div>
+
+  <div class="admin-grid">
+    <section class="panel-card">
+      <h2>Round attuale</h2>
+      <div id="admin-round-status"><p class="hint">Nessun round attivo.</p></div>
+
+      <div id="admin-new-round-form" class="new-round-form">
+        <p class="hint">Imposta il tempo segreto del nuovo round</p>
+        <div class="time-inputs">
+          <input type="number" id="nr-min" min="0" max="59" placeholder="mm">
+          <span>:</span>
+          <input type="number" id="nr-sec" min="0" max="59" placeholder="ss">
+          <span>.</span>
+          <input type="number" id="nr-cs" min="0" max="99" placeholder="cc">
+        </div>
+        <button class="btn-main" id="btn-start-round" type="button">Avvia round</button>
+      </div>
+
+      <button class="btn-main stop" id="btn-close-round" type="button" style="display:none; margin-top:.8rem;">Chiudi round e assegna punti</button>
+    </section>
+
+    <section class="panel-card">
+      <h2>Risultati in arrivo</h2>
+      <table class="data-table" id="admin-submissions-table">
+        <thead><tr><th>Giocatore</th><th>Tempo</th><th>Scarto</th><th>Punti</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <p class="empty-hint" id="admin-no-subs">Nessun risultato ancora.</p>
+    </section>
+
+    <section class="panel-card">
+      <h2>Classifica generale</h2>
+      <table class="data-table" id="admin-leaderboard-table">
+        <thead><tr><th>#</th><th>Giocatore</th><th>Punti</th><th>Round giocati</th></tr></thead>
+        <tbody><tr><td colspan="4" class="empty-hint">Nessun punteggio ancora.</td></tr></tbody>
+      </table>
+    </section>
+
+    <section class="panel-card">
+      <h2>Storico round</h2>
+      <div id="admin-history-list"><p class="empty-hint">Nessun round ancora.</p></div>
+    </section>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
 <script>
-let startTime = 0;
-let elapsed = 0;
-let running = false;
-let raf;
+/* =========================================================
+   FIREBASE INIT
+========================================================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyB0LUxAWKVUIhXYRb2T2JOT3ypiX9q_5Ck",
+  authDomain: "nievo-fcc94.firebaseapp.com",
+  databaseURL: "https://nievo-fcc94-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "nievo-fcc94",
+  storageBucket: "nievo-fcc94.firebasestorage.app",
+  messagingSenderId: "497831212426",
+  appId: "1:497831212426:web:357e8c37b249042c53c473",
+  measurementId: "G-ZERXCC9LH8"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-const display = document.getElementById("display");
-const btnMain = document.getElementById("btn-main");
-const btnReset = document.getElementById("btn-reset");
-const btnHide = document.getElementById("btn-hide");
-
-/* AUDIO */
-let audioCtx;
-
-function getAudio(){
-  if(!audioCtx){
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
-  return audioCtx;
+/* =========================================================
+   VIEW ROUTER
+========================================================= */
+const views = document.querySelectorAll('.view');
+function showView(id){
+  views.forEach(v => v.classList.toggle('active', v.id === id));
 }
 
-function beep(f1,f2){
-  const ctx = getAudio();
+document.getElementById('go-traditional').onclick = () => showView('view-traditional');
+document.getElementById('back-from-traditional').onclick = (e) => { e.preventDefault(); showView('view-home'); };
+document.getElementById('go-evolution').onclick = () => showView('view-login');
+document.getElementById('back-from-login').onclick = (e) => { e.preventDefault(); showView('view-home'); };
+
+document.querySelectorAll('.login-tab').forEach(tab => {
+  tab.onclick = () => {
+    document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.login-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('form-' + tab.dataset.tab + '-login').classList.add('active');
+  };
+});
+
+/* =========================================================
+   HELPER CONDIVISI — STESSA IDENTICA LOGICA DEL BEEP/FORMAT
+   (usati sia dal cronometro tradizionale sia dal gioco)
+========================================================= */
+let _audioCtx;
+function getAudioCtx(){
+  if(!_audioCtx){
+    _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  return _audioCtx;
+}
+
+function playBeep(f1, f2){
+  const ctx = getAudioCtx();
   const now = ctx.currentTime;
 
-  function tone(f,o){
+  function tone(f, o){
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
 
-    osc.type="square";
-    osc.frequency.value=f;
+    osc.type = "square";
+    osc.frequency.value = f;
 
-    gain.gain.setValueAtTime(0.0001, now+o);
-    gain.gain.exponentialRampToValueAtTime(0.3, now+o+0.01);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now+o+0.12);
+    gain.gain.setValueAtTime(0.0001, now + o);
+    gain.gain.exponentialRampToValueAtTime(0.3, now + o + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + o + 0.12);
 
     osc.connect(gain);
     gain.connect(ctx.destination);
 
-    osc.start(now+o);
-    osc.stop(now+o+0.2);
+    osc.start(now + o);
+    osc.stop(now + o + 0.2);
   }
 
-  tone(f1,0);
-  tone(f2,0.12);
+  tone(f1, 0);
+  tone(f2, 0.12);
 }
 
-/* TIMER */
-function format(ms){
-  const cs=Math.floor(ms/10)%100;
-  const s=Math.floor(ms/1000)%60;
-  const m=Math.floor(ms/60000);
+function formatTime(ms){
+  const cs = Math.floor(ms/10)%100;
+  const s = Math.floor(ms/1000)%60;
+  const m = Math.floor(ms/60000);
   return `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}.${String(cs).padStart(2,"0")}`;
 }
 
-function tick(){
-  if(!running) return;
-  const now = performance.now();
-  display.textContent = format(elapsed + (now - startTime));
-  raf = requestAnimationFrame(tick);
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
 }
 
-/* 🔥 TOGGLE START / STOP */
-btnMain.onclick = () => {
+/* =========================================================
+   CRONOMETRO TRADIZIONALE — LOGICA INVARIATA
+========================================================= */
+(function(){
+  let startTime = 0;
+  let elapsed = 0;
+  let running = false;
+  let raf;
 
-  getAudio().resume?.();
+  const display = document.getElementById("display");
+  const btnMain = document.getElementById("btn-main");
+  const btnReset = document.getElementById("btn-reset");
+  const btnHide = document.getElementById("btn-hide");
 
-  if(!running){
-    // START
-    beep(660,880);
-
-    running = true;
-    startTime = performance.now();
+  function tick(){
+    if(!running) return;
+    const now = performance.now();
+    display.textContent = formatTime(elapsed + (now - startTime));
     raf = requestAnimationFrame(tick);
+  }
 
-    btnMain.textContent = "STOP";
-    btnMain.classList.add("stop");
+  btnMain.onclick = () => {
+    getAudioCtx().resume?.();
 
-  } else {
-    // STOP
-    beep(880,550);
+    if(!running){
+      playBeep(660,880);
+      running = true;
+      startTime = performance.now();
+      raf = requestAnimationFrame(tick);
+      btnMain.textContent = "STOP";
+      btnMain.classList.add("stop");
+    } else {
+      playBeep(880,550);
+      running = false;
+      elapsed += performance.now() - startTime;
+      cancelAnimationFrame(raf);
+      btnMain.textContent = "START";
+      btnMain.classList.remove("stop");
+    }
+  };
 
+  btnReset.onclick = () => {
     running = false;
-    elapsed += performance.now() - startTime;
+    elapsed = 0;
+    display.textContent = "00:00.00";
     cancelAnimationFrame(raf);
-
     btnMain.textContent = "START";
     btnMain.classList.remove("stop");
+  };
+
+  btnHide.onclick = () => {
+    display.classList.toggle("hidden");
+  };
+})();
+
+/* =========================================================
+   SESSIONE / LOGIN
+========================================================= */
+let currentUser = null;
+let playerListeners = [];
+let adminListeners = [];
+
+function detachListeners(arr){
+  arr.forEach(({ref, event, cb}) => ref.off(event, cb));
+  arr.length = 0;
+}
+
+const nameRegex = /^[a-zA-Z0-9 _-]{1,20}$/;
+
+document.getElementById('form-player-login').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const errEl = document.getElementById('player-login-error');
+  errEl.textContent = '';
+  const name = document.getElementById('input-username').value.trim();
+
+  if(!name){ errEl.textContent = 'Inserisci un nome utente.'; return; }
+  if(name.toLowerCase() === 'admin'){ errEl.textContent = 'Questo nome non è disponibile.'; return; }
+  if(!nameRegex.test(name)){ errEl.textContent = 'Usa solo lettere, numeri, spazi, - o _ (max 20 caratteri).'; return; }
+
+  currentUser = {role:'player', username:name};
+  sessionStorage.setItem('cronoUser', JSON.stringify(currentUser));
+  enterPlayerView(name);
+});
+
+document.getElementById('player-logout').onclick = (e) => {
+  e.preventDefault();
+  detachListeners(playerListeners);
+  sessionStorage.removeItem('cronoUser');
+  currentUser = null;
+  showView('view-home');
+};
+
+document.getElementById('form-admin-login').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const errEl = document.getElementById('admin-login-error');
+  errEl.textContent = '';
+  const u = document.getElementById('input-admin-user').value.trim();
+  const p = document.getElementById('input-admin-pass').value;
+
+  if(u === 'admin' && p === 'admin'){
+    currentUser = {role:'admin'};
+    sessionStorage.setItem('cronoUser', JSON.stringify(currentUser));
+    enterAdminView();
+  } else {
+    errEl.textContent = 'Credenziali non valide.';
+  }
+});
+
+document.getElementById('admin-logout').onclick = (e) => {
+  e.preventDefault();
+  detachListeners(adminListeners);
+  sessionStorage.removeItem('cronoUser');
+  currentUser = null;
+  showView('view-home');
+};
+
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = sessionStorage.getItem('cronoUser');
+  if(saved){
+    try {
+      currentUser = JSON.parse(saved);
+      if(currentUser.role === 'player'){ enterPlayerView(currentUser.username); }
+      else if(currentUser.role === 'admin'){ enterAdminView(); }
+    } catch(e){ sessionStorage.removeItem('cronoUser'); }
+  }
+});
+
+/* =========================================================
+   CLASSIFICA — render condiviso (player mini-list)
+========================================================= */
+function renderLeaderboard(data, containerId){
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  const entries = Object.entries(data || {}).map(([username, v]) => ({
+    username, points: v.points || 0
+  })).sort((a,b) => b.points - a.points);
+
+  if(entries.length === 0){
+    el.innerHTML = '<p class="empty-hint">Nessun punteggio ancora.</p>';
+    return;
+  }
+
+  el.innerHTML = entries.map((e,i) => `
+    <div class="lb-row">
+      <span class="lb-rank">${i+1}</span>
+      <span class="lb-name">${escapeHtml(e.username)}</span>
+      <span class="lb-points">${e.points} pt</span>
+    </div>
+  `).join('');
+}
+
+/* =========================================================
+   GIOCO — VISTA GIOCATORE
+========================================================= */
+let pStartTime = 0;
+let pElapsed = 0;
+let pRunning = false;
+let pHasSubmitted = false;
+let pCurrentRoundId = null;
+let pRoundIdAtStart = null;
+
+const displayPlayer = document.getElementById('display-player');
+const btnMainPlayer = document.getElementById('btn-main-player');
+const roundLabel = document.getElementById('player-round-label');
+const resultCard = document.getElementById('player-result-card');
+
+btnMainPlayer.onclick = () => {
+  if(btnMainPlayer.disabled) return;
+  getAudioCtx().resume?.();
+
+  if(!pRunning){
+    playBeep(660,880);
+    pRunning = true;
+    pStartTime = performance.now();
+    pRoundIdAtStart = pCurrentRoundId;
+    btnMainPlayer.textContent = "STOP";
+    btnMainPlayer.classList.add("stop");
+  } else {
+    playBeep(880,550);
+    pRunning = false;
+    pElapsed += performance.now() - pStartTime;
+    btnMainPlayer.textContent = "INVIATO";
+    btnMainPlayer.classList.remove("stop");
+    btnMainPlayer.disabled = true;
+    displayPlayer.textContent = formatTime(pElapsed);
+    displayPlayer.classList.remove('hidden');
+    submitPlayerTime(pElapsed, pRoundIdAtStart);
   }
 };
 
-/* RESET */
-btnReset.onclick = () => {
-  running = false;
-  elapsed = 0;
-  display.textContent = "00:00.00";
-  cancelAnimationFrame(raf);
+function submitPlayerTime(ms, roundId){
+  if(!roundId || pHasSubmitted) return;
+  pHasSubmitted = true;
+  db.ref(`game/rounds/${roundId}/submissions/${currentUser.username}`).set({
+    timeMs: ms,
+    timeFormatted: formatTime(ms),
+    submittedAt: Date.now()
+  }).catch(err => {
+    alert("Errore durante l'invio del tempo: " + err.message);
+  });
+}
 
-  btnMain.textContent = "START";
-  btnMain.classList.remove("stop");
+function resetPlayerStopwatch(){
+  pStartTime = 0; pElapsed = 0; pRunning = false; pHasSubmitted = false;
+  displayPlayer.textContent = '••:••.••';
+  displayPlayer.classList.add('hidden');
+  btnMainPlayer.textContent = 'START';
+  btnMainPlayer.classList.remove('stop');
+  btnMainPlayer.disabled = false;
+}
+
+function enterPlayerView(username){
+  showView('view-player');
+  document.getElementById('player-name-label').textContent = username;
+  detachListeners(playerListeners);
+  resultCard.style.display = 'none';
+  pCurrentRoundId = null;
+
+  const curRoundRef = db.ref('game/currentRoundId');
+  const cb = (snap) => handlePlayerRoundChange(snap.val(), username);
+  curRoundRef.on('value', cb);
+  playerListeners.push({ref:curRoundRef, event:'value', cb});
+
+  const lbRef = db.ref('game/leaderboard');
+  const lbCb = (snap) => renderLeaderboard(snap.val(), 'player-leaderboard-list');
+  lbRef.on('value', lbCb);
+  playerListeners.push({ref:lbRef, event:'value', cb:lbCb});
+}
+
+let pRoundDataRef = null, pRoundDataCb = null;
+
+function handlePlayerRoundChange(roundId, username){
+  if(pRoundDataRef){
+    pRoundDataRef.off('value', pRoundDataCb);
+    pRoundDataRef = null;
+  }
+
+  if(!roundId){
+    pCurrentRoundId = null;
+    roundLabel.textContent = "🎯 In attesa che l'admin avvii un round";
+    resultCard.style.display = 'none';
+    resetPlayerStopwatch();
+    btnMainPlayer.disabled = true;
+    btnMainPlayer.textContent = 'ATTENDI';
+    return;
+  }
+
+  if(roundId !== pCurrentRoundId){
+    pCurrentRoundId = roundId;
+    resetPlayerStopwatch();
+    btnMainPlayer.disabled = true;
+    btnMainPlayer.textContent = 'ATTENDI';
+  }
+
+  const roundRef = db.ref(`game/rounds/${roundId}`);
+  const cb = (snap) => renderPlayerRound(snap.val(), username);
+  roundRef.on('value', cb);
+  pRoundDataRef = roundRef;
+  pRoundDataCb = cb;
+  playerListeners.push({ref:roundRef, event:'value', cb});
+}
+
+function renderPlayerRound(round, username){
+  if(!round) return;
+  const mySub = round.submissions && round.submissions[username];
+
+  if(round.status === 'open'){
+    if(mySub){
+      roundLabel.textContent = `🎯 Round #${round.number} — tempo inviato`;
+      btnMainPlayer.disabled = true;
+      btnMainPlayer.textContent = 'INVIATO';
+      displayPlayer.textContent = mySub.timeFormatted;
+      displayPlayer.classList.remove('hidden');
+      resultCard.style.display = 'block';
+      resultCard.innerHTML = `<p>Hai inviato <strong>${mySub.timeFormatted}</strong>. In attesa che l'admin chiuda il round...</p>`;
+    } else {
+      roundLabel.textContent = `🎯 Round #${round.number} — premi START, poi STOP quando pensi sia il momento giusto`;
+      resultCard.style.display = 'none';
+      if(!pRunning && !pHasSubmitted){
+        btnMainPlayer.disabled = false;
+        btnMainPlayer.textContent = 'START';
+      }
+    }
+  } else if(round.status === 'closed'){
+    roundLabel.textContent = `🏁 Round #${round.number} — chiuso`;
+    btnMainPlayer.disabled = true;
+    btnMainPlayer.textContent = 'ROUND CHIUSO';
+
+    if(mySub){
+      displayPlayer.textContent = mySub.timeFormatted;
+      displayPlayer.classList.remove('hidden');
+      const diffSec = ((mySub.diff || 0) / 1000).toFixed(2);
+      const pts = mySub.points || 0;
+      resultCard.style.display = 'block';
+      resultCard.innerHTML = `
+        <p>Tempo segreto: <strong>${round.targetFormatted}</strong></p>
+        <p>Il tuo tempo: <strong>${mySub.timeFormatted}</strong></p>
+        <p>Scarto: <strong>${diffSec}s</strong></p>
+        <p class="points-line">${pts > 0 ? `🎉 Hai guadagnato ${pts} ${pts === 1 ? 'punto' : 'punti'}!` : 'Nessun punto questo round.'}</p>`;
+    } else {
+      resultCard.style.display = 'block';
+      resultCard.innerHTML = `<p>Non hai partecipato a questo round. Il tempo segreto era <strong>${round.targetFormatted}</strong>.</p>`;
+    }
+  }
+}
+
+/* =========================================================
+   GIOCO — VISTA ADMIN
+========================================================= */
+let aCurrentRoundId = null;
+let aRoundDataRef = null, aRoundDataCb = null;
+let aKnownSubUsernames = new Set();
+
+function enterAdminView(){
+  showView('view-admin');
+  detachListeners(adminListeners);
+  aKnownSubUsernames = new Set();
+  aCurrentRoundId = null;
+
+  const curRoundRef = db.ref('game/currentRoundId');
+  const cb = (snap) => handleAdminRoundChange(snap.val());
+  curRoundRef.on('value', cb);
+  adminListeners.push({ref:curRoundRef, event:'value', cb});
+
+  const lbRef = db.ref('game/leaderboard');
+  const lbCb = (snap) => renderAdminLeaderboardTable(snap.val());
+  lbRef.on('value', lbCb);
+  adminListeners.push({ref:lbRef, event:'value', cb:lbCb});
+
+  const histRef = db.ref('game/rounds');
+  const histCb = (snap) => renderAdminHistory(snap.val());
+  histRef.on('value', histCb);
+  adminListeners.push({ref:histRef, event:'value', cb:histCb});
+}
+
+function handleAdminRoundChange(roundId){
+  if(aRoundDataRef){
+    aRoundDataRef.off('value', aRoundDataCb);
+    aRoundDataRef = null;
+  }
+  aCurrentRoundId = roundId;
+  aKnownSubUsernames = new Set();
+
+  const statusEl = document.getElementById('admin-round-status');
+  const newRoundForm = document.getElementById('admin-new-round-form');
+  const closeBtn = document.getElementById('btn-close-round');
+
+  if(!roundId){
+    statusEl.innerHTML = '<p class="hint">Nessun round attivo.</p>';
+    newRoundForm.style.display = 'block';
+    closeBtn.style.display = 'none';
+    document.querySelector('#admin-submissions-table tbody').innerHTML = '';
+    document.getElementById('admin-no-subs').style.display = 'block';
+    return;
+  }
+
+  const roundRef = db.ref(`game/rounds/${roundId}`);
+  const cb = (snap) => renderAdminRound(snap.val());
+  roundRef.on('value', cb);
+  aRoundDataRef = roundRef;
+  aRoundDataCb = cb;
+}
+
+function renderAdminRound(round){
+  if(!round) return;
+  const statusEl = document.getElementById('admin-round-status');
+  const newRoundForm = document.getElementById('admin-new-round-form');
+  const closeBtn = document.getElementById('btn-close-round');
+  const tbody = document.querySelector('#admin-submissions-table tbody');
+  const noSubs = document.getElementById('admin-no-subs');
+
+  const subs = round.submissions || {};
+  const usernames = Object.keys(subs);
+
+  statusEl.innerHTML = `
+    <p>Round <strong>#${round.number}</strong> — tempo segreto <strong>${round.targetFormatted}</strong></p>
+    <p class="hint">Stato: ${round.status === 'open' ? '🟢 Aperto' : '🔴 Chiuso'} · ${usernames.length} ${usernames.length === 1 ? 'risposta' : 'risposte'}</p>
+  `;
+
+  if(round.status === 'open'){
+    newRoundForm.style.display = 'none';
+    closeBtn.style.display = 'block';
+  } else {
+    newRoundForm.style.display = 'block';
+    closeBtn.style.display = 'none';
+  }
+
+  if(usernames.length === 0){
+    tbody.innerHTML = '';
+    noSubs.style.display = 'block';
+    return;
+  }
+  noSubs.style.display = 'none';
+
+  const rows = usernames.map(u => {
+    const s = subs[u];
+    const diff = round.status === 'closed' ? (s.diff || 0) : Math.abs(s.timeMs - round.target);
+    const pts = round.status === 'closed' ? (s.points || 0) : null;
+    return {username:u, timeFormatted:s.timeFormatted, diff, pts};
+  }).sort((a,b) => a.diff - b.diff);
+
+  tbody.innerHTML = rows.map(r => {
+    const isNew = !aKnownSubUsernames.has(r.username);
+    return `<tr class="${isNew ? 'pulse' : ''}">
+      <td>${escapeHtml(r.username)}</td>
+      <td>${r.timeFormatted}</td>
+      <td>${(r.diff/1000).toFixed(2)}s</td>
+      <td>${r.pts === null ? '—' : r.pts + ' pt'}</td>
+    </tr>`;
+  }).join('');
+
+  usernames.forEach(u => aKnownSubUsernames.add(u));
+}
+
+document.getElementById('btn-start-round').onclick = async () => {
+  let min = Math.max(0, Math.min(59, parseInt(document.getElementById('nr-min').value) || 0));
+  let sec = Math.max(0, Math.min(59, parseInt(document.getElementById('nr-sec').value) || 0));
+  let cs  = Math.max(0, Math.min(99, parseInt(document.getElementById('nr-cs').value)  || 0));
+
+  if(min === 0 && sec === 0 && cs === 0){
+    alert('Imposta un tempo segreto valido.');
+    return;
+  }
+
+  const targetMs = (min*60 + sec) * 1000 + cs * 10;
+  const targetFormatted = formatTime(targetMs);
+
+  try {
+    const counterResult = await db.ref('game/roundCounter').transaction(cur => (cur || 0) + 1);
+    const roundNumber = counterResult.snapshot.val();
+
+    const roundRef = db.ref('game/rounds').push();
+    await roundRef.set({
+      number: roundNumber,
+      target: targetMs,
+      targetFormatted,
+      status: 'open',
+      createdAt: Date.now(),
+      closedAt: null
+    });
+    await db.ref('game/currentRoundId').set(roundRef.key);
+
+    document.getElementById('nr-min').value = '';
+    document.getElementById('nr-sec').value = '';
+    document.getElementById('nr-cs').value = '';
+  } catch(err){
+    alert("Errore nell'avvio del round: " + err.message);
+  }
 };
 
-/* HIDE */
-btnHide.onclick = () => {
-  display.classList.toggle("hidden");
+document.getElementById('btn-close-round').onclick = async () => {
+  if(!aCurrentRoundId) return;
+  const closeBtn = document.getElementById('btn-close-round');
+  closeBtn.disabled = true;
+
+  try {
+    const snap = await db.ref(`game/rounds/${aCurrentRoundId}`).once('value');
+    const round = snap.val();
+    if(!round || round.status !== 'open'){ closeBtn.disabled = false; return; }
+
+    const target = round.target;
+    const subs = round.submissions || {};
+    const usernames = Object.keys(subs);
+
+    const updates = {};
+    updates[`game/rounds/${aCurrentRoundId}/status`] = 'closed';
+    updates[`game/rounds/${aCurrentRoundId}/closedAt`] = Date.now();
+
+    let winners = {};
+    if(usernames.length > 0){
+      const diffs = {};
+      usernames.forEach(u => { diffs[u] = Math.abs(subs[u].timeMs - target); });
+
+      const exactUsers = usernames.filter(u => diffs[u] === 0);
+      if(exactUsers.length > 0){
+        exactUsers.forEach(u => winners[u] = 3);
+      } else {
+        const minDiff = Math.min(...usernames.map(u => diffs[u]));
+        usernames.filter(u => diffs[u] === minDiff).forEach(u => winners[u] = 1);
+      }
+
+      usernames.forEach(u => {
+        updates[`game/rounds/${aCurrentRoundId}/submissions/${u}/diff`] = diffs[u];
+        updates[`game/rounds/${aCurrentRoundId}/submissions/${u}/points`] = winners[u] || 0;
+      });
+    }
+
+    await db.ref().update(updates);
+
+    for(const u of usernames){
+      await db.ref(`game/leaderboard/${u}/points`).transaction(cur => (cur || 0) + (winners[u] || 0));
+      await db.ref(`game/leaderboard/${u}/roundsPlayed`).transaction(cur => (cur || 0) + 1);
+    }
+  } catch(err){
+    alert('Errore nella chiusura del round: ' + err.message);
+  } finally {
+    closeBtn.disabled = false;
+  }
 };
+
+function renderAdminLeaderboardTable(data){
+  const tbody = document.querySelector('#admin-leaderboard-table tbody');
+  const entries = Object.entries(data || {}).map(([username, v]) => ({
+    username, points: v.points || 0, roundsPlayed: v.roundsPlayed || 0
+  })).sort((a,b) => b.points - a.points);
+
+  if(entries.length === 0){
+    tbody.innerHTML = '<tr><td colspan="4" class="empty-hint">Nessun punteggio ancora.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = entries.map((e,i) => `
+    <tr>
+      <td>${i+1}</td>
+      <td>${escapeHtml(e.username)}</td>
+      <td>${e.points} pt</td>
+      <td>${e.roundsPlayed}</td>
+    </tr>`).join('');
+}
+
+function renderAdminHistory(data){
+  const el = document.getElementById('admin-history-list');
+  if(!data){
+    el.innerHTML = '<p class="empty-hint">Nessun round ancora.</p>';
+    return;
+  }
+  const rounds = Object.values(data).sort((a,b) => b.createdAt - a.createdAt);
+  el.innerHTML = rounds.map(r => {
+    const subs = r.submissions || {};
+    const count = Object.keys(subs).length;
+    return `<div class="history-row">
+      <span>#${r.number}</span>
+      <span>${r.targetFormatted}</span>
+      <span>${r.status === 'open' ? '🟢' : '🔴'}</span>
+      <span>${count} risposte</span>
+    </div>`;
+  }).join('');
+}
 </script>
 
 </body>
