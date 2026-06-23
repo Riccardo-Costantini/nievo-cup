@@ -805,12 +805,21 @@
                 const sh = toArray(r.scorersHome);
                 const sa = toArray(r.scorersAway);
                 const status = r.status || 'In programma';
+
+                // Controlla se l'ordine visivo è invertito rispetto ai dati Firebase.
+                // Firebase chiama "home" la prima squadra e "away" la seconda;
+                // se nel VISUAL_ORDER le abbiamo messe al contrario, invertiamo i goal.
+                const fbHomeName = m.home?.name || '';
+                const visualMatchesFb = homeName.toLowerCase() === fbHomeName.toLowerCase();
+                const homeGoals = visualMatchesFb ? sh.length : sa.length;
+                const awayGoals = visualMatchesFb ? sa.length : sh.length;
+
                 return {
                     id,
                     home: homeName,
                     away: awayName,
-                    homeGoals: sh.length,
-                    awayGoals: sa.length,
+                    homeGoals,
+                    awayGoals,
                     status,
                     rawHome: m.home?.name || homeName,
                     rawAway: m.away?.name || awayName,
