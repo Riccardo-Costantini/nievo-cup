@@ -57,55 +57,7 @@
             }
         }
 
-        /* ---- HEADER ---- */
-        .header {
-            display: flex;
-            align-items: center;
-            justify-content: space-evenly;
-            width: 100%;
-            background: transparent;
-            padding: 1rem 1rem 0.5rem 1rem;
-            gap: 0.8rem;
-            position: relative;
-            z-index: 10;
-        }
-
-        .logo img {
-            height: 8vw;
-        }
-        .menu {
-            display: flex;
-            gap: 2rem;
-        }
-        .voce {
-            white-space: nowrap;
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 2.8dvw;
-            letter-spacing: 0.1em;
-            color: var(--text);
-            line-height: 1;
-        }
-        .voce a p {
-            margin: 0;
-            padding: 12px;
-            color: #ffffff;
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 8px;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .voce:hover a p,
-        .voce a:active p {
-            background: rgba(255, 255, 255, 0.12);
-            border-color: rgba(255, 255, 255, 0.35);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 10px rgba(255, 255, 255, 0.1);
-            transform: translateY(-1px);
-        }
-        .menu {
-            gap: 14px;
-        }
+    
 
         /* ---- PAGE TITLE ---- */
         .page-hero {
@@ -441,26 +393,6 @@
         }
 
         @media (max-width: 700px) {
-            .header {
-                flex-direction: column;
-                padding: 0.5rem 0.5rem 0.3rem;
-                gap: 0.3rem;
-            }
-            .logo img {
-                height: 12vw;
-            }
-            .menu {
-                gap: 0.5rem;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-            .voce {
-                font-size: 3.2dvw;
-            }
-            .voce a p {
-                padding: 6px 10px;
-                font-size: 2.8dvw;
-            }
 
             .bracket {
                 min-width: 720px;
