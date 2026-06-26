@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz di Cultura Generale</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0f0f13;
+    --surface:   #1a1a24;
+    --border:    #2a2a3a;
+    --accent:    #7c6ef5;
+    --accent2:   #b5abff;
+    --text:      #e8e8f0;
+    --muted:     #7a7a9a;
+    --answer-bg: #1c1c2e;
+    --answer-border: #4a40b8;
+    --gold:      #f5c842;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding-bottom: 4rem;
+  }
+
+  /* ── HERO ── */
+  header {
+    background: linear-gradient(160deg, #1a1230 0%, #0f0f13 60%);
+    border-bottom: 1px solid var(--border);
+    padding: 3.5rem 1.5rem 3rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(124,110,245,.18) 0%, transparent 70%);
+    top: -200px; left: 50%; transform: translateX(-50%);
+    pointer-events: none;
+  }
+  .hero-label {
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 1rem;
+  }
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 6vw, 3.8rem);
+    font-weight: 800;
+    line-height: 1.05;
+    color: #fff;
+    letter-spacing: -.02em;
+  }
+  h1 span { color: var(--accent); }
+  .hero-sub {
+    margin-top: .9rem;
+    color: var(--muted);
+    font-size: .95rem;
+    max-width: 500px;
+    margin-inline: auto;
+  }
+  .counter-row {
+    display: flex;
+    justify-content: center;
+    gap: 2.5rem;
+    margin-top: 2rem;
+  }
+  .counter-item { text-align: center; }
+  .counter-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--accent2);
+    line-height: 1;
+  }
+  .counter-label {
+    font-size: .72rem;
+    color: var(--muted);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    margin-top: .25rem;
+  }
+
+  /* ── FILTER BAR ── */
+  .filter-bar {
+    display: flex;
+    gap: .5rem;
+    padding: 1rem 1.5rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: rgba(15,15,19,.92);
+    backdrop-filter: blur(12px);
+    align-items: center;
+  }
+  .filter-bar::-webkit-scrollbar { display: none; }
+  .filter-btn {
+    flex-shrink: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: .4rem .9rem;
+    border-radius: 999px;
+    font-size: .8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .2s;
+    white-space: nowrap;
+    font-family: 'Inter', sans-serif;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  /* ── VIEW TOGGLE ── */
+  .view-toggle {
+    margin-left: auto;
+    flex-shrink: 0;
+    display: flex;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .view-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    padding: .4rem .8rem;
+    font-size: .78rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    font-family: 'Inter', sans-serif;
+    transition: all .2s;
+    white-space: nowrap;
+  }
+  .view-btn.active {
+    background: var(--accent);
+    color: #fff;
+    border-radius: 999px;
+  }
+  .view-btn:hover:not(.active) { color: var(--text); }
+
+  /* ── GRID ── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+    gap: 1rem;
+    padding: 1.5rem;
+    max-width: 1200px;
+    margin-inline: auto;
+  }
+
+  /* ── CARD (grid mode) ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: transform .2s, border-color .2s, box-shadow .2s;
+  }
+  .card:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent);
+    box-shadow: 0 8px 32px rgba(124,110,245,.15);
+  }
+  .card-header {
+    padding: 1.1rem 1.2rem .9rem;
+    display: flex;
+    gap: .75rem;
+    align-items: flex-start;
+  }
+  .q-num {
+    flex-shrink: 0;
+    font-family: 'Syne', sans-serif;
+    font-size: .75rem;
+    font-weight: 800;
+    color: var(--accent2);
+    background: rgba(124,110,245,.12);
+    border-radius: 6px;
+    padding: .2rem .45rem;
+    line-height: 1.4;
+    letter-spacing: .04em;
+    margin-top: .1rem;
+  }
+  .q-cat {
+    font-size: .68rem;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: .35rem;
+  }
+  .q-text {
+    font-size: .93rem;
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--text);
+  }
+  .reveal-btn {
+    width: calc(100% - 2.4rem);
+    margin: 0 1.2rem 1.2rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--accent2);
+    padding: .6rem 1rem;
+    border-radius: 8px;
+    font-size: .82rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    transition: all .2s;
+    font-family: 'Inter', sans-serif;
+  }
+  .reveal-btn:hover {
+    background: rgba(124,110,245,.1);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .35s ease, opacity .3s ease;
+    opacity: 0;
+  }
+  .answer.visible {
+    max-height: 200px;
+    opacity: 1;
+  }
+  .answer-inner {
+    margin: 0 1.2rem 1.2rem;
+    background: var(--answer-bg);
+    border: 1px solid var(--answer-border);
+    border-radius: 8px;
+    padding: .75rem 1rem;
+    font-size: .88rem;
+    line-height: 1.55;
+    color: var(--accent2);
+  }
+  .answer-inner strong {
+    display: block;
+    font-size: .68rem;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    color: var(--gold);
+    margin-bottom: .35rem;
+  }
+
+  /* ═══════════════════════════════
+     ── SINGLE / RANDOM MODE ──
+  ═══════════════════════════════ */
+  #single-view {
+    display: none;
+    padding: 2rem 1.5rem;
+    max-width: 680px;
+    margin-inline: auto;
+  }
+
+  /* progress bar */
+  .sq-progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    margin-bottom: 1.8rem;
+  }
+  .sq-progress-bar {
+    flex: 1;
+    height: 4px;
+    background: var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .sq-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 999px;
+    transition: width .4s ease;
+  }
+  .sq-progress-label {
+    font-size: .75rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  /* big card */
+  .sq-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    overflow: hidden;
+    position: relative;
+  }
+  .sq-card-top {
+    padding: 2rem 2rem 1.5rem;
+  }
+  .sq-meta {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    margin-bottom: 1.4rem;
+  }
+  .sq-cat-badge {
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    background: rgba(245,200,66,.1);
+    border: 1px solid rgba(245,200,66,.2);
+    padding: .25rem .65rem;
+    border-radius: 999px;
+  }
+  .sq-num-badge {
+    font-size: .68rem;
+    font-weight: 600;
+    color: var(--muted);
+  }
+  .sq-question {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.2rem, 3vw, 1.65rem);
+    font-weight: 700;
+    line-height: 1.3;
+    color: #fff;
+  }
+
+  /* answer panel inside big card */
+  .sq-answer-panel {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .4s ease, opacity .35s ease;
+    opacity: 0;
+  }
+  .sq-answer-panel.visible {
+    max-height: 300px;
+    opacity: 1;
+  }
+  .sq-answer-inner {
+    margin: 0 2rem 1.5rem;
+    background: var(--answer-bg);
+    border: 1px solid var(--answer-border);
+    border-radius: 10px;
+    padding: 1rem 1.2rem;
+    font-size: .95rem;
+    line-height: 1.6;
+    color: var(--accent2);
+  }
+  .sq-answer-label {
+    display: block;
+    font-size: .65rem;
+    text-transform: uppercase;
+    letter-spacing: .14em;
+    color: var(--gold);
+    font-weight: 700;
+    margin-bottom: .5rem;
+  }
+
+  /* action buttons */
+  .sq-actions {
+    display: flex;
+    gap: .75rem;
+    padding: 1.2rem 2rem 2rem;
+    flex-wrap: wrap;
+  }
+  .sq-btn {
+    flex: 1;
+    min-width: 130px;
+    padding: .75rem 1.2rem;
+    border-radius: 10px;
+    font-size: .88rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    transition: all .2s;
+    font-family: 'Inter', sans-serif;
+    border: none;
+  }
+  .sq-btn-reveal {
+    background: var(--accent);
+    color: #fff;
+  }
+  .sq-btn-reveal:hover { background: #6a5de0; }
+  .sq-btn-reveal:disabled {
+    background: var(--border);
+    color: var(--muted);
+    cursor: default;
+  }
+  .sq-btn-next {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .sq-btn-next:hover {
+    background: var(--border);
+    border-color: var(--accent);
+    color: var(--accent2);
+  }
+
+  /* seen chips */
+  .sq-seen-row {
+    margin-top: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    flex-wrap: wrap;
+  }
+  .sq-seen-label {
+    font-size: .72rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .1em;
+  }
+  .sq-seen-chips {
+    display: flex;
+    gap: .35rem;
+    flex-wrap: wrap;
+  }
+  .chip {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: background .3s;
+  }
+  .chip.seen { background: var(--accent); }
+  .chip.current {
+    background: var(--gold);
+    box-shadow: 0 0 6px rgba(245,200,66,.5);
+  }
+
+  /* all-done state */
+  .sq-done {
+    text-align: center;
+    padding: 3rem 2rem;
+  }
+  .sq-done-icon { font-size: 3rem; margin-bottom: 1rem; }
+  .sq-done h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: .5rem;
+  }
+  .sq-done p { color: var(--muted); font-size: .9rem; margin-bottom: 1.5rem; }
+  .sq-done-btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: .75rem 2rem;
+    border-radius: 10px;
+    font-size: .9rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: background .2s;
+  }
+  .sq-done-btn:hover { background: #6a5de0; }
+
+  /* ── PROGRESS TOAST ── */
+  #progress-toast {
+    position: fixed;
+    bottom: 1.5rem; right: 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: .7rem 1.1rem;
+    font-size: .82rem;
+    color: var(--muted);
+    display: none;
+    align-items: center;
+    gap: .6rem;
+    z-index: 100;
+    box-shadow: 0 8px 32px rgba(0,0,0,.4);
+  }
+  #progress-toast.show { display: flex; }
+  .toast-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+
+  /* card flip animation */
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .sq-card { animation: fadeSlideIn .35s ease both; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card, .answer, .sq-answer-panel, .sq-card { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <p class="hero-label">Quiz interattivo</p>
+  <h1>Cultura<br><span>Generale</span></h1>
+  <p class="hero-sub">Metti alla prova la tua conoscenza su storia, scienza, arte, geografia e molto altro.</p>
+  <div class="counter-row">
+    <div class="counter-item"><div class="counter-num">100</div><div class="counter-label">Domande</div></div>
+    <div class="counter-item"><div class="counter-num" id="score">0</div><div class="counter-label">Risposte viste</div></div>
+    <div class="counter-item"><div class="counter-num">7</div><div class="counter-label">Categorie</div></div>
+  </div>
+</header>
+
+<div class="filter-bar">
+  <button class="filter-btn active" onclick="setCategory('all', this)">Tutte</button>
+  <button class="filter-btn" onclick="setCategory('Storia', this)">🏛 Storia</button>
+  <button class="filter-btn" onclick="setCategory('Scienza', this)">🔬 Scienza</button>
+  <button class="filter-btn" onclick="setCategory('Geografia', this)">🌍 Geografia</button>
+  <button class="filter-btn" onclick="setCategory('Arte e Cultura', this)">🎨 Arte & Cultura</button>
+  <button class="filter-btn" onclick="setCategory('Letteratura', this)">📚 Letteratura</button>
+  <button class="filter-btn" onclick="setCategory('Sport', this)">⚽ Sport</button>
+  <button class="filter-btn" onclick="setCategory('Musica', this)">🎵 Musica</button>
+
+  <div class="view-toggle">
+    <button class="view-btn active" id="btn-grid" onclick="setView('grid')">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Griglia
+    </button>
+    <button class="view-btn" id="btn-single" onclick="setView('single')">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+      Una per volta
+    </button>
+  </div>
+</div>
+
+<!-- GRID VIEW -->
+<div class="grid" id="grid"></div>
+
+<!-- SINGLE VIEW -->
+<div id="single-view">
+  <div class="sq-progress-wrap">
+    <div class="sq-progress-bar"><div class="sq-progress-fill" id="sq-progress-fill"></div></div>
+    <span class="sq-progress-label" id="sq-progress-label">0 / 0</span>
+  </div>
+
+  <div class="sq-card" id="sq-card">
+    <!-- filled by JS -->
+  </div>
+
+  <div class="sq-seen-row" id="sq-seen-row">
+    <span class="sq-seen-label">Progresso</span>
+    <div class="sq-seen-chips" id="sq-seen-chips"></div>
+  </div>
+</div>
+
+<div id="progress-toast">
+  <div class="toast-dot"></div>
+  <span id="toast-text"></span>
+</div>
+
+<script>
+/* ═══════════════════ DATA ═══════════════════ */
+const questions = [
+  // STORIA
+  { cat: "Storia", q: "In che anno cadde l'Impero Romano d'Occidente?", a: "Nel 476 d.C., quando Romolo Augustolo fu deposto da Odoacre." },
+  { cat: "Storia", q: "Chi fu il primo imperatore di Roma?", a: "Augusto (Ottaviano), che regnò dal 27 a.C. al 14 d.C." },
+  { cat: "Storia", q: "In quale anno iniziò la Prima Guerra Mondiale?", a: "Nel 1914, con l'assassinio dell'Arciduca Francesco Ferdinando a Sarajevo." },
+  { cat: "Storia", q: "Chi era Napoleone Bonaparte?", a: "Generale e imperatore francese (1769–1821), fondamentale nella storia europea moderna." },
+  { cat: "Storia", q: "Cosa fu la Rivoluzione Francese?", a: "Un periodo di radicale trasformazione politica e sociale in Francia tra il 1789 e il 1799." },
+  { cat: "Storia", q: "In che anno fu firmata la Magna Carta?", a: "Nel 1215, in Inghilterra, dal re Giovanni Senzaterra." },
+  { cat: "Storia", q: "Chi scoprì l'America nel 1492?", a: "Cristoforo Colombo, navigatore genovese al servizio della Spagna." },
+  { cat: "Storia", q: "Cosa fu l'Olocausto?", a: "Il genocidio di circa 6 milioni di ebrei e milioni di altri perseguitati dal regime nazista durante la Seconda Guerra Mondiale." },
+  { cat: "Storia", q: "Quando fu costruita la muraglia cinese?", a: "La costruzione iniziò nel VII sec. a.C. e continuò per secoli; la sezione più nota risale alla dinastia Ming (XIV–XVII sec.)." },
+  { cat: "Storia", q: "Chi fu Giulio Cesare?", a: "General e statista romano (100–44 a.C.), figura centrale nella transizione dalla Repubblica all'Impero." },
+  { cat: "Storia", q: "In quale anno terminò la Seconda Guerra Mondiale?", a: "Nel 1945: la Germania si arrese l'8 maggio, il Giappone il 2 settembre." },
+  { cat: "Storia", q: "Cosa fu la Rivoluzione Industriale?", a: "Una trasformazione economica e tecnologica iniziata in Gran Bretagna nel XVIII sec., basata sulla meccanizzazione della produzione." },
+  { cat: "Storia", q: "Chi era Alessandro Magno?", a: "Re di Macedonia (356–323 a.C.) che conquistò un impero che si estendeva dall'Egitto all'India." },
+  { cat: "Storia", q: "Quando cadde il muro di Berlino?", a: "Il 9 novembre 1989." },
+  { cat: "Storia", q: "Cosa fu la Guerra Fredda?", a: "Il conflitto ideologico e geopolitico tra USA e URSS durato circa dal 1947 al 1991." },
+  // SCIENZA
+  { cat: "Scienza", q: "Qual è la formula chimica dell'acqua?", a: "H₂O (due atomi di idrogeno e uno di ossigeno)." },
+  { cat: "Scienza", q: "Chi propose la teoria della relatività?", a: "Albert Einstein, nel 1905 (relatività ristretta) e 1915 (relatività generale)." },
+  { cat: "Scienza", q: "Quanti pianeti ci sono nel sistema solare?", a: "8 pianeti: Mercurio, Venere, Terra, Marte, Giove, Saturno, Urano e Nettuno." },
+  { cat: "Scienza", q: "Cosa sono i DNA e RNA?", a: "Molecole acide nucleiche: il DNA conserva l'informazione genetica, l'RNA la trasporta per sintetizzare le proteine." },
+  { cat: "Scienza", q: "A quanto equivale la velocità della luce nel vuoto?", a: "Circa 299.792 km/s (≈ 300.000 km/s)." },
+  { cat: "Scienza", q: "Chi formulò la legge di gravitazione universale?", a: "Isaac Newton, pubblicata nel 1687 nei Principia Mathematica." },
+  { cat: "Scienza", q: "Cos'è la fotosintesi clorofilliana?", a: "Il processo mediante cui le piante convertono CO₂ e acqua in glucosio e ossigeno usando la luce solare." },
+  { cat: "Scienza", q: "Qual è il numero atomico dell'oro?", a: "79 (simbolo Au, dalla parola latina Aurum)." },
+  { cat: "Scienza", q: "Cos'è il Big Bang?", a: "La teoria cosmologica secondo cui l'universo si originò da uno stato di densità e temperatura estrema circa 13,8 miliardi di anni fa." },
+  { cat: "Scienza", q: "Che cos'è un buco nero?", a: "Una regione dello spaziotempo con gravità talmente intensa che nulla – nemmeno la luce – può sfuggirne." },
+  { cat: "Scienza", q: "Qual è il gas più abbondante nell'atmosfera terrestre?", a: "L'azoto (N₂), che costituisce circa il 78% dell'aria." },
+  { cat: "Scienza", q: "Cosa studia la sismologia?", a: "I terremoti e la propagazione delle onde sismiche attraverso la Terra." },
+  { cat: "Scienza", q: "Chi scoprì la penicillina?", a: "Alexander Fleming, nel 1928, osservando che una muffa (Penicillium) uccideva i batteri." },
+  { cat: "Scienza", q: "Cos'è la tavola periodica degli elementi?", a: "Una classificazione sistematica di tutti gli elementi chimici in ordine di numero atomico crescente, creata da Mendeleev nel 1869." },
+  { cat: "Scienza", q: "Cosa sono le cellule staminali?", a: "Cellule indifferenziate capaci di autorinnovarsi e differenziarsi in vari tipi cellulari specializzati." },
+  // GEOGRAFIA
+  { cat: "Geografia", q: "Qual è il fiume più lungo del mondo?", a: "Il Nilo (circa 6.650 km), sebbene il Rio delle Amazzoni sia il più grande per portata d'acqua." },
+  { cat: "Geografia", q: "Qual è la montagna più alta del mondo?", a: "L'Everest (8.848,86 m), nella catena dell'Himalaya tra Nepal e Tibet." },
+  { cat: "Geografia", q: "Quanti continenti esistono sulla Terra?", a: "7 continenti: Africa, America del Nord, America del Sud, Antartide, Asia, Europa e Oceania." },
+  { cat: "Geografia", q: "Qual è l'oceano più grande del mondo?", a: "L'Oceano Pacifico, che copre circa 165 milioni di km²." },
+  { cat: "Geografia", q: "Qual è il deserto più grande del mondo?", a: "Il Deserto del Sahara, circa 9,2 milioni di km² (escludendo i deserti polari)." },
+  { cat: "Geografia", q: "Qual è la capitale dell'Australia?", a: "Canberra (non Sydney, come molti credono)." },
+  { cat: "Geografia", q: "Quale paese ha la superficie più grande del mondo?", a: "La Russia, con circa 17,1 milioni di km²." },
+  { cat: "Geografia", q: "In quale continente si trova il Brasile?", a: "In America del Sud." },
+  { cat: "Geografia", q: "Qual è il lago più profondo del mondo?", a: "Il Lago Bajkal, in Siberia, con una profondità massima di 1.642 m." },
+  { cat: "Geografia", q: "Quale paese attraversa sia l'equatore che il tropico del Capricorno?", a: "Il Brasile." },
+  { cat: "Geografia", q: "Qual è la capitale del Canada?", a: "Ottawa." },
+  { cat: "Geografia", q: "Quanti stati costituiscono gli USA?", a: "50 stati." },
+  { cat: "Geografia", q: "Dove si trova il Monte Fuji?", a: "In Giappone, sull'isola di Honshū, a circa 100 km da Tokyo." },
+  { cat: "Geografia", q: "Qual è il paese con più lingue ufficiali al mondo?", a: "Il Zimbabwe, con 16 lingue ufficiali riconosciute dalla Costituzione." },
+  { cat: "Geografia", q: "In quale paese si trova Machu Picchu?", a: "In Perù, nella regione andina." },
+  // ARTE E CULTURA
+  { cat: "Arte e Cultura", q: "Chi dipinse la Cappella Sistina?", a: "Michelangelo Buonarroti, tra il 1508 e il 1512, su commissione di Papa Giulio II." },
+  { cat: "Arte e Cultura", q: "Cosa rappresenta la Gioconda?", a: "Un ritratto di Lisa Gherardini, dipinto da Leonardo da Vinci tra il 1503 e il 1519 circa." },
+  { cat: "Arte e Cultura", q: "Chi è l'autore de 'L'Urlo'?", a: "Edvard Munch, pittore norvegese, che lo realizzò nel 1893." },
+  { cat: "Arte e Cultura", q: "In quale città si trova il Colosseo?", a: "A Roma, Italia." },
+  { cat: "Arte e Cultura", q: "Cosa sono le Sette Meraviglie del Mondo Antico?", a: "La Grande Piramide di Giza, i Giardini Pensili di Babilonia, il Tempio di Artemide, la Statua di Zeus, il Mausoleo di Alicarnasso, il Colosso di Rodi e il Faro di Alessandria." },
+  { cat: "Arte e Cultura", q: "Chi è l'autore de 'La notte stellata'?", a: "Vincent van Gogh, dipinta nel 1889 mentre era ricoverato a Saint-Rémy-de-Provence." },
+  { cat: "Arte e Cultura", q: "Dove si trova il Louvre?", a: "A Parigi, Francia. È il museo più visitato al mondo." },
+  { cat: "Arte e Cultura", q: "Chi è l'autore de 'Il Pensatore'?", a: "Auguste Rodin, scultore francese, originariamente concepita nel 1880." },
+  { cat: "Arte e Cultura", q: "Cosa è la Commedia dell'Arte?", a: "Una forma di teatro italiano nato nel XVI sec., basata su maschere fisse e improvvisazione." },
+  { cat: "Arte e Cultura", q: "Chi progettò il Partenone?", a: "Gli architetti Ictino e Callicrate, sotto la supervisione di Fidia, nel V sec. a.C." },
+  { cat: "Arte e Cultura", q: "Cosa rappresenta la statua del David di Michelangelo?", a: "Il re biblico Davide nell'attimo prima della battaglia con Golia, scolpita tra il 1501 e il 1504." },
+  { cat: "Arte e Cultura", q: "In quale periodo storico fiorì il Rinascimento italiano?", a: "Principalmente tra il XIV e il XVI secolo, con epicentro a Firenze." },
+  { cat: "Arte e Cultura", q: "Chi fu Pablo Picasso?", a: "Pittore e scultore spagnolo (1881–1973), cofondatore del Cubismo e una delle figure più influenti dell'arte del XX sec." },
+  { cat: "Arte e Cultura", q: "Cosa è la Bauhaus?", a: "Una scuola di design e architettura fondata in Germania nel 1919 da Walter Gropius, fondamentale nel design moderno." },
+  { cat: "Arte e Cultura", q: "Dove si trovano le Piramidi di Giza?", a: "In Egitto, sulla riva occidentale del Nilo, vicino al Cairo." },
+  // LETTERATURA
+  { cat: "Letteratura", q: "Chi è l'autore de 'I Promessi Sposi'?", a: "Alessandro Manzoni, pubblicato tra il 1827 e il 1842." },
+  { cat: "Letteratura", q: "Chi scrisse 'La Divina Commedia'?", a: "Dante Alighieri, composta tra il 1304 e il 1321 circa." },
+  { cat: "Letteratura", q: "Chi è l'autore di 'Don Chisciotte'?", a: "Miguel de Cervantes, pubblicato in due volumi nel 1605 e nel 1615." },
+  { cat: "Letteratura", q: "Chi scrisse 'Orgoglio e Pregiudizio'?", a: "Jane Austen, pubblicato nel 1813." },
+  { cat: "Letteratura", q: "Chi è l'autore de 'Il Processo'?", a: "Franz Kafka, scritto nel 1914–15 e pubblicato postumo nel 1925." },
+  { cat: "Letteratura", q: "Chi scrisse '1984'?", a: "George Orwell, pubblicato nel 1949." },
+  { cat: "Letteratura", q: "Chi è l'autore del 'Decameron'?", a: "Giovanni Boccaccio, scritto tra il 1349 e il 1353." },
+  { cat: "Letteratura", q: "Chi scrisse 'I Fratelli Karamazov'?", a: "Fëdor Dostoevskij, pubblicato nel 1880." },
+  { cat: "Letteratura", q: "In quale opera Shakespeare scrisse 'Essere o non essere'?", a: "Nell'Amleto (Atto III, Scena I), scritto tra il 1600 e il 1601." },
+  { cat: "Letteratura", q: "Chi è l'autore di 'Il Piccolo Principe'?", a: "Antoine de Saint-Exupéry, pubblicato nel 1943." },
+  { cat: "Letteratura", q: "Chi scrisse 'L'Ulisse'?", a: "James Joyce, pubblicato nel 1922. È considerato uno dei romanzi più importanti del XX sec." },
+  { cat: "Letteratura", q: "Chi è l'autore di 'Cent'anni di solitudine'?", a: "Gabriel García Márquez, pubblicato nel 1967, capolavoro del realismo magico." },
+  { cat: "Letteratura", q: "Chi è l'autore di 'Cime Tempestose'?", a: "Emily Brontë, pubblicato nel 1847." },
+  { cat: "Letteratura", q: "Chi scrisse 'Il Signore degli Anelli'?", a: "J.R.R. Tolkien, pubblicato tra il 1954 e il 1955." },
+  { cat: "Letteratura", q: "Chi è l'autore di 'Nome della Rosa'?", a: "Umberto Eco, pubblicato nel 1980." },
+  // SPORT
+  { cat: "Sport", q: "Ogni quanti anni si tengono i Giochi Olimpici estivi?", a: "Ogni 4 anni." },
+  { cat: "Sport", q: "In quale paese nacque il calcio moderno?", a: "In Inghilterra, dove le prime regole codificate furono stabilite nel 1863 dalla Football Association." },
+  { cat: "Sport", q: "Quanti giocatori ci sono in una squadra di pallavolo in campo?", a: "6 giocatori per squadra." },
+  { cat: "Sport", q: "Quanto dura una partita di tennis al meglio dei 5 set?", a: "Non ha un limite di tempo fisso; si gioca fino al completamento dei set previsti." },
+  { cat: "Sport", q: "Qual è la distanza ufficiale di una maratona?", a: "42,195 km (26 miglia e 385 iarde)." },
+  { cat: "Sport", q: "In quale sport si usa il termine 'ace'?", a: "Nel tennis, indica un servizio che l'avversario non riesce a toccare." },
+  { cat: "Sport", q: "Quante medaglie d'oro ha vinto Michael Phelps alle Olimpiadi?", a: "23 medaglie d'oro olimpiche, il record assoluto nella storia dei Giochi Olimpici." },
+  { cat: "Sport", q: "Dove si svolge ogni anno la 24 Ore di Le Mans?", a: "A Le Mans, in Francia, sull'omonimo circuito." },
+  { cat: "Sport", q: "Quante squadre partecipano al Sei Nazioni di rugby?", a: "6 squadre: Inghilterra, Francia, Galles, Irlanda, Italia e Scozia." },
+  { cat: "Sport", q: "In quale anno si tennero le prime Olimpiadi moderne?", a: "Nel 1896, ad Atene, in Grecia." },
+  { cat: "Sport", q: "Chi detiene il record mondiale dei 100 metri piani maschili?", a: "Usain Bolt, con 9,58 secondi stabiliti a Berlino nel 2009." },
+  { cat: "Sport", q: "Qual è il torneo di tennis più antico del mondo?", a: "Wimbledon, fondato nel 1877 a Londra." },
+  { cat: "Sport", q: "Di quanti giocatori è composta una squadra di baseball?", a: "9 giocatori in campo per squadra." },
+  { cat: "Sport", q: "Chi ha vinto più Mondiali di calcio come nazione?", a: "Il Brasile, con 5 titoli mondiali (1958, 1962, 1970, 1994, 2002)." },
+  { cat: "Sport", q: "Qual è il sport più praticato al mondo?", a: "Il calcio (football), con oltre 250 milioni di giocatori in più di 200 paesi." },
+  // MUSICA
+  { cat: "Musica", q: "Quante sinfonie compose Ludwig van Beethoven?", a: "9 sinfonie, tra cui la celeberrima Nona con il coro finale (Inno alla Gioia)." },
+  { cat: "Musica", q: "Chi è l'autore della Quinta Sinfonia 'del Destino'?", a: "Ludwig van Beethoven, composta tra il 1804 e il 1808." },
+  { cat: "Musica", q: "Cosa è un'opera lirica?", a: "Un dramma musicale in cui l'azione scenica è interamente o prevalentemente cantata, con accompagnamento orchestrale." },
+  { cat: "Musica", q: "Chi compose 'Le Quattro Stagioni'?", a: "Antonio Vivaldi, compositore veneziano (1678–1741)." },
+  { cat: "Musica", q: "Quante corde ha una chitarra classica?", a: "6 corde." },
+  { cat: "Musica", q: "Chi è conosciuto come il 'Re del Rock and Roll'?", a: "Elvis Presley (1935–1977)." },
+  { cat: "Musica", q: "Cosa è il jazz?", a: "Un genere musicale originato dagli afroamericani nel sud degli Stati Uniti a fine '800, caratterizzato da improvvisazione e swing." },
+  { cat: "Musica", q: "Quante note ci sono nella scala musicale?", a: "7 note (Do, Re, Mi, Fa, Sol, La, Si) più la ripetizione dell'ottava." },
+  { cat: "Musica", q: "Chi compose la 'Traviata'?", a: "Giuseppe Verdi, opera rappresentata per la prima volta nel 1853 a Venezia." },
+  { cat: "Musica", q: "Chi è l'autore del Requiem in Re minore K. 626?", a: "Wolfgang Amadeus Mozart, rimasto incompiuto alla sua morte nel 1791." },
+  { cat: "Musica", q: "Cosa è un metronomo?", a: "Uno strumento che produce click regolari a un tempo impostato, usato per mantenere il ritmo durante lo studio musicale." },
+  { cat: "Musica", q: "Chi fu Freddie Mercury?", a: "Cantante e compositore britannico (1946–1991), frontman dei Queen, famoso per la sua voce e le performance sceniche." },
+  { cat: "Musica", q: "Cosa sono gli archi nell'orchestra?", a: "La sezione orchestrale composta da violini, viole, violoncelli e contrabbassi." },
+  { cat: "Musica", q: "Chi compose la 'Tosca'?", a: "Giacomo Puccini, opera lirica in tre atti rappresentata per la prima volta nel 1900 a Roma." },
+  { cat: "Musica", q: "Cosa è il blues?", a: "Un genere musicale afroamericano nato nel XIX sec., caratterizzato da strutture armoniche specifiche e tematiche di tristezza e resilienza." },
+];
+
+/* ═══════════════════ STATE ═══════════════════ */
+let revealedCount = 0;
+let currentCat = 'all';
+let currentView = 'grid'; // 'grid' | 'single'
+
+// single-mode state
+let sq_pool = [];        // shuffled indices into filtered questions
+let sq_cursor = 0;       // current position in pool
+let sq_answered = new Set(); // indices already revealed
+
+/* ═══════════════════ HELPERS ═══════════════════ */
+function getFiltered() {
+  return currentCat === 'all' ? questions : questions.filter(q => q.cat === currentCat);
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/* ═══════════════════ GRID VIEW ═══════════════════ */
+function createCard(item, index) {
+  const num = String(index + 1).padStart(2, '0');
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.dataset.cat = item.cat;
+  card.innerHTML = `
+    <div class="card-header">
+      <span class="q-num">#${num}</span>
+      <div>
+        <div class="q-cat">${item.cat}</div>
+        <div class="q-text">${item.q}</div>
+      </div>
+    </div>
+    <button class="reveal-btn" onclick="toggleAnswer(this)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      Visualizza risposta
+    </button>
+    <div class="answer">
+      <div class="answer-inner">
+        <strong>✓ Risposta</strong>
+        ${item.a}
+      </div>
+    </div>
+  `;
+  return card;
+}
+
+function toggleAnswer(btn) {
+  const answer = btn.nextElementSibling;
+  const isOpen = answer.classList.contains('visible');
+  answer.classList.toggle('visible', !isOpen);
+  if (!isOpen) {
+    if (!btn.dataset.counted) {
+      btn.dataset.counted = '1';
+      revealedCount++;
+      document.getElementById('score').textContent = revealedCount;
+      showToast(`${revealedCount} risposta${revealedCount !== 1 ? 'e' : ''} svelata${revealedCount !== 1 ? 'e' : ''}!`);
+    }
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg> Nascondi risposta`;
+  } else {
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg> Visualizza risposta`;
+  }
+}
+
+/* ═══════════════════ SINGLE VIEW ═══════════════════ */
+function initSingleMode() {
+  const filtered = getFiltered();
+  sq_pool = shuffle(filtered.map((_, i) => i));
+  sq_cursor = 0;
+  sq_answered = new Set();
+  renderSingleCard();
+  renderChips();
+}
+
+function renderSingleCard() {
+  const filtered = getFiltered();
+  const card = document.getElementById('sq-card');
+
+  if (sq_cursor >= sq_pool.length) {
+    // all done
+    card.innerHTML = `
+      <div class="sq-done">
+        <div class="sq-done-icon">🎉</div>
+        <h2>Hai visto tutte le domande!</h2>
+        <p>Hai completato tutte le ${filtered.length} domande di questa categoria.</p>
+        <button class="sq-done-btn" onclick="restartSingle()">Ricomincia da capo</button>
+      </div>
+    `;
+    updateProgress(filtered.length, filtered.length);
+    return;
+  }
+
+  const idx = sq_pool[sq_cursor];
+  const item = filtered[idx];
+  const globalNum = questions.indexOf(item) + 1;
+  const isAnswered = sq_answered.has(idx);
+
+  card.style.animation = 'none';
+  card.offsetHeight; // reflow
+  card.style.animation = '';
+
+  card.innerHTML = `
+    <div class="sq-card-top">
+      <div class="sq-meta">
+        <span class="sq-cat-badge">${item.cat}</span>
+        <span class="sq-num-badge">Domanda #${globalNum}</span>
+      </div>
+      <div class="sq-question">${item.q}</div>
+    </div>
+
+    <div class="sq-answer-panel ${isAnswered ? 'visible' : ''}" id="sq-ans-panel">
+      <div class="sq-answer-inner">
+        <span class="sq-answer-label">✓ Risposta</span>
+        ${item.a}
+      </div>
+    </div>
+
+    <div class="sq-actions">
+      <button class="sq-btn sq-btn-reveal" id="sq-reveal-btn"
+        onclick="sqReveal(${idx})"
+        ${isAnswered ? 'disabled' : ''}>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        ${isAnswered ? 'Risposta mostrata' : 'Mostra risposta'}
+      </button>
+      <button class="sq-btn sq-btn-next" onclick="sqNext()">
+        Prossima
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+    </div>
+  `;
+
+  updateProgress(sq_cursor, filtered.length);
+}
+
+function sqReveal(idx) {
+  const panel = document.getElementById('sq-ans-panel');
+  panel.classList.add('visible');
+  const btn = document.getElementById('sq-reveal-btn');
+  btn.disabled = true;
+  btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Risposta mostrata`;
+
+  if (!sq_answered.has(idx)) {
+    sq_answered.add(idx);
+    revealedCount++;
+    document.getElementById('score').textContent = revealedCount;
+    showToast(`${revealedCount} risposta${revealedCount !== 1 ? 'e' : ''} svelata${revealedCount !== 1 ? 'e' : ''}!`);
+    renderChips();
+  }
+}
+
+function sqNext() {
+  sq_cursor++;
+  renderSingleCard();
+  renderChips();
+  document.getElementById('single-view').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function restartSingle() {
+  const filtered = getFiltered();
+  sq_pool = shuffle(filtered.map((_, i) => i));
+  sq_cursor = 0;
+  sq_answered = new Set();
+  renderSingleCard();
+  renderChips();
+}
+
+function updateProgress(current, total) {
+  const pct = total === 0 ? 0 : Math.round((current / total) * 100);
+  document.getElementById('sq-progress-fill').style.width = pct + '%';
+  document.getElementById('sq-progress-label').textContent = `${current} / ${total}`;
+}
+
+function renderChips() {
+  const filtered = getFiltered();
+  const total = Math.min(filtered.length, 50); // cap visual chips at 50
+  const chipsEl = document.getElementById('sq-seen-chips');
+  chipsEl.innerHTML = '';
+  for (let i = 0; i < total; i++) {
+    const d = document.createElement('div');
+    const poolIdx = sq_pool[i];
+    if (i === sq_cursor) {
+      d.className = 'chip current';
+    } else if (sq_answered.has(poolIdx)) {
+      d.className = 'chip seen';
+    } else {
+      d.className = 'chip';
+    }
+    chipsEl.appendChild(d);
+  }
+  document.getElementById('sq-seen-row').style.display = filtered.length > 0 ? 'flex' : 'none';
+}
+
+/* ═══════════════════ VIEW / CATEGORY SWITCHING ═══════════════════ */
+function setView(view) {
+  currentView = view;
+  document.getElementById('btn-grid').classList.toggle('active', view === 'grid');
+  document.getElementById('btn-single').classList.toggle('active', view === 'single');
+  document.getElementById('grid').style.display = view === 'grid' ? 'grid' : 'none';
+  document.getElementById('single-view').style.display = view === 'single' ? 'block' : 'none';
+
+  if (view === 'single') {
+    initSingleMode();
+  }
+}
+
+function setCategory(cat, btn) {
+  currentCat = cat;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  if (currentView === 'grid') {
+    document.querySelectorAll('.card').forEach(card => {
+      card.style.display = (cat === 'all' || card.dataset.cat === cat) ? '' : 'none';
+    });
+  } else {
+    initSingleMode();
+  }
+}
+
+/* ═══════════════════ TOAST ═══════════════════ */
+let toastTimeout;
+function showToast(text) {
+  const t = document.getElementById('progress-toast');
+  document.getElementById('toast-text').textContent = text;
+  t.classList.add('show');
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+/* ═══════════════════ INIT ═══════════════════ */
+const grid = document.getElementById('grid');
+questions.forEach((q, i) => grid.appendChild(createCard(q, i)));
+</script>
+</body>
+</html>
