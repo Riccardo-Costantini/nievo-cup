@@ -82,7 +82,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 2px;
-  padding: 10px 4px;
+  padding: 10px 2px;
   border: none;
   background: none;
   color: #5a80a8;
@@ -92,13 +92,14 @@ body {
   min-height: 56px;
 }
 .nav-btn:active { background: rgba(30,80,180,0.15); }
-.nav-btn .nav-icon { font-size: 22px; line-height: 1; }
-.nav-btn .nav-label { font-size: 10px; letter-spacing: 0.5px; }
+.nav-btn .nav-icon { font-size: 20px; line-height: 1; }
+.nav-btn .nav-label { font-size: 9px; letter-spacing: 0.5px; }
 .nav-btn.nav-fish { color: #5bc8ff; }
-.nav-btn.nav-fish .nav-icon { font-size: 26px; }
+.nav-btn.nav-fish .nav-icon { font-size: 24px; }
 .nav-btn.nav-shop { color: #ffc964; }
 .nav-btn.nav-inv  { color: #7dff7d; }
 .nav-btn.nav-equip { color: #c8a0ff; }
+.nav-btn.nav-dex { color: #ff9d7d; }
 .nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
 .nav-btn.bite-pulse { animation: bitePulse 0.4s infinite alternate; }
@@ -205,18 +206,23 @@ body {
 .equipped-badge { font-size: 10px; color: #7dff7d; }
 .owned-badge { font-size: 10px; color: #5ddf5d; }
 
-/* ===== INVENTORY ===== */
+/* ===== INVENTORY & DEX ===== */
 .inv-summary { font-size: 13px; color: #7aa0cc; margin-bottom: 12px; }
-.inv-fish-list { display: flex; flex-direction: column; gap: 6px; }
-.inv-fish {
+.inv-fish-list, .dex-fish-list { display: flex; flex-direction: column; gap: 6px; }
+.inv-fish, .dex-fish {
   display: flex; align-items: center; gap: 10px;
   background: #091535; border: 1px solid #1a3060; border-radius: 9px; padding: 10px 12px;
 }
-.inv-fish .fish-icon { font-size: 22px; width: 30px; text-align: center; flex-shrink: 0; }
-.inv-fish .fish-info { flex: 1; min-width: 0; }
-.inv-fish .fish-name { font-size: 13px; color: #c8e0ff; }
-.inv-fish .fish-sub { font-size: 11px; color: #6888a8; margin-top: 1px; }
+.inv-fish .fish-icon, .dex-fish .fish-icon { font-size: 22px; width: 30px; text-align: center; flex-shrink: 0; }
+.inv-fish .fish-info, .dex-fish .fish-info { flex: 1; min-width: 0; }
+.inv-fish .fish-name, .dex-fish .fish-name { font-size: 13px; color: #c8e0ff; }
+.inv-fish .fish-sub, .dex-fish .fish-sub { font-size: 11px; color: #6888a8; margin-top: 1px; }
 .inv-fish .fish-val { font-size: 14px; color: #ffd700; font-weight: bold; flex-shrink: 0; }
+
+/* Locked Dex item style */
+.dex-fish.locked { background: rgba(5,13,33,0.4); border: 1px dashed #14244a; opacity: 0.6; }
+.dex-fish.locked .fish-icon { filter: brightness(0.2) grayscale(1); }
+.dex-fish.locked .fish-name { color: #4e6685; font-style: italic; }
 
 .btn-sell-all {
   margin-top: 14px; width: 100%; padding: 14px; border-radius: 10px;
@@ -283,7 +289,7 @@ body {
 .bar-row { display: flex; align-items: center; gap: 10px; }
 .bar-label-txt { font-size: 11px; color: #6a90b8; width: 75px; flex-shrink: 0; }
 .bar-outer { flex: 1; height: 28px; background: #080f28; border: 1.5px solid #1e3a70; border-radius: 8px; overflow: hidden; position: relative; }
-.bar-fill { height: 100%; border-radius: 7px; transition: width 0.1s; }
+.bar-fill height: 100%; border-radius: 7px; transition: width 0.1s; }
 .bar-fish-fill   { background: linear-gradient(90deg, #a02010, #ff4030); }
 .bar-player-fill { background: linear-gradient(90deg, #148030, #30e860); }
 .bar-inner-lbl { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.9); }
@@ -330,9 +336,9 @@ button, [role=button] { touch-action: manipulation; }
   #hud { padding: 10px 16px 8px; }
   .hud-val { font-size: 16px; }
   .hud-coins-val { font-size: 18px; }
-  .nav-btn { padding: 12px 8px; }
-  .nav-btn .nav-icon { font-size: 24px; }
-  .nav-btn.nav-fish .nav-icon { font-size: 28px; }
+  .nav-btn { padding: 12px 4px; }
+  .nav-btn .nav-icon { font-size: 22px; }
+  .nav-btn.nav-fish .nav-icon { font-size: 26px; }
   #tapZone { height: 130px; font-size: 30px; }
   #mgFishIcon { font-size: 75px; }
   #mgFishName { font-size: 24px; }
@@ -395,6 +401,10 @@ button, [role=button] { touch-action: manipulation; }
     <span class="nav-icon">🐟</span>
     <span class="nav-label">Pesci</span>
   </button>
+  <button class="nav-btn nav-dex" onclick="G.openModal('dex')">
+    <span class="nav-icon">📖</span>
+    <span class="nav-label">Pescidex</span>
+  </button>
   <button class="nav-btn nav-shop" onclick="G.openModal('shop')">
     <span class="nav-icon">🏪</span>
     <span class="nav-label">Shop</span>
@@ -438,6 +448,19 @@ button, [role=button] { touch-action: manipulation; }
     <div class="modal-body">
       <div class="tabs" id="equipTabs"></div>
       <div id="equipContent"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="dexModal">
+  <div class="modal">
+    <div class="modal-drag"></div>
+    <div class="modal-header">
+      <h2>📖 Pescidex</h2>
+      <button class="close-btn" onclick="G.closeModal('dex')">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="dexContent"></div>
     </div>
   </div>
 </div>
@@ -551,7 +574,7 @@ const FISH_DB = [
 ];
 
 const STATE = {
-  saveVersion: 1,
+  saveVersion: 2,
   coins: 0,
   caughtCount: 0,
   lastCaughtName: '',
@@ -559,6 +582,7 @@ const STATE = {
   ownedItems: { rod: ['rod_bamboo'], line: ['line_light'], hook: ['hook_small'], bait: ['bait_worm'] },
   equipped: { rod: 'rod_bamboo', line: 'line_light', hook: 'hook_small', bait: 'bait_worm' },
   baitQty: { bait_worm: 999, bait_shrimp: 0, bait_squid: 0, bait_sardine: 0, bait_lure: 0, bait_deep: 0 },
+  maxWeightRecord: {}, // Saves the maximum weight caught per fish ID
   phase: 'idle', 
   activeFish: null,
   biteTimeout: null,
@@ -662,7 +686,7 @@ const G = {
       const gameState = {
         saveVersion: STATE.saveVersion, coins: STATE.coins, caughtCount: STATE.caughtCount,
         lastCaughtName: STATE.lastCaughtName, inventory: STATE.inventory, ownedItems: STATE.ownedItems,
-        equipped: STATE.equipped, baitQty: STATE.baitQty
+        equipped: STATE.equipped, baitQty: STATE.baitQty, maxWeightRecord: STATE.maxWeightRecord
       };
       localStorage.setItem('deepblue_savegame', JSON.stringify(gameState));
     } catch (e) { console.error("Errore autosave:", e); }
@@ -695,6 +719,10 @@ const G = {
       if (parsed.baitQty) {
         Object.keys(STATE.baitQty).forEach(k => { if (typeof parsed.baitQty[k] === 'number') STATE.baitQty[k] = parsed.baitQty[k]; });
       }
+      
+      // Handle Dex max records and backwards compatibility
+      STATE.maxWeightRecord = (parsed.maxWeightRecord && typeof parsed.maxWeightRecord === 'object') ? parsed.maxWeightRecord : {};
+      
       this.showNotif("Partita caricata!", "success");
     } catch (err) {
       this.showNotif("Nuova partita inizializzata.", "success");
@@ -716,7 +744,7 @@ const G = {
       const gameState = {
         saveVersion: STATE.saveVersion, coins: STATE.coins, caughtCount: STATE.caughtCount,
         lastCaughtName: STATE.lastCaughtName, inventory: STATE.inventory, ownedItems: STATE.ownedItems,
-        equipped: STATE.equipped, baitQty: STATE.baitQty
+        equipped: STATE.equipped, baitQty: STATE.baitQty, maxWeightRecord: STATE.maxWeightRecord
       };
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(gameState));
       const anchor = document.createElement('a');
@@ -746,6 +774,7 @@ const G = {
     STATE.ownedItems = { rod: ['rod_bamboo'], line: ['line_light'], hook: ['hook_small'], bait: ['bait_worm'] };
     STATE.equipped = { rod: 'rod_bamboo', line: 'line_light', hook: 'hook_small', bait: 'bait_worm' };
     STATE.baitQty = { bait_worm: 999, bait_shrimp: 0, bait_squid: 0, bait_sardine: 0, bait_lure: 0, bait_deep: 0 };
+    STATE.maxWeightRecord = {};
   },
 
   syncHud() {
@@ -933,6 +962,12 @@ const G = {
       STATE.inventory.push({ id: fish.id, name: fish.name, icon: fish.icon, rarity: fish.rarity, kg: fish.actualKg, value: finalVal });
       STATE.caughtCount++; STATE.lastCaughtName = `${fish.icon} ${fish.name} (${fish.actualKg.toFixed(2)} Kg)`;
       
+      // Update max weight record for Pescidex
+      const prevRecord = STATE.maxWeightRecord[fish.id] || 0;
+      if (fish.actualKg > prevRecord) {
+        STATE.maxWeightRecord[fish.id] = fish.actualKg;
+      }
+      
       this.logMsg(`Catturato: ${fish.name} di ${fish.actualKg.toFixed(2)} Kg! (💰${finalVal})`);
       let rType = 'success';
       if(['rare','epic'].includes(fish.rarity)) rType = 'gold';
@@ -955,6 +990,7 @@ const G = {
     if(type === 'shop') this.renderShop();
     if(type === 'inv') this.renderInventory();
     if(type === 'equip') this.renderEquip();
+    if(type === 'dex') this.renderDex();
   },
 
   closeModal(type) { document.getElementById(`${type}Modal`).classList.remove('show'); },
@@ -1090,7 +1126,45 @@ const G = {
     container.innerHTML = html;
   },
 
-  setEquipTab(t) { this.activeEquipTab = t; this.renderEquip(); }
+  setEquipTab(t) { this.activeEquipTab = t; this.renderEquip(); },
+
+  renderDex() {
+    const container = document.getElementById('dexContent');
+    let discoveredCount = 0;
+    
+    FISH_DB.forEach(f => { if(STATE.maxWeightRecord[f.id]) discoveredCount++; });
+    
+    let html = `<div class="inv-summary font-family:monospace">Specie scoperte: ${discoveredCount} / ${FISH_DB.length}</div>`;
+    html += `<div class="dex-fish-list">`;
+    
+    FISH_DB.forEach(f => {
+      const maxWeight = STATE.maxWeightRecord[f.id];
+      const isDiscovered = !!maxWeight;
+      
+      if (isDiscovered) {
+        html += `
+          <div class="dex-fish">
+            <div class="fish-icon">${f.icon}</div>
+            <div class="fish-info">
+              <div class="fish-name">${f.name} <span class="rarity-badge r-${f.rarity}">${f.rarity}</span></div>
+              <div class="fish-sub">Record max: <b>${maxWeight.toFixed(2)} Kg</b></div>
+            </div>
+          </div>`;
+      } else {
+        html += `
+          <div class="dex-fish locked">
+            <div class="fish-icon">❓</div>
+            <div class="fish-info">
+              <div class="fish-name">???</div>
+              <div class="fish-sub">Specie non ancora scoperta</div>
+            </div>
+          </div>`;
+      }
+    });
+    
+    html += `</div>`;
+    container.innerHTML = html;
+  }
 };
 
 window.addEventListener('load', () => G.init());
@@ -1102,21 +1176,22 @@ window.addEventListener('keydown', e => {
   if (e.code === 'KeyS') G.openModal('shop');
   if (e.code === 'KeyI') G.openModal('inv');
   if (e.code === 'KeyE') G.openModal('equip');
-  if (e.key === 'Escape') { G.closeModal('shop'); G.closeModal('inv'); G.closeModal('equip'); }
+  if (e.code === 'KeyD') G.openModal('dex');
+  if (e.key === 'Escape') { G.closeModal('shop'); G.closeModal('inv'); G.closeModal('equip'); G.closeModal('dex'); }
 });
 
 const canvas = document.getElementById('gameCanvas');
 canvas.addEventListener('click', () => { if (STATE.phase === 'hooking') G.fishAction(); });
 
 document.querySelectorAll('.modal-bg').forEach(bg => {
-  bg.addEventListener('click', e => { if (e.target === bg) { G.closeModal('shop'); G.closeModal('inv'); G.closeModal('equip'); } });
+  bg.addEventListener('click', e => { if (e.target === bg) { G.closeModal('shop'); G.closeModal('inv'); G.closeModal('equip'); G.closeModal('dex'); } });
 });
 
 let touchStartY = 0;
 document.querySelectorAll('.modal').forEach(m => {
   m.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, {passive:true});
   m.addEventListener('touchend', e => {
-    if (e.changedTouches[0].clientY - touchStartY > 60) { G.closeModal('shop'); G.closeModal('inv'); G.closeModal('equip'); }
+    if (e.changedTouches[0].clientY - touchStartY > 60) { G.closeModal('shop'); G.closeModal('inv'); G.closeModal('equip'); G.closeModal('dex'); }
   }, {passive:true});
 });
 </script>
