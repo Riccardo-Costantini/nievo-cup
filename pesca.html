@@ -1255,6 +1255,168 @@ document.querySelectorAll('.modal').forEach(m => {
 // ── 10. INIT ──────────────────────────────────────────────
 G.updateHUD();
 G.setStatus('Premi 🎣 per pescare!');
+
+// ============================================================
+// 💾 SISTEMA DI SALVATAGGIO (SAVE SYSTEM)
+// ============================================================
+
+const SAVE_KEY = "deep_blue_fisher_save";
+const SAVE_VERSION = 1;
+
+// Struttura dello stato globale di salvataggio
+let gameState = {
+  saveVersion: SAVE_VERSION,
+  coins: 0,
+  inventory: [],
+  stats: {
+    totalCaught: 0,
+    lastFishName: ""
+  },
+  owned: {
+    rods: ['rod_bamboo'],
+    lines: ['line_light'],
+    hooks: ['hook_small'],
+    baits: { bait_worm: 999 }
+  },
+  equipped: {
+    rod: 'rod_bamboo',
+    line: 'line_light',
+    hook: 'hook_small',
+    bait: 'bait_worm'
+  }
+};
+
+// 1. Funzione per salvare la partita
+function saveGame() {
+  try {
+    // Sincronizza le tue variabili di gioco correnti con gameState prima di salvare
+    // (Assicurati che queste variabili corrispondano a quelle del tuo motore di gioco)
+    if (typeof STATE !== 'undefined') {
+       gameState.coins = STATE.coins || gameState.coins;
+       gameState.inventory = STATE.inventory || gameState.inventory;
+       gameState.stats.totalCaught = STATE.stats?.totalCaught || gameState.stats.totalCaught;
+       gameState.owned = STATE.owned || gameState.owned;
+       gameState.equipped = STATE.equipped || gameState.equipped;
+    }
+
+    gameState.saveVersion = SAVE_VERSION;
+    localStorage.setItem(SAVE_KEY, JSON.stringify(gameState));
+    console.log("💾 Partita salvata automaticamente.");
+  } catch (error) {
+    console.error("Errore durante il salvataggio:", error);
+  }
+}
+
+// 2. Funzione per caricare la partita
+function loadGame() {
+  try {
+    const savedData = localStorage.getItem(SAVE_KEY);
+    if (savedData) {
+      const parsedData = JSON.parse(savedData);
+      
+      // Unisce i salvataggi con i valori di default in caso manchino dei campi nuovi
+      gameState = {
+        ...gameState,
+        ...parsedData,
+        stats: { ...gameState.stats, ...(parsedData.stats || {}) },
+        owned: { ...gameState.owned, ...(parsedData.owned || {}) },
+        equipped: { ...gameState.equipped, ...(parsedData.equipped || {}) }
+      };
+
+      // Ripristina le variabili del motore di gioco
+      if (typeof STATE !== 'undefined') {
+         STATE.coins = gameState.coins;
+         STATE.inventory = gameState.inventory;
+         STATE.stats = gameState.stats;
+         STATE.owned = gameState.owned;
+         STATE.equipped = gameState.equipped;
+      }
+      
+      console.log("💾 Salvataggio caricato con successo!");
+      return true;
+    }
+  } catch (error) {
+    console.warn("⚠️ Nessun salvataggio valido o dati corrotti. Inizio nuova partita.");
+  }
+  return false;
+}
+
+// 3. Funzione per resettare i progressi
+function resetSave() {
+  if (confirm("Vuoi davvero cancellare TUTTI i tuoi progressi? Questa azione non si può annullare!")) {
+    localStorage.removeItem(SAVE_KEY);
+    location.reload();
+  }
+}
+
+// 4. Esporta salvataggio in un file JSON
+function exportSave() {
+  saveGame();
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(gameState));
+  const a = document.createElement('a');
+  a.setAttribute("href", dataStr);
+  a.setAttribute("download", `deep_blue_fisher_save_${new Date().toISOString().slice(0, 10)}.json`);
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+// 5. Importa salvataggio da un file JSON
+function importSave() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const importedData = JSON.parse(event.target.result);
+        if (importedData && importedData.saveVersion !== undefined) {
+          localStorage.setItem(SAVE_KEY, JSON.stringify(importedData));
+          alert("✅ Salvataggio importato con successo! Il gioco verrà riavviato.");
+          location.reload();
+        } else {
+          alert("❌ File di salvataggio non valido.");
+        }
+      } catch (error) {
+        alert("❌ Errore durante l'importazione. Il file potrebbe essere corrotto.");
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+// ============================================================
+// AUTOMAZIONE E BOOT
+// ============================================================
+
+window.addEventListener('DOMContentLoaded', () => {
+  // Al caricamento, cerca un salvataggio. Altrimenti inizia da zero.
+  const hasSave = loadGame();
+  if (!hasSave) {
+    console.log("Nessun salvataggio trovato. Creazione nuovo salvataggio...");
+    saveGame(); 
+  }
+  
+  // Aggiorna la grafica del gioco in base ai dati appena caricati (se la funzione esiste nel tuo codice)
+  if (typeof updateHUD === 'function') updateHUD();
+  if (typeof G !== 'undefined' && typeof G.updateHUD === 'function') G.updateHUD();
+});
+
+// Autosave ogni 30 secondi
+setInterval(saveGame, 30000); 
+
+// Autosave istantaneo alla chiusura/ricarica della pagina
+window.addEventListener('beforeunload', saveGame);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') saveGame();
+});
+
 </script>
 </body>
 </html>
