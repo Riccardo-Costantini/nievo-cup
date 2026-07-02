@@ -252,6 +252,19 @@ body {
 .equip-section-title { font-size: 11px; color: #5a80a8; text-transform: uppercase; letter-spacing: 1px; margin: 12px 0 6px; }
 .equip-section-title:first-child { margin-top: 0; }
 
+/* ===== SAVE STYLING ===== */
+.save-controls { display: flex; flex-direction: column; gap: 10px; padding: 6px 2px; }
+.btn-save-action {
+  padding: 12px; font-family: 'Courier New', monospace; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; border: 1px solid transparent; text-align: center;
+}
+.btn-save-export { background: #15325c; color: #7dd4ff; border-color: #2b5591; }
+.btn-save-export:active { background: #22467a; }
+.btn-save-import { background: #133a25; color: #7dff9d; border-color: #245c3d; position: relative; }
+.btn-save-import:active { background: #1c5235; }
+.btn-save-import input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.btn-save-reset { background: #421111; color: #ff7d7d; border-color: #6e2323; margin-top: 15px; }
+.btn-save-reset:active { background: #5c1b1b; }
+
 /* ===== RARITY BADGES ===== */
 .rarity-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: bold; }
 .r-common    { background: #142814; color: #5ddf5d; border: 1px solid #2a5a2a; }
@@ -411,7 +424,6 @@ button, [role=button] { touch-action: manipulation; }
 </head>
 <body>
 
-<!-- TOP HUD -->
 <div id="hud">
   <div class="hud-cell">
     <div class="hud-lbl">Monete</div>
@@ -428,22 +440,16 @@ button, [role=button] { touch-action: manipulation; }
   </div>
 </div>
 
-<!-- CANVAS -->
 <canvas id="gameCanvas"></canvas>
 
-<!-- WAIT PROGRESS -->
 <div id="waitProgressBar"><div id="waitProgressFill"></div></div>
 
-<!-- STATUS STRIP -->
 <div id="statusStrip">Premi 🎣 per pescare!</div>
 
-<!-- FISH LOG -->
 <div id="fishLog"></div>
 
-<!-- NOTIFICATIONS -->
 <div id="notifArea"></div>
 
-<!-- BOTTOM NAV -->
 <div id="bottomNav">
   <button class="nav-btn nav-fish" id="btnFish" onclick="G.fishAction()">
     <span class="nav-icon">🎣</span>
@@ -463,7 +469,6 @@ button, [role=button] { touch-action: manipulation; }
   </button>
 </div>
 
-<!-- ====== SHOP MODAL ====== -->
 <div class="modal-bg" id="shopModal">
   <div class="modal">
     <div class="modal-drag"></div>
@@ -478,7 +483,6 @@ button, [role=button] { touch-action: manipulation; }
   </div>
 </div>
 
-<!-- ====== INVENTORY MODAL ====== -->
 <div class="modal-bg" id="invModal">
   <div class="modal">
     <div class="modal-drag"></div>
@@ -492,7 +496,6 @@ button, [role=button] { touch-action: manipulation; }
   </div>
 </div>
 
-<!-- ====== EQUIP MODAL ====== -->
 <div class="modal-bg" id="equipModal">
   <div class="modal">
     <div class="modal-drag"></div>
@@ -501,12 +504,12 @@ button, [role=button] { touch-action: manipulation; }
       <button class="close-btn" onclick="G.closeModal('equip')">×</button>
     </div>
     <div class="modal-body">
+      <div class="tabs" id="equipTabs"></div>
       <div id="equipContent"></div>
     </div>
   </div>
 </div>
 
-<!-- ====== MINIGAME OVERLAY ====== -->
 <div id="minigameOverlay">
   <div id="mgFishIcon">🐟</div>
   <div id="mgFishName">Pesce</div>
@@ -535,7 +538,6 @@ button, [role=button] { touch-action: manipulation; }
   </div>
 </div>
 
-<!-- INTRO -->
 <div id="introOverlay">
   <div style="font-size:52px">🎣</div>
   <h1>DEEP BLUE FISHER</h1>
@@ -604,614 +606,898 @@ const FISH_DB = [
   {id:'bonito',     name:'Palamita',        icon:'🐟',rarity:'uncommon', sizeClass:'medium', minKg:1.0, maxKg:7.0,  difficulty:5, value:60,   preferred:['bait_sardine','bait_lure'],        hookSize:['hook_medium']},
   {id:'dentex',     name:'Dentice',         icon:'🐠',rarity:'rare',     sizeClass:'medium', minKg:1.5, maxKg:8.0,  difficulty:5, value:100,  preferred:['bait_squid','bait_sardine'],       hookSize:['hook_medium']},
   {id:'mahi_mahi',  name:'Mahi-Mahi',       icon:'🐬',rarity:'rare',     sizeClass:'medium', minKg:2.0, maxKg:15,   difficulty:6, value:150,  preferred:['bait_sardine','bait_lure'],        hookSize:['hook_medium','hook_large']},
-  {id:'grouper',    name:'Cernia',          icon:'🐠',rarity:'rare',     sizeClass:'medium', minKg:2.0, maxKg:12,   difficulty:5, value:120,  preferred:['bait_squid','bait_shrimp'],        hookSize:['hook_medium','hook_large']},
+  {id:'grouper',    name:'Cernia',          icon:'🐠',rarity:'rare',     sizeClass:'medium', minKg:2.0, maxKg:12,   difficulty:5, value:120,  preferred:['bait_squid','bait_shrimp'],         hookSize:['hook_medium','hook_large']},
   {id:'amberjack',  name:'Ricciola',        icon:'🐟',rarity:'rare',     sizeClass:'medium', minKg:3.0, maxKg:18,   difficulty:6, value:140,  preferred:['bait_sardine','bait_squid'],       hookSize:['hook_medium','hook_large']},
-  {id:'octopus',    name:'Polpo',           icon:'🐙',rarity:'uncommon', sizeClass:'medium', minKg:0.5, maxKg:5.0,  difficulty:4, value:70,   preferred:['bait_shrimp','bait_squid'],        hookSize:['hook_medium']},
+  {id:'octopus',    name:'Polpo',           icon:'🐙',rarity:'uncommon', sizeClass:'medium', minKg:0.5, maxKg:5.0,  difficulty:4, value:70,   preferred:['bait_shrimp','bait_squid'],         hookSize:['hook_medium']},
   {id:'garfish',    name:'Aguglia',         icon:'🐟',rarity:'uncommon', sizeClass:'medium', minKg:0.3, maxKg:2.0,  difficulty:4, value:35,   preferred:['bait_lure','bait_sardine'],        hookSize:['hook_medium']},
-  {id:'barracuda',  name:'Barracuda',       icon:'🐟',rarity:'rare',     sizeClass:'large',  minKg:3.0, maxKg:20,   difficulty:6, value:160,  preferred:['bait_lure','bait_sardine'],        hookSize:['hook_medium','hook_large']},
-  {id:'cobia',      name:'Cobia',           icon:'🐟',rarity:'rare',     sizeClass:'large',  minKg:5.0, maxKg:40,   difficulty:6, value:220,  preferred:['bait_squid','bait_sardine'],       hookSize:['hook_large']},
-  {id:'giant_trevally',name:'Carangide Gigante',icon:'🐠',rarity:'rare', sizeClass:'large',  minKg:5.0, maxKg:35,   difficulty:7, value:250,  preferred:['bait_lure','bait_squid'],          hookSize:['hook_large']},
-  {id:'tarpon',     name:'Tarpon',          icon:'🐟',rarity:'rare',     sizeClass:'large',  minKg:10,  maxKg:70,   difficulty:7, value:300,  preferred:['bait_sardine','bait_shrimp'],      hookSize:['hook_large']},
-  {id:'tuna_skip',  name:'Tonnetto',        icon:'🐟',rarity:'rare',     sizeClass:'large',  minKg:5.0, maxKg:25,   difficulty:7, value:200,  preferred:['bait_sardine','bait_squid'],       hookSize:['hook_large']},
-  // Epic
-  {id:'wahoo',      name:'Wahoo',           icon:'🐟',rarity:'epic',     sizeClass:'xlarge', minKg:10,  maxKg:60,   difficulty:7, value:400,  preferred:['bait_lure','bait_sardine'],        hookSize:['hook_large','hook_circle']},
-  {id:'sailfish',   name:'Marlin Veliero',  icon:'🐡',rarity:'epic',     sizeClass:'xlarge', minKg:20,  maxKg:90,   difficulty:8, value:700,  preferred:['bait_squid','bait_deep'],          hookSize:['hook_large','hook_circle']},
-  {id:'yellowfin',  name:'Tonno Pinna Gialla',icon:'🐡',rarity:'epic',  sizeClass:'xlarge', minKg:20,  maxKg:120,  difficulty:8, value:600,  preferred:['bait_sardine','bait_deep'],        hookSize:['hook_large','hook_circle']},
-  {id:'swordfish',  name:'Pesce Spada',     icon:'🗡️',rarity:'epic',    sizeClass:'xlarge', minKg:30,  maxKg:180,  difficulty:8, value:800,  preferred:['bait_squid','bait_deep'],          hookSize:['hook_large','hook_circle']},
-  {id:'thresher',   name:'Squalo Volpe',    icon:'🦈',rarity:'epic',     sizeClass:'xxlarge',minKg:60,  maxKg:300,  difficulty:9, value:1800, preferred:['bait_deep','bait_sardine'],        hookSize:['hook_circle']},
-  {id:'hammerhead', name:'Squalo Martello', icon:'🦈',rarity:'epic',     sizeClass:'xxlarge',minKg:80,  maxKg:400,  difficulty:9, value:2000, preferred:['bait_deep','bait_squid'],          hookSize:['hook_circle']},
-  {id:'tiger_shark',name:'Squalo Tigre',    icon:'🦈',rarity:'epic',     sizeClass:'xxlarge',minKg:90,  maxKg:500,  difficulty:9, value:2200, preferred:['bait_deep'],                      hookSize:['hook_circle']},
-  {id:'ocean_sunfish',name:'Pesce Luna',    icon:'🌕',rarity:'epic',     sizeClass:'xxlarge',minKg:50,  maxKg:600,  difficulty:8, value:2500, preferred:['bait_squid','bait_deep'],          hookSize:['hook_circle']},
-  {id:'bluefin_tuna',name:'Tonno Rosso',    icon:'🐡',rarity:'epic',     sizeClass:'xxlarge',minKg:50,  maxKg:350,  difficulty:9, value:1500, preferred:['bait_deep','bait_sardine'],        hookSize:['hook_circle']},
-  // Legendary
-  {id:'blue_marlin',name:'Marlin Blu',      icon:'🏆',rarity:'legendary',sizeClass:'boss',   minKg:100, maxKg:500,  difficulty:10,value:5000, preferred:['bait_deep'],                      hookSize:['hook_circle']},
-  {id:'oarfish',    name:'Pesce Remo',      icon:'🐟',rarity:'legendary',sizeClass:'boss',   minKg:30,  maxKg:100,  difficulty:9, value:6000, preferred:['bait_deep'],                      hookSize:['hook_circle']},
-  {id:'great_white',name:'Grande Squalo Bianco',icon:'🦈',rarity:'legendary',sizeClass:'boss',minKg:300,maxKg:1200,difficulty:10,value:0,   preferred:['bait_deep'],hookSize:['hook_circle'],adventure:true,advValue:8000},
-  {id:'manta_ray',  name:'Manta Gigante',   icon:'🦋',rarity:'legendary',sizeClass:'boss',   minKg:200, maxKg:1000, difficulty:9, value:0,    preferred:['bait_deep'],hookSize:['hook_circle'],adventure:true,advValue:4000},
+  {id:'barracuda',  name:'Barracuda',       icon:'🐟',rarity:'rare',     sizeClass:'medium', minKg:1.5, maxKg:10,   difficulty:6, value:110,  preferred:['bait_lure','bait_sardine'],        hookSize:['hook_medium','hook_large']},
+  // Large/Epic
+  {id:'bluefin',    name:'Tonno Rosso',     icon:'🐟',rarity:'epic',     sizeClass:'large',  minKg:15,  maxKg:120,  difficulty:8, value:450,  preferred:['bait_sardine','bait_squid'],       hookSize:['hook_large','hook_circle']},
+  {id:'swordfish',  name:'Pesce Spada',     icon:'⚔️',rarity:'epic',     sizeClass:'large',  minKg:20,  maxKg:180,  difficulty:9, value:600,  preferred:['bait_squid','bait_sardine'],        hookSize:['hook_large','hook_circle']},
+  {id:'blue_shark', name:'Verdesca',        icon:'🦈',rarity:'epic',     sizeClass:'large',  minKg:25,  maxKg:150,  difficulty:8, value:500,  preferred:['bait_sardine','bait_squid'],       hookSize:['hook_large','hook_circle']},
+  {id:'conger',     name:'Grongo',          icon:'🐍',rarity:'uncommon', sizeClass:'medium', minKg:2.0, maxKg:15,   difficulty:5, value:80,   preferred:['bait_squid','bait_worm'],          hookSize:['hook_medium','hook_large']},
+  {id:'sunfish',    name:'Pesce Luna',      icon:'🐠',rarity:'rare',     sizeClass:'large',  minKg:10,  maxKg:80,   difficulty:6, value:300,  preferred:['bait_shrimp','bait_squid'],         hookSize:['hook_large']},
+  // XLarge/Legendary
+  {id:'manta',      name:'Manta Gigante',   icon:'🐋',rarity:'legendary',sizeClass:'xlarge', minKg:80,  maxKg:400,  difficulty:11,value:1200, preferred:['bait_shrimp','bait_deep'],         hookSize:['hook_circle']},
+  {id:'hammerhead', name:'Squalo Martello', icon:'🦈',rarity:'legendary',sizeClass:'xlarge', minKg:60,  maxKg:350,  difficulty:12,value:1500, preferred:['bait_sardine','bait_deep'],        hookSize:['hook_circle']},
+  {id:'mako',       name:'Squalo Mako',     icon:'🦈',rarity:'legendary',sizeClass:'xlarge', minKg:50,  maxKg:300,  difficulty:13,value:1800, preferred:['bait_squid','bait_deep'],          hookSize:['hook_circle']},
+  // XXLarge/Boss
+  {id:'kraken',     name:'Piccolo Kraken',  icon:'🦑',rarity:'legendary',sizeClass:'xxlarge',minKg:150, maxKg:800,  difficulty:15,value:3500, preferred:['bait_deep','bait_squid'],          hookSize:['hook_circle']},
+  {id:'leviathan',  name:'Leviatano',       icon:'🐉',rarity:'legendary',sizeClass:'boss',   minKg:300, maxKg:2000, difficulty:18,value:6000, preferred:['bait_deep'],                      hookSize:['hook_circle']},
 ];
 
-// ── 3. PLAYER STATE ────────────────────────────────────────
-const PLAYER = {
-  coins: 50,
-  totalCaught: 0,
-  inventory: [],
-  ownedRods:   ['rod_bamboo'],
-  ownedLines:  ['line_light'],
-  ownedHooks:  ['hook_small'],
-  ownedBaits:  { bait_worm: 999 },
-  equip: { rod:'rod_bamboo', line:'line_light', hook:'hook_small', bait:'bait_worm' },
-};
-
-// ── 4. GAME STATE ──────────────────────────────────────────
+// ── 3. STATE MANAGEMENT ────────────────────────────────────
 const STATE = {
-  phase: 'idle',
-  waitTimer: 0,
-  waitDuration: 0,
-  bobDir: 1, bobDepth: 8,
-  waveOffset: 0,
-  bubbles: [],
-  floatingTexts: [],
-  fishParticles: [],
-  currentFish: null,
-  fishHP: 100, fishHPMax: 100,
-  playerStamina: 100, playerStaminaMax: 100,
-  minigameInterval: null,
-  log: [],
-  shopTab: 'rods',
+  // Configurazione salvataggio
+  saveVersion: 1,
+
+  // Economia e progressi
+  coins: 0,
+  caughtCount: 0,
+  lastCaughtName: '',
+  
+  // Inventario dei pesci pescati (da vendere)
+  inventory: [], // array di oggetti { id, name, icon, rarity, kg, value }
+  
+  // Equipaggiamento sbloccato e attivo
+  ownedItems: {
+    rod: ['rod_bamboo'],
+    line: ['line_light'],
+    hook: ['hook_small'],
+    bait: ['bait_worm'],
+  },
+  equipped: {
+    rod: 'rod_bamboo',
+    line: 'line_light',
+    hook: 'hook_small',
+    bait: 'bait_worm',
+  },
+  baitQty: {
+    bait_worm: 999,
+    bait_shrimp: 0,
+    bait_squid: 0,
+    bait_sardine: 0,
+    bait_lure: 0,
+    bait_deep: 0,
+  },
+
+  // Stato dinamico della sessione (non persiste nel salvataggio fisso)
+  phase: 'idle', // 'idle' | 'waiting' | 'hooking' | 'minigame'
+  activeFish: null,
+  biteTimeout: null,
+  waitInterval: null,
+  waitProgress: 0,
+  waitTotalTime: 0,
+  
+  // Stato del minigioco attivo
+  mg: {
+    fishStamina: 100,
+    playerStamina: 100,
+    fishMax: 100,
+    playerMax: 100,
+    decayTask: null,
+    fishAiTask: null,
+  }
 };
 
-// ── 5. CANVAS ──────────────────────────────────────────────
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
+// ── 4. VISUAL EFFECT SUB-ENGINE (Canvas Background) ─────────
+const CanvasBg = {
+  ctx: null, width: 0, height: 0, bubbles: [], particles: [], fishBg: [],
+  init(canvasId) {
+    const cvs = document.getElementById(canvasId);
+    this.ctx = cvs.getContext('2d');
+    this.resize(cvs);
+    window.addEventListener('resize', () => this.resize(cvs));
+    
+    // Genera bolle e pesciolini decorativi di sfondo
+    for(let i=0; i<25; i++) this.bubbles.push({ x:Math.random()*this.width, y:Math.random()*this.height, r:Math.random()*3+1, s:Math.random()*1+0.4 });
+    for(let i=0; i<6; i++) this.fishBg.push({ x:Math.random()*this.width, y:Math.random()*this.height, s:Math.random()*20+12, sp:Math.random()*0.6+0.2, d:Math.random()>0.5?1:-1 });
+    
+    this.loop();
+  },
+  resize(cvs) {
+    const dpr = window.devicePixelRatio || 1;
+    const rect = cvs.getBoundingClientRect();
+    cvs.width = rect.width * dpr;
+    cvs.height = rect.height * dpr;
+    this.ctx.scale(dpr, dpr);
+    this.width = rect.width;
+    this.height = rect.height;
+  },
+  addSplash(x, y, count=15, color='#5bc8ff') {
+    for(let i=0; i<count; i++) {
+      this.particles.push({
+        x: x || this.width/2, y: y || this.height*0.45,
+        vx: (Math.random()-0.5)*5, vy: (Math.random()-0.6)*6 - 2,
+        r: Math.random()*4+1.5, alpha: 1, color: color
+      });
+    }
+  },
+  loop() {
+    requestAnimationFrame(() => this.loop());
+    const ctx = this.ctx; if(!ctx) return;
+    
+    // Clear & Sfondo marino gradiente sfumato
+    let grad = ctx.createLinearGradient(0, 0, 0, this.height);
+    grad.addColorStop(0, '#0a204a');
+    grad.addColorStop(0.5, '#05122c');
+    grad.addColorStop(1, '#020718');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, this.width, this.height);
+    
+    // Disegna pesci decorativi sul fondo
+    ctx.fillStyle = 'rgba(20,60,120,0.15)';
+    this.fishBg.forEach(f => {
+      f.x += f.sp * f.d;
+      if(f.x > this.width + 50 && f.d===1) f.x = -50;
+      if(f.x < -50 && f.d===-1) f.x = this.width + 50;
+      ctx.beginPath();
+      ctx.ellipse(f.x, f.y, f.s, f.s*0.4, 0, 0, Math.PI*2);
+      ctx.fill();
+    });
 
-function resize() {
-  canvas.width  = canvas.offsetWidth;
-  canvas.height = canvas.offsetHeight;
-}
-window.addEventListener('resize', resize);
-resize();
+    // Aggiorna e disegna bolle
+    ctx.fillStyle = 'rgba(91,200,255,0.18)';
+    this.bubbles.forEach(b => {
+      b.y -= b.s;
+      if(b.y < -10) { b.y = this.height+10; b.x = Math.random()*this.width; }
+      ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI*2); ctx.fill();
+    });
+    
+    // Aggiorna particelle splash di pesca
+    this.particles.forEach((p, idx) => {
+      p.x += p.vx; p.y += p.vy; p.vy += 0.15; // gravità
+      p.alpha -= 0.02;
+      if(p.alpha <= 0) { this.particles.splice(idx, 1); return; }
+      ctx.save(); ctx.globalAlpha = p.alpha; ctx.fillStyle = p.color;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill(); ctx.restore();
+    });
 
-// ── 6. SCENE DRAWING ───────────────────────────────────────
-const WATER_FRAC = 0.38;
-
-function drawScene(ts) {
-  const W = canvas.width, H = canvas.height;
-  STATE.waveOffset = ts * 0.0005;
-
-  // Sky
-  const sky = ctx.createLinearGradient(0, 0, 0, H * WATER_FRAC);
-  sky.addColorStop(0, '#050e22');
-  sky.addColorStop(1, '#0c2248');
-  ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H * WATER_FRAC);
-
-  // Stars
-  for (let i = 0; i < 35; i++) {
-    const sx = (i * 137.5 % 1) * W, sy = (i * 79.3 % 1) * H * WATER_FRAC * 0.8;
-    ctx.globalAlpha = 0.25 + (Math.sin(ts * 0.001 + i) * 0.5 + 0.5) * 0.45;
-    ctx.fillStyle = '#fff'; ctx.fillRect(sx, sy, 1.5, 1.5);
-  }
-  ctx.globalAlpha = 1;
-
-  // Moon
-  const mg = ctx.createRadialGradient(W*0.8, H*0.1, 2, W*0.8, H*0.1, 22);
-  mg.addColorStop(0, '#fffff0'); mg.addColorStop(1, '#b0b880');
-  ctx.fillStyle = mg; ctx.beginPath(); ctx.arc(W*0.8, H*0.1, 22, 0, Math.PI*2); ctx.fill();
-
-  // Water body
-  const wy = H * WATER_FRAC;
-  const wg = ctx.createLinearGradient(0, wy, 0, H);
-  wg.addColorStop(0, '#0b3570'); wg.addColorStop(0.4, '#082858'); wg.addColorStop(1, '#030c22');
-  ctx.fillStyle = wg; ctx.fillRect(0, wy, W, H - wy);
-
-  // Wave surface
-  ctx.beginPath(); ctx.moveTo(0, wy);
-  for (let x = 0; x <= W; x += 5) {
-    const w = Math.sin(x * 0.02 + STATE.waveOffset) * 4 + Math.sin(x * 0.038 + STATE.waveOffset * 1.5) * 2;
-    ctx.lineTo(x, wy + w);
-  }
-  ctx.lineTo(W, wy); ctx.lineTo(0, wy);
-  ctx.fillStyle = 'rgba(25,90,210,0.22)'; ctx.fill();
-
-  // Water shimmer lines
-  ctx.strokeStyle = 'rgba(80,160,255,0.1)'; ctx.lineWidth = 1;
-  for (let i = 0; i < 6; i++) {
-    const ly = wy + 18 + i * 24, ox = Math.sin(ts * 0.0003 + i * 1.7) * 25;
-    ctx.beginPath(); ctx.moveTo(40 + ox, ly); ctx.lineTo(140 + ox, ly); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(W - 170 + ox, ly + 4); ctx.lineTo(W - 60 + ox, ly + 4); ctx.stroke();
-  }
-
-  // Ambient deep fish silhouettes
-  const dfs = [
-    {x: Math.sin(ts*0.00018)*W*0.28 + W*0.18, y: wy + (H-wy)*0.55, s:0.9, a:0.14},
-    {x: Math.sin(ts*0.00013+2)*W*0.35+W*0.4,  y: wy + (H-wy)*0.72, s:1.3, a:0.09},
-    {x: Math.sin(ts*0.00016+4)*W*0.2+W*0.65,  y: wy + (H-wy)*0.86, s:1.9, a:0.06},
-  ];
-  dfs.forEach(f => {
-    ctx.save(); ctx.globalAlpha = f.a; ctx.translate(f.x, f.y); ctx.scale(f.s, f.s);
-    ctx.fillStyle = '#142a60';
-    ctx.beginPath(); ctx.ellipse(0,0,20,9,0,0,Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(-20,0); ctx.lineTo(-32,-9); ctx.lineTo(-32,9); ctx.closePath(); ctx.fill();
-    ctx.restore();
-  });
-
-  // Bubbles
-  if (Math.random() < 0.06) STATE.bubbles.push({x:Math.random()*W, y:H, r:1+Math.random()*3, speed:0.3+Math.random()*0.5, a:0.3+Math.random()*0.3});
-  STATE.bubbles.forEach(b => { b.y -= b.speed; b.x += Math.sin(b.y*0.05)*0.35; });
-  STATE.bubbles = STATE.bubbles.filter(b => b.y > wy);
-  if (STATE.bubbles.length > 50) STATE.bubbles.splice(0, STATE.bubbles.length - 50);
-  STATE.bubbles.forEach(b => {
-    ctx.save(); ctx.globalAlpha = b.a * Math.min(1, (b.y - wy) / 35);
-    ctx.strokeStyle = 'rgba(100,190,255,0.7)'; ctx.lineWidth = 0.8;
-    ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI*2); ctx.stroke();
-    ctx.restore();
-  });
-
-  // Rod & line
-  if (STATE.phase !== 'idle') {
-    const rodTipX = W * 0.52, rodTipY = wy * 0.55;
-    const rodBaseX = W * 0.28, rodBaseY = wy * 1.02;
-    ctx.save();
-    ctx.strokeStyle = '#7a5c10'; ctx.lineWidth = 3; ctx.lineCap = 'round';
-    ctx.shadowColor = '#b08820'; ctx.shadowBlur = 5;
-    ctx.beginPath(); ctx.moveTo(rodBaseX, rodBaseY);
-    ctx.quadraticCurveTo(rodBaseX + (rodTipX-rodBaseX)*0.55, rodBaseY - 25, rodTipX, rodTipY);
-    ctx.stroke(); ctx.restore();
-
-    // Line to bob
-    const bobX = W * 0.52, bobY = wy - 12 + STATE.bobDepth + Math.sin(STATE.waveOffset*2)*3;
-    ctx.save(); ctx.strokeStyle = 'rgba(210,215,255,0.55)'; ctx.lineWidth = 1.2;
-    ctx.setLineDash([5,4]);
-    ctx.beginPath(); ctx.moveTo(rodTipX, rodTipY); ctx.lineTo(rodTipX+8, wy-5); ctx.stroke();
-    ctx.setLineDash([]); ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(210,215,255,0.7)';
-    ctx.beginPath(); ctx.moveTo(rodTipX+8, wy-5); ctx.lineTo(bobX, bobY); ctx.stroke();
-    ctx.restore();
-
-    if (STATE.phase === 'waiting' || STATE.phase === 'hooking') {
-      ctx.save();
-      ctx.shadowColor = STATE.phase==='hooking' ? '#ff3030' : '#ff9900';
-      ctx.shadowBlur = STATE.phase==='hooking' ? 14 : 7;
-      ctx.fillStyle = STATE.phase==='hooking' ? '#ff2020' : '#ff8800';
-      ctx.beginPath(); ctx.ellipse(bobX, bobY-4, 4, 9, 0, 0, Math.PI*2); ctx.fill();
-      ctx.fillStyle = '#ffdd00';
-      ctx.beginPath(); ctx.ellipse(bobX, bobY+5, 4, 6, 0, 0, Math.PI*2); ctx.fill();
-      ctx.restore();
+    // Elementi scenici statici al centro in base alla fase
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    if(STATE.phase === 'idle') {
+      ctx.font = '14px "Courier New"'; ctx.fillStyle = 'rgba(90,140,200,0.4)';
+      ctx.fillText('Lancia la lenza per iniziare', this.width/2, this.height*0.45);
+    } else if(STATE.phase === 'waiting') {
+      ctx.font = '36px "Courier New"';
+      ctx.fillText('⚓', this.width/2, this.height*0.43);
+      ctx.font = '13px "Courier New"'; ctx.fillStyle = '#6a90b8';
+      ctx.fillText('In attesa che un pesce abbocchi...', this.width/2, this.height*0.53);
+    } else if(STATE.phase === 'hooking') {
+      ctx.font = '54px "Courier New"';
+      ctx.fillText('🔴', this.width/2, this.height*0.42);
+      ctx.font = 'bold 20px "Courier New"'; ctx.fillStyle = '#ff4040';
+      ctx.fillText('!!! ABBOCCATO !!!', this.width/2, this.height*0.54);
+      ctx.font = '12px "Courier New"'; ctx.fillStyle = '#ff8080';
+      ctx.fillText('PREMI SUBITO IL TASTO TIRA!', this.width/2, this.height*0.60);
     }
   }
+};
 
-  // Fish particles
-  STATE.fishParticles = STATE.fishParticles.filter(p => ts - p.born < p.life);
-  STATE.fishParticles.forEach(p => {
-    const age = (ts - p.born) / p.life;
-    ctx.save(); ctx.globalAlpha = 1 - age;
-    ctx.font = `${p.size}px serif`;
-    ctx.fillText(p.icon, p.x + Math.sin(age*10)*15, p.y - age * 80);
-    ctx.restore();
-  });
-
-  // Floating texts
-  STATE.floatingTexts = STATE.floatingTexts.filter(t => t.alpha > 0);
-  STATE.floatingTexts.forEach(t => {
-    ctx.save(); ctx.globalAlpha = t.alpha;
-    ctx.font = `bold ${t.size}px 'Courier New',monospace`;
-    ctx.fillStyle = t.color; ctx.textAlign = 'center';
-    ctx.shadowColor = t.color; ctx.shadowBlur = 8;
-    ctx.fillText(t.text, t.x, t.y); ctx.restore();
-    t.y -= 0.9; t.alpha -= 0.014;
-  });
-
-  // Bob bob
-  if (STATE.phase === 'waiting') {
-    STATE.bobDepth += STATE.bobDir * 0.18;
-    if (STATE.bobDepth > 16 || STATE.bobDepth < 2) STATE.bobDir *= -1;
-  }
-}
-
-// ── 7. GAME LOOP ───────────────────────────────────────────
-let lastTs = 0;
-function loop(ts) {
-  const dt = ts - lastTs; lastTs = ts;
-  if (canvas.width !== canvas.offsetWidth || canvas.height !== canvas.offsetHeight) resize();
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  drawScene(ts);
-
-  if (STATE.phase === 'waiting') {
-    STATE.waitTimer += dt;
-    const prog = Math.min(1, STATE.waitTimer / STATE.waitDuration);
-    document.getElementById('waitProgressFill').style.width = (prog * 100) + '%';
-    if (STATE.waitTimer >= STATE.waitDuration) triggerBite();
-  }
-
-  requestAnimationFrame(loop);
-}
-requestAnimationFrame(loop);
-
-// ── 8. FISHING LOGIC ───────────────────────────────────────
-function triggerBite() {
-  STATE.phase = 'hooking';
-  G.setStatus('🔴 Pesce all\'amo! Premi TIRA! in fretta!');
-  const btn = document.getElementById('btnFish');
-  btn.querySelector('.nav-icon').textContent = '🔴';
-  btn.querySelector('.nav-label').textContent = 'TIRA!';
-  btn.classList.add('bite-pulse');
-  STATE.biteMissTimer = setTimeout(() => {
-    if (STATE.phase === 'hooking') {
-      G.notify('Troppo lento! Il pesce è fuggito! 😤', 'danger');
-      G.resetFishing();
-    }
-  }, 3200);
-}
-
+// ── 5. CORE ENGINE & UI CONTROLLER ─────────────────────────
 const G = {
-  fishAction() {
-    if (STATE.phase === 'idle')     return G.startFishing();
-    if (STATE.phase === 'hooking')  return G.startMinigame();
-    if (STATE.phase === 'waiting')  return; // waiting
+  activeShopTab: 'rod',
+  activeEquipTab: 'rod',
+
+  init() {
+    CanvasBg.init('gameCanvas');
+    
+    // SISTEMA DI CARICAMENTO AUTOMATICO NATIVO ALL'AVVIO
+    this.loadGame();
+    
+    this.syncHud();
+    this.logMsg("Benvenuto in Deep Blue Fisher!");
+    
+    // Avvia il loop dell'autosave periodico asincrono ogni 25 secondi
+    setInterval(() => {
+      this.saveGame();
+    }, 25000);
   },
 
-  startFishing() {
-    const bait = PLAYER.equip.bait, bd = BAITS[bait];
-    if (!bd.infinite && (PLAYER.ownedBaits[bait]||0) <= 0) {
-      G.notify('Esca esaurita! Comprane altra. 🦐', 'danger'); return;
+  // ── 5A. AUTOMATIC / MANUAL SAVE CORE (LocalStorage & JSON) ──
+  saveGame() {
+    try {
+      const gameState = {
+        saveVersion: STATE.saveVersion,
+        coins: STATE.coins,
+        caughtCount: STATE.caughtCount,
+        lastCaughtName: STATE.lastCaughtName,
+        inventory: STATE.inventory,
+        ownedItems: STATE.ownedItems,
+        equipped: STATE.equipped,
+        baitQty: STATE.baitQty
+      };
+      
+      localStorage.setItem('deepblue_savegame', JSON.stringify(gameState));
+      // Il salvataggio silenzioso periodico non mostra notif, ma quello manuale/evento cruciale sì
+      console.log("Gioco salvato automaticamente nel LocalStorage.");
+    } catch (e) {
+      console.error("Errore durante il salvataggio automatico nel localStorage:", e);
     }
-    if (!bd.infinite) PLAYER.ownedBaits[bait]--;
-
-    STATE.phase = 'waiting';
-    STATE.waitTimer = 0;
-    const rod = RODS[PLAYER.equip.rod];
-    STATE.waitDuration = (4000 + Math.random() * 6000) * rod.waitMult;
-    STATE.bobDepth = 8; STATE.bobDir = 1;
-
-    document.getElementById('waitProgressBar').style.display = 'block';
-    document.getElementById('waitProgressFill').style.width = '0%';
-
-    const btn = document.getElementById('btnFish');
-    btn.querySelector('.nav-icon').textContent = '⏳';
-    btn.querySelector('.nav-label').textContent = 'Attesa';
-    btn.disabled = true;
-
-    const baitQty = bd.infinite ? '∞' : (PLAYER.ownedBaits[bait]||0);
-    G.setStatus(`🎣 Aspettando un pesce... Esca: ${bd.icon} (${baitQty})`);
   },
 
-  startMinigame() {
-    clearTimeout(STATE.biteMissTimer);
-    STATE.phase = 'minigame';
+  loadGame() {
+    try {
+      const rawSave = localStorage.getItem('deepblue_savegame');
+      if (!rawSave) {
+        console.log("Nessun salvataggio trovato. Inizializzazione nuova partita.");
+        this.resetToDefaults();
+        return;
+      }
+
+      const parsed = JSON.parse(rawSave);
+      
+      // Controllo robustezza dati corrotti o incompleti
+      if (!parsed || typeof parsed !== 'object') {
+        throw new Error("Salvataggio corrotto o vuoto.");
+      }
+
+      // Upgrade futuri del salvataggio tramite saveVersion
+      if (parsed.saveVersion && parsed.saveVersion < STATE.saveVersion) {
+        console.log("Rilevato salvataggio obsoleto. Eseguo migrazione dati...");
+        // Qui andrebbero logiche di conversione se cambiasse la struttura dei dati
+      }
+
+      // Ripristino dati strutturati con valori di fallback di emergenza robusti
+      STATE.coins = typeof parsed.coins === 'number' ? parsed.coins : 0;
+      STATE.caughtCount = typeof parsed.caughtCount === 'number' ? parsed.caughtCount : 0;
+      STATE.lastCaughtName = parsed.lastCaughtName || '';
+      STATE.inventory = Array.isArray(parsed.inventory) ? parsed.inventory : [];
+      
+      // Merge oggetti di attrezzatura con fallback
+      if (parsed.ownedItems) {
+        if (Array.isArray(parsed.ownedItems.rod)) STATE.ownedItems.rod = parsed.ownedItems.rod;
+        if (Array.isArray(parsed.ownedItems.line)) STATE.ownedItems.line = parsed.ownedItems.line;
+        if (Array.isArray(parsed.ownedItems.hook)) STATE.ownedItems.hook = parsed.ownedItems.hook;
+        if (Array.isArray(parsed.ownedItems.bait)) STATE.ownedItems.bait = parsed.ownedItems.bait;
+      }
+      
+      if (parsed.equipped) {
+        if (parsed.equipped.rod) STATE.equipped.rod = parsed.equipped.rod;
+        if (parsed.equipped.line) STATE.equipped.line = parsed.equipped.line;
+        if (parsed.equipped.hook) STATE.equipped.hook = parsed.equipped.hook;
+        if (parsed.equipped.bait) STATE.equipped.bait = parsed.equipped.bait;
+      }
+      
+      if (parsed.baitQty) {
+        Object.keys(STATE.baitQty).forEach(k => {
+          if (typeof parsed.baitQty[k] === 'number') {
+            STATE.baitQty[k] = parsed.baitQty[k];
+          }
+        });
+      }
+
+      console.log("Salvataggio caricato con successo dal LocalStorage.");
+      this.showNotif("Partita caricata correttamente!", "success");
+    } catch (err) {
+      console.error("Fallimento caricamento salvataggio:", err);
+      this.showNotif("Impossibile caricare salvataggio corrotto! Nuova partita avviata.", "danger");
+      this.resetToDefaults();
+    }
+    this.syncHud();
+  },
+
+  resetSave() {
+    if (confirm("Sei sicuro di voler CANCELLARE definitivamente tutti i progressi attuali? Questa azione non è reversibile.")) {
+      localStorage.removeItem('deepblue_savegame');
+      this.resetToDefaults();
+      this.saveGame();
+      this.syncHud();
+      this.showNotif("Salvataggio resettato!", "danger");
+      this.closeModal('equip');
+    }
+  },
+
+  exportSave() {
+    try {
+      const gameState = {
+        saveVersion: STATE.saveVersion,
+        coins: STATE.coins,
+        caughtCount: STATE.caughtCount,
+        lastCaughtName: STATE.lastCaughtName,
+        inventory: STATE.inventory,
+        ownedItems: STATE.ownedItems,
+        equipped: STATE.equipped,
+        baitQty: STATE.baitQty
+      };
+      
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(gameState, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `deep_blue_fisher_save_v${STATE.saveVersion}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      this.showNotif("Salvataggio esportato con successo!", "success");
+    } catch (err) {
+      this.showNotif("Errore durante l'esportazione", "danger");
+    }
+  },
+
+  importSave(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const parsed = JSON.parse(e.target.result);
+        if (!parsed || typeof parsed !== 'object') throw new Error("JSON non valido");
+        
+        // Per importare carichiamo l'oggetto forzatamente nel localstorage e rinfreschiamo l'engine
+        localStorage.setItem('deepblue_savegame', JSON.stringify(parsed));
+        this.loadGame();
+        this.closeModal('equip');
+        this.showNotif("File di salvataggio importato!", "success");
+      } catch (err) {
+        alert("Errore critico: Il file selezionato non è un salvataggio JSON valido per questo gioco.");
+      }
+    };
+    reader.readAsText(file);
+  },
+
+  resetToDefaults() {
+    STATE.coins = 0;
+    STATE.caughtCount = 0;
+    STATE.lastCaughtName = '';
+    STATE.inventory = [];
+    STATE.ownedItems = { rod: ['rod_bamboo'], line: ['line_light'], hook: ['hook_small'], bait: ['bait_worm'] };
+    STATE.equipped = { rod: 'rod_bamboo', line: 'line_light', hook: 'hook_small', bait: 'bait_worm' };
+    STATE.baitQty = { bait_worm: 999, bait_shrimp: 0, bait_squid: 0, bait_sardine: 0, bait_lure: 0, bait_deep: 0 };
+  },
+
+  // ── 5B. GAMEPLAY ACTION FLOWS ──────────────────────────────
+  syncHud() {
+    document.getElementById('hudCoins').innerText = `💰 ${STATE.coins}`;
+    document.getElementById('shopCoins').innerText = STATE.coins;
+    document.getElementById('hudCaught').innerText = STATE.caughtCount;
+    document.getElementById('hudLastFish').innerText = STATE.lastCaughtName ? `Ultimo: ${STATE.lastCaughtName}` : '';
+    
+    const r = RODS[STATE.equipped.rod];
+    const l = LINES[STATE.equipped.line];
+    const h = HOOKS[STATE.equipped.hook];
+    const b = BAITS[STATE.equipped.bait];
+    document.getElementById('hudEquipSummary').innerHTML = `${r.icon}${r.name}<br>${l.icon}${l.name}<br>${h.icon}${h.name}<br>${b.icon}${b.name}`;
+  },
+  
+  logMsg(txt) {
+    const log = document.getElementById('fishLog');
+    const d = new Date();
+    const timeStr = `[${d.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit', second:'2-digit'})}]`;
+    log.innerHTML = `<div>${timeStr} ${txt}</div>` + log.innerHTML;
+    // mantieni solo ultimi 5 logs
+    if(log.children.length > 5) log.removeChild(log.lastChild);
+  },
+
+  showNotif(txt, type='') {
+    const area = document.getElementById('notifArea');
+    const el = document.createElement('div');
+    el.className = `notif ${type}`;
+    el.innerText = txt;
+    area.appendChild(el);
+    setTimeout(() => { if(el && el.parentNode) el.parentNode.removeChild(el); }, 3100);
+  },
+
+  fishAction() {
+    const btn = document.getElementById('btnFish');
+    const lbl = document.getElementById('fishBtnLabel');
+    
+    if(STATE.phase === 'idle') {
+      // Controlla esche esaurite
+      const curBaitId = STATE.equipped.bait;
+      const baitData = BAITS[curBaitId];
+      if(!baitData.infinite && STATE.baitQty[curBaitId] <= 0) {
+        this.showNotif("Hai finito questo tipo di esca! Scegline un'altra.", "danger");
+        this.openModal('equip');
+        return;
+      }
+      
+      // Consuma l'esca finita (tranne quelle infinite come l'artificiale)
+      if(!baitData.infinite && curBaitId !== 'bait_worm') {
+        STATE.baitQty[curBaitId]--;
+        // Auto-salvataggio immediato al consumo risorsa importante
+        this.saveGame();
+      }
+
+      // Lancia la lenza
+      STATE.phase = 'waiting';
+      btn.className = "nav-btn nav-fish";
+      lbl.innerText = "ATTENDI";
+      this.logMsg(`Lanciata la lenza con esca: ${baitData.name}...`);
+      CanvasBg.addSplash(null, null, 12, '#a0c8ff');
+      
+      // Calcola tempo di attesa influenzato dalla canna e dall'esca
+      const rodData = RODS[STATE.equipped.rod];
+      const baseWait = Math.random() * 4000 + 3000; // 3-7 sec base
+      const finalWait = baseWait * rodData.waitMult * (1 / baitData.attractMult);
+      
+      // Mostra barra di avanzamento lineare sotto il canvas
+      const bar = document.getElementById('waitProgressBar');
+      const fill = document.getElementById('waitProgressFill');
+      bar.style.display = 'block';
+      fill.style.width = '0%';
+      
+      let startTs = Date.now();
+      STATE.waitInterval = setInterval(() => {
+        let elapsed = Date.now() - startTs;
+        let pct = Math.min(100, (elapsed / finalWait) * 100);
+        fill.style.width = `${pct}%`;
+        if(pct >= 100) clearInterval(STATE.waitInterval);
+      }, 100);
+
+      document.getElementById('statusStrip').innerText = "Attendi che abbochi qualcosa...";
+
+      STATE.biteTimeout = setTimeout(() => {
+        this.triggerBite();
+      }, finalWait);
+
+    } else if(STATE.phase === 'waiting') {
+      // Ritira lenza vuota prima del tempo
+      this.resetToIdle();
+      this.logMsg("Hai ritirato la lenza vuota.");
+      this.showNotif("Lenza ritirata");
+    } else if(STATE.phase === 'hooking') {
+      // Tempismo perfetto! Passa al minigioco
+      clearTimeout(STATE.biteTimeout);
+      this.startMinigame();
+    }
+  },
+
+  triggerBite() {
+    clearInterval(STATE.waitInterval);
     document.getElementById('waitProgressBar').style.display = 'none';
+    
+    STATE.phase = 'hooking';
+    const btn = document.getElementById('btnFish');
+    btn.className = "nav-btn nav-fish bite-pulse";
+    document.getElementById('fishBtnLabel').innerText = "TIRA!";
+    document.getElementById('statusStrip').innerText = "!! ABBOCCATO !! PREMI ORA !";
+    
+    // Splash continuo dell'abboccata sul canvas
+    CanvasBg.addSplash(null, null, 25, '#ff4040');
 
-    const fish = G.rollFish();
-    STATE.currentFish = fish;
-    const rod = RODS[PLAYER.equip.rod];
-    STATE.fishHPMax    = 40 + fish.difficulty * 14;
-    STATE.fishHP       = STATE.fishHPMax;
-    STATE.playerStaminaMax = 80 + rod.tier * 12;
-    STATE.playerStamina    = STATE.playerStaminaMax;
+    // Il giocatore ha un tempo limitato di reazione (da 1 a 2 secondi) basato sull'attrezzatura
+    const hData = HOOKS[STATE.equipped.hook];
+    const escapeReduce = hData.escapeReduce || 0;
+    const reactTime = (Math.random() * 800 + 1000) * (1 + escapeReduce);
 
-    document.getElementById('mgFishIcon').textContent = fish.icon;
-    document.getElementById('mgFishName').textContent = fish.name;
-    document.getElementById('mgFishStats').innerHTML =
-      `<span class="rarity-badge r-${fish.rarity}">${fish.rarity.toUpperCase()}</span>&nbsp;&nbsp;` +
-      `Diff: ${'⭐'.repeat(Math.ceil(fish.difficulty/2))} (${fish.difficulty}/10)<br>` +
-      `Peso: ${fish.minKg.toFixed(1)}–${fish.maxKg.toFixed(1)} kg`;
+    STATE.biteTimeout = setTimeout(() => {
+      this.logMsg("Il pesce è fuggito! Sei stato troppo lento.");
+      this.showNotif("Pesce fuggito!", "danger");
+      this.resetToIdle();
+    }, reactTime);
+  },
+
+  resetToIdle() {
+    clearInterval(STATE.waitInterval);
+    clearTimeout(STATE.biteTimeout);
+    document.getElementById('waitProgressBar').style.display = 'none';
+    STATE.phase = 'idle';
+    document.getElementById('btnFish').className = "nav-btn nav-fish";
+    document.getElementById('fishBtnLabel').innerText = "PESCA";
+    document.getElementById('statusStrip').innerText = "Premi 🎣 per pescare!";
+  },
+
+  // ── 5C. SIMULATED REELING MINIGAME SUBSYSTEM ────────────────
+  startMinigame() {
+    clearTimeout(STATE.biteTimeout);
+    document.getElementById('btnFish').className = "nav-btn nav-fish";
+    
+    // Selezione algoritmica del pesce in base ad esca e amo
+    const bData = BAITS[STATE.equipped.bait];
+    const hData = HOOKS[STATE.equipped.hook];
+    
+    // Filtra pesci idonei
+    let pool = FISH_DB.filter(f => {
+      const sizeMatch = bData.attracts.includes(f.sizeClass) && hData.sizeRange.includes(f.sizeClass);
+      return sizeMatch;
+    });
+    if(pool.length === 0) pool = [FISH_DB[0]]; // fallback sardina
+    
+    // Scelta casuale pesata leggermente sulla preferenza esca
+    let selected = pool[Math.floor(Math.random() * pool.length)];
+    STATE.activeFish = selected;
+
+    // Inizializza parametri dinamici del minigioco di tiro alla fune
+    const rData = RODS[STATE.equipped.rod];
+    const lData = LINES[STATE.equipped.line];
+    
+    // Difficoltà scalata sul peso
+    const weight = Math.random() * (selected.maxKg - selected.minKg) + selected.minKg;
+    STATE.activeFish.actualKg = weight;
+    
+    // Calcola stamine di partenza
+    let fishMax = 40 + selected.difficulty * 22;
+    let playerMax = 100 + (rData.tier * 15);
+    
+    // Se il peso supera il filo, incrementa rischio rottura immediata o estrema difficoltà
+    if(weight > lData.maxKg) {
+      fishMax *= 1.8; 
+    }
+
+    STATE.mg.fishMax = fishMax;
+    STATE.mg.fishStamina = fishMax;
+    STATE.mg.playerMax = playerMax;
+    STATE.mg.playerStamina = playerMax * 0.75; // inizia a 3/4 per dare sfida
+
+    // Configura overlay DOM
+    document.getElementById('mgFishIcon').innerText = selected.icon;
+    document.getElementById('mgFishName').innerText = selected.name.toUpperCase();
+    document.getElementById('mgFishStats').innerHTML = `Classe: <span class="rarity-badge r-${selected.rarity}">${selected.rarity}</span><br>Peso Stimato: ~<b>${weight.toFixed(2)} Kg</b>`;
+    
+    this.updateMgBars();
     document.getElementById('minigameOverlay').classList.add('show');
-    G.updateBars();
+    STATE.phase = 'minigame';
 
-    STATE.minigameInterval = setInterval(() => {
-      if (STATE.phase !== 'minigame') { clearInterval(STATE.minigameInterval); return; }
-      const drain = 0.7 + fish.difficulty * 0.28;
-      STATE.playerStamina = Math.max(0, STATE.playerStamina - drain);
-      G.updateBars();
-      if (STATE.playerStamina <= 0) G.miniLose('Stamina esaurita!');
-    }, 200);
+    // Loop IA del Pesce: periodicamente tira riducendo stamina giocatore
+    STATE.mg.fishAiTask = setInterval(() => {
+      // Il pesce combatte: toglie energia al giocatore proporzionale alla sua difficoltà
+      let basePull = 3 + (selected.difficulty * 1.2);
+      // Protezione lenza della canna da pesca sbloccata
+      basePull *= (1 - rData.lineBreakProtect);
+
+      STATE.mg.playerStamina -= basePull;
+      
+      // Il pesce recupera un briciolo di stamina se il giocatore non fa nulla
+      STATE.mg.fishStamina = Math.min(STATE.mg.fishMax, STATE.mg.fishStamina + 1.5);
+      
+      this.updateMgBars();
+      this.checkMgConditions();
+    }, 250);
+
+    // Decadimento naturale della stamina del giocatore nel tempo (fatica lineare)
+    STATE.mg.decayTask = setInterval(() => {
+      STATE.mg.playerStamina -= 1.0;
+      this.updateMgBars();
+      this.checkMgConditions();
+    }, 400);
   },
 
   miniTap(e) {
-    if (e) { e.preventDefault(); e.stopPropagation(); }
-    if (STATE.phase !== 'minigame') return;
-    const rod = RODS[PLAYER.equip.rod], hook = HOOKS[PLAYER.equip.hook];
-    const power = 4 + rod.tier * 1.6 + hook.tier * 1.1;
-    STATE.fishHP       = Math.max(0, STATE.fishHP - power);
-    STATE.playerStamina = Math.max(0, STATE.playerStamina - 0.6);
-    G.updateBars();
-
-    // Visual feedback
+    if(e) e.preventDefault();
+    if(STATE.phase !== 'minigame') return;
+    
+    // Effetto visivo flash sul tasto tap
     const tz = document.getElementById('tapZone');
     tz.classList.add('tapped');
-    setTimeout(() => tz.classList.remove('tapped'), 90);
+    setTimeout(() => tz.classList.remove('tapped'), 60);
 
-    if (STATE.fishHP <= 0) G.miniWin();
-    else if (STATE.playerStamina <= 0) G.miniLose('Stamina esaurita!');
+    // Il tap del giocatore arreca danno alla stamina del pesce
+    const rData = RODS[STATE.equipped.rod];
+    let dmg = 4 + (rData.tier * 2.5); // canne migliori fanno più danno al pesce
+    
+    STATE.mg.fishStamina -= dmg;
+    
+    // Un tap restituisce un filo di stamina al giocatore per premiare l'attività
+    STATE.mg.playerStamina = Math.min(STATE.mg.playerMax, STATE.mg.playerStamina + 1.2);
+
+    // Splash casuale di particelle nel minigioco
+    CanvasBg.addSplash(Math.random()*CanvasBg.width, Math.random()*CanvasBg.height, 2, 'rgba(255,255,255,0.4)');
+
+    this.updateMgBars();
+    this.checkMgConditions();
   },
 
-  updateBars() {
-    const fp  = Math.max(0, Math.round(STATE.fishHP / STATE.fishHPMax * 100));
-    const pp  = Math.max(0, Math.round(STATE.playerStamina / STATE.playerStaminaMax * 100));
-    document.getElementById('barFish').style.width   = fp + '%';
-    document.getElementById('barFishLbl').textContent = fp;
-    document.getElementById('barPlayer').style.width  = pp + '%';
-    document.getElementById('barPlayerLbl').textContent = pp;
+  updateMgBars() {
+    const fPct = Math.max(0, (STATE.mg.fishStamina / STATE.mg.fishMax) * 100);
+    const pPct = Math.max(0, (STATE.mg.playerStamina / STATE.mg.playerMax) * 100);
+    
+    document.getElementById('barFish').style.width = `${fPct}%`;
+    document.getElementById('barFishLbl').innerText = Math.ceil(STATE.mg.fishStamina);
+    
+    document.getElementById('barPlayer').style.width = `${pPct}%`;
+    document.getElementById('barPlayerLbl').innerText = Math.ceil(STATE.mg.playerStamina);
   },
 
-  miniWin() {
-    clearInterval(STATE.minigameInterval);
-    STATE.phase = 'idle';
+  checkMgConditions() {
+    if(STATE.mg.fishStamina <= 0) {
+      // VITTORIA: Catturato!
+      this.endMinigame(true);
+    } else if(STATE.mg.playerStamina <= 0) {
+      // SCONFITTA: Filo spezzato o stanchezza
+      this.endMinigame(false);
+    }
+  },
+
+  endMinigame(isSuccess) {
+    clearInterval(STATE.mg.fishAiTask);
+    clearInterval(STATE.mg.decayTask);
     document.getElementById('minigameOverlay').classList.remove('show');
-    const fish = STATE.currentFish;
-    const kg = parseFloat((fish.minKg + Math.random() * (fish.maxKg - fish.minKg)).toFixed(2));
+    
+    if(isSuccess) {
+      const fish = STATE.activeFish;
+      const finalVal = Math.round(fish.value * (1 + (fish.actualKg * 0.05)));
+      
+      const caughtObj = {
+        id: fish.id,
+        name: fish.name,
+        icon: fish.icon,
+        rarity: fish.rarity,
+        kg: fish.actualKg,
+        value: finalVal
+      };
+      
+      // Aggiungi all'inventario di vendita temporaneo
+      STATE.inventory.push(caughtObj);
+      STATE.caughtCount++;
+      STATE.lastCaughtName = `${fish.icon} ${fish.name} (${fish.actualKg.toFixed(2)} Kg)`;
+      
+      this.logMsg(`Catturato: ${fish.name} di ${fish.actualKg.toFixed(2)} Kg! Valore stimato: 💰${finalVal}`);
+      
+      let rType = 'success';
+      if(fish.rarity === 'rare') rType = 'gold';
+      if(fish.rarity === 'epic') rType = 'gold';
+      if(fish.rarity === 'legendary') rType = 'legendary';
+      
+      this.showNotif(`Preso! ${fish.icon} ${fish.name} (${fish.actualKg.toFixed(2)}kg)`, rType);
+      
+      // AUTO-SAVE IMMEDIATO A OGNI CATTURA IMPORTANTE
+      this.saveGame();
 
-    let earnedVal;
-    if (fish.adventure) {
-      earnedVal = fish.advValue;
-      PLAYER.coins += earnedVal;
-      G.notify(`🌊 Avvistamento: ${fish.icon} ${fish.name}! +${earnedVal}💰`, 'legendary');
     } else {
-      earnedVal = Math.round(fish.value * (0.8 + Math.random()*0.5) * (1 + kg/fish.maxKg * 0.5));
-      PLAYER.inventory.push({ fish, kg, value: earnedVal, ts: Date.now() });
+      // Controlla se la lenza si è rotta casualmente o per peso eccessivo
+      const lData = LINES[STATE.equipped.line];
+      const broke = (STATE.activeFish.actualKg > lData.maxKg) || (Math.random() < lData.breakChance);
+      
+      if(broke) {
+        this.logMsg(`La lenza si è SPEZZATA! Il pesce era troppo forte per il filo '${lData.name}'.`);
+        this.showNotif("La lenza si è spezzata! 💥", "danger");
+      } else {
+        this.logMsg(`Il pesce si è slamato a causa della fatica eccessiva.`);
+        this.showNotif("Ti è sfuggito di mano!", "danger");
+      }
     }
-
-    PLAYER.totalCaught++;
-    G.addLog(`${fish.icon} ${fish.name} (${kg}kg)`);
-
-    const W = canvas.width, H = canvas.height, wy = H * WATER_FRAC;
-    STATE.fishParticles.push({ icon:fish.icon, x:W*0.5, y:wy, size:34, born:performance.now(), life:1600 });
-    STATE.floatingTexts.push({
-      text: `+${earnedVal}💰 · ${kg}kg`,
-      x:W*0.5, y:wy*0.85,
-      color: fish.rarity==='legendary'?'#ff8040':fish.rarity==='epic'?'#ffaa20':'#ffd700',
-      size: fish.rarity==='legendary'?20:15, alpha:1
-    });
-
-    const pfx = { common:'', uncommon:'Bella pesca! ', rare:'🎉 ', epic:'🔥 Ottimo! ', legendary:'👑 LEGGENDARIO! ' };
-    G.notify(`${pfx[fish.rarity]||''}${fish.icon} ${fish.name} — ${kg}kg — +${earnedVal}💰`,
-      fish.rarity==='legendary'?'legendary':fish.rarity==='epic'?'gold':'success');
-
-    G.resetFishing();
-    G.updateHUD();
+    
+    this.syncHud();
+    this.resetToIdle();
   },
 
-  miniLose(reason) {
-    clearInterval(STATE.minigameInterval);
-    STATE.phase = 'idle';
-    document.getElementById('minigameOverlay').classList.remove('show');
-    const line = LINES[PLAYER.equip.line], fish = STATE.currentFish;
-    const breakProb = line.breakChance * (fish.difficulty / 5) * (1 - RODS[PLAYER.equip.rod].lineBreakProtect);
-    if (Math.random() < breakProb)
-      G.notify(`💔 Lenza rotta! ${fish.icon} è scappato. (${reason})`, 'danger');
-    else
-      G.notify(`😤 ${fish.icon} ${fish.name} è fuggito! (${reason})`, 'danger');
-    G.resetFishing();
-  },
-
-  resetFishing() {
-    STATE.phase = 'idle';
-    STATE.currentFish = null;
-    document.getElementById('waitProgressBar').style.display = 'none';
-    const btn = document.getElementById('btnFish');
-    btn.querySelector('.nav-icon').textContent = '🎣';
-    btn.querySelector('.nav-label').textContent = 'PESCA';
-    btn.classList.remove('bite-pulse');
-    btn.disabled = false;
-    G.setStatus('Premi 🎣 per pescare!');
-    G.updateHUD();
-  },
-
-  // ── Fish roll ──────────────────────────────────────────
-  rollFish() {
-    const hook = HOOKS[PLAYER.equip.hook], bait = BAITS[PLAYER.equip.bait];
-    const rod  = RODS[PLAYER.equip.rod];
-    const sizeOrder = ['tiny','small','medium','large','xlarge','xxlarge','boss'];
-    const rodMaxIdx = { rod_bamboo:3, rod_fiberglass:4, rod_carbon:5, rod_deep_sea:6 }[PLAYER.equip.rod] ?? 3;
-    const hookMaxSzIdx = sizeOrder.indexOf(hook.sizeRange[hook.sizeRange.length-1]);
-    const rarW = { common:60, uncommon:25, rare:10, epic:4, legendary:1 };
-
-    const weights = FISH_DB.map(f => {
-      const fsz = sizeOrder.indexOf(f.sizeClass);
-      if (fsz > rodMaxIdx) return 0;
-      let w = rarW[f.rarity] ?? 8;
-      if (f.preferred.includes(PLAYER.equip.bait)) w *= bait.attractMult * 1.6;
-      else if (bait.attracts.includes(f.sizeClass)) w *= bait.attractMult;
-      if (f.hookSize.includes(PLAYER.equip.hook)) w *= 1.4;
-      if (['rare','epic','legendary'].includes(f.rarity)) w *= (1 + rod.catchBonus * 2);
-      if (fsz > hookMaxSzIdx + 1) w *= 0.04;
-      return Math.max(0.001, w);
-    });
-
-    const total = weights.reduce((a,b) => a+b, 0);
-    let r = Math.random() * total;
-    for (let i = 0; i < FISH_DB.length; i++) {
-      r -= weights[i];
-      if (r <= 0) return FISH_DB[i];
-    }
-    return FISH_DB[0];
-  },
-
-  // ── Shop ───────────────────────────────────────────────
+  // ── 5D. UI INTERFACE GENERATORS (Modals, Shop, Sell) ───────
   openModal(type) {
-    if (type === 'shop')  { document.getElementById('shopModal').classList.add('show');  G.renderShop(); }
-    if (type === 'inv')   { document.getElementById('invModal').classList.add('show');   G.renderInv(); }
-    if (type === 'equip') { document.getElementById('equipModal').classList.add('show'); G.renderEquip(); }
+    document.getElementById(`${type}Modal`).classList.add('show');
+    if(type === 'shop') this.renderShop();
+    if(type === 'inv') this.renderInventory();
+    if(type === 'equip') this.renderEquip();
   },
+
   closeModal(type) {
-    document.getElementById(type+'Modal').classList.remove('show');
+    document.getElementById(`${type}Modal`).classList.remove('show');
   },
 
   renderShop() {
-    document.getElementById('shopCoins').textContent = PLAYER.coins;
-    const tabs = [
-      {key:'rods',  label:'🎣 Canne'},
-      {key:'lines', label:'〰️ Lenze'},
-      {key:'hooks', label:'🪝 Ami'},
-      {key:'baits', label:'🦐 Esche'},
+    const tabsContainer = document.getElementById('shopTabs');
+    const contentContainer = document.getElementById('shopContent');
+    
+    const categories = [
+      { id: 'rod', name: 'Canne 🎣' },
+      { id: 'line', name: 'Lenza 〰️' },
+      { id: 'hook', name: 'Ami 🪝' },
+      { id: 'bait', name: 'Esche 🪱' }
     ];
-    document.getElementById('shopTabs').innerHTML = tabs.map(t =>
-      `<button class="tab-btn ${STATE.shopTab===t.key?'active':''}" onclick="G.setShopTab('${t.key}')">${t.label}</button>`
-    ).join('');
-    G.renderShopContent();
-  },
-  setShopTab(k) { STATE.shopTab = k; G.renderShop(); },
-
-  renderShopContent() {
-    const maps = { rods:RODS, lines:LINES, hooks:HOOKS, baits:BAITS };
-    const items = Object.values(maps[STATE.shopTab]);
-    const ownedMap = { rods:PLAYER.ownedRods, lines:PLAYER.ownedLines, hooks:PLAYER.ownedHooks };
-    const keyMap  = { rods:'rod', lines:'line', hooks:'hook', baits:'bait' };
-    const equipKey = keyMap[STATE.shopTab];
-
-    document.getElementById('shopContent').innerHTML = items.map(item => {
-      const isOwned   = STATE.shopTab === 'baits'
-        ? ((PLAYER.ownedBaits[item.id]||0) > 0 || item.infinite)
-        : (ownedMap[STATE.shopTab] || []).includes(item.id);
-      const isEquipped = PLAYER.equip[equipKey] === item.id;
-      let cls = isEquipped ? 'equipped' : isOwned ? 'owned' : '';
-
-      let qtyBadge = '';
-      if (STATE.shopTab === 'baits') {
-        const qty = item.infinite ? '∞' : (PLAYER.ownedBaits[item.id] || 0);
-        qtyBadge = `<div style="font-size:10px;color:#5a8aaa;margin-top:2px">Scorta: ${qty}</div>`;
-      }
-
-      let action = '';
-      if (STATE.shopTab === 'baits') {
-        if (item.price === 0) action = `<span style="font-size:11px;color:#5ddf5d">Gratis</span>`;
-        else action = `<button class="btn-buy" ${PLAYER.coins>=item.price?'':'disabled'} onclick="G.buyItem('${STATE.shopTab}','${item.id}')">x${item.qty}<br>💰${item.price}</button>`;
-      } else if (isEquipped) {
-        action = `<span class="equipped-badge">✓ EQUIP</span>`;
-      } else if (isOwned) {
-        action = `<button class="btn-equip-shop" onclick="G.equipFromShop('${STATE.shopTab}','${item.id}')">Equip</button>`;
-      } else {
-        action = `<button class="btn-buy" ${PLAYER.coins>=item.price?'':'disabled'} onclick="G.buyItem('${STATE.shopTab}','${item.id}')">💰${item.price}</button>`;
-      }
-
-      return `<div class="shop-item ${cls}">
-        <div class="item-icon">${item.icon}</div>
-        <div class="item-info">
-          <div class="item-name">${item.name}</div>
-          <div class="item-desc">${item.desc}</div>
-          ${qtyBadge}
-        </div>
-        <div class="item-actions">${action}</div>
-      </div>`;
-    }).join('');
-  },
-
-  buyItem(tab, id) {
-    const maps = { rods:RODS, lines:LINES, hooks:HOOKS, baits:BAITS };
-    const item = maps[tab][id];
-    if (PLAYER.coins < item.price) { G.notify('Monete insufficienti! 💔', 'danger'); return; }
-    PLAYER.coins -= item.price;
-    if (tab === 'rods')  { if (!PLAYER.ownedRods.includes(id))  PLAYER.ownedRods.push(id); }
-    if (tab === 'lines') { if (!PLAYER.ownedLines.includes(id)) PLAYER.ownedLines.push(id); }
-    if (tab === 'hooks') { if (!PLAYER.ownedHooks.includes(id)) PLAYER.ownedHooks.push(id); }
-    if (tab === 'baits') { PLAYER.ownedBaits[id] = (PLAYER.ownedBaits[id]||0) + item.qty; }
-    G.notify(`✅ Acquistato: ${item.name}`, 'success');
-    G.renderShop(); G.updateHUD();
-  },
-
-  equipFromShop(tab, id) {
-    const keyMap = { rods:'rod', lines:'line', hooks:'hook', baits:'bait' };
-    PLAYER.equip[keyMap[tab]] = id;
-    G.renderShop(); G.updateHUD();
-  },
-
-  // ── Equip panel ────────────────────────────────────────
-  renderEquip() {
-    const sections = [
-      { title:'🎣 Canna da pesca', key:'rod', items:RODS, owned:PLAYER.ownedRods },
-      { title:'〰️ Lenza',          key:'line',items:LINES,owned:PLAYER.ownedLines },
-      { title:'🪝 Amo',            key:'hook',items:HOOKS,owned:PLAYER.ownedHooks },
-      { title:'🦐 Esca',           key:'bait',items:BAITS,owned:null },
-    ];
+    
+    tabsContainer.innerHTML = categories.map(c => `
+      <button class="tab-btn ${this.activeShopTab === c.id ? 'active' : ''}" onclick="G.setShopTab('${c.id}')">${c.name}</button>
+    `).join('');
+    
+    let dataSource = {};
+    if(this.activeShopTab === 'rod') dataSource = RODS;
+    if(this.activeShopTab === 'line') dataSource = LINES;
+    if(this.activeShopTab === 'hook') dataSource = HOOKS;
+    if(this.activeShopTab === 'bait') dataSource = BAITS;
+    
     let html = '';
-    sections.forEach(sec => {
-      html += `<div class="equip-section-title">${sec.title}</div><div class="equip-grid">`;
-      Object.values(sec.items).forEach(item => {
-        const owned = sec.owned
-          ? sec.owned.includes(item.id)
-          : ((PLAYER.ownedBaits[item.id]||0) > 0 || item.infinite);
-        if (!owned) return;
-        const sel = PLAYER.equip[sec.key] === item.id;
-        const qty = sec.key==='bait' ? (item.infinite?'∞':(PLAYER.ownedBaits[item.id]||0)) : '';
-        html += `<div class="equip-card ${sel?'selected':''}" onclick="G.equipCard('${sec.key}','${item.id}')">
-          <div class="ec-icon">${item.icon} ${sel?'✓':''}</div>
-          <div class="ec-name">${item.name}</div>
-          <div class="ec-sub">${item.desc.substring(0,32)}${qty ? ` · ${qty}` : ''}</div>
-        </div>`;
-      });
-      html += `</div>`;
-    });
-    document.getElementById('equipContent').innerHTML = html;
-  },
+    Object.values(dataSource).forEach(item => {
+      const isOwned = STATE.ownedItems[this.activeShopTab].includes(item.id);
+      const isEquipped = STATE.equipped[this.activeShopTab] === item.id;
+      
+      let actionBtn = '';
+      if(this.activeShopTab === 'bait' && item.id !== 'bait_worm') {
+        // Le esche si comprano a pacchetti cumulabili continuamente
+        actionBtn = `<button class="btn-buy" ${STATE.coins < item.price ? 'disabled' : ''} onclick="G.buyBait('${item.id}', ${item.price}, ${item.qty})">Compra x${item.qty}<br>💰${item.price}</button>`;
+      } else {
+        if(isEquipped) {
+          actionBtn = `<span class="equipped-badge">Attivo e in uso</span>`;
+        } else if(isOwned) {
+          actionBtn = `<button class="btn-equip-shop" onclick="G.equipItem('${this.activeShopTab}', '${item.id}')">Equipaggia</button>`;
+        } else {
+          actionBtn = `<button class="btn-buy" ${STATE.coins < item.price ? 'disabled' : ''} onclick="G.buyItem('${this.activeShopTab}', '${item.id}', ${item.price})">Acquista<br>💰${item.price}</button>`;
+        }
+      }
+      
+      let ownedBaitTxt = '';
+      if(this.activeShopTab === 'bait') {
+        ownedBaitTxt = `<div class="owned-badge">Disponibili: <b>${STATE.baitQty[item.id]}</b></div>`;
+      }
 
-  equipCard(key, id) {
-    PLAYER.equip[key] = id;
-    G.renderEquip();
-    G.updateHUD();
-  },
-
-  // ── Inventory ──────────────────────────────────────────
-  renderInv() {
-    const el = document.getElementById('invContent');
-    if (!PLAYER.inventory.length) {
-      el.innerHTML = `<div class="empty-inv">🐠<br>Nessun pesce nell'inventario.<br>Vai a pescare!</div>`; return;
-    }
-    const total = PLAYER.inventory.reduce((a,i) => a+i.value, 0);
-    el.innerHTML = `
-      <div class="inv-summary">${PLAYER.inventory.length} pesci — Valore totale: <b style="color:#ffd700">${total}💰</b></div>
-      <div class="inv-fish-list">
-        ${PLAYER.inventory.map(e => `<div class="inv-fish">
-          <div class="fish-icon">${e.fish.icon}</div>
-          <div class="fish-info">
-            <div class="fish-name">${e.fish.name}</div>
-            <div class="fish-sub"><span class="rarity-badge r-${e.fish.rarity}">${e.fish.rarity}</span> · ${e.kg}kg</div>
+      html += `
+        <div class="shop-item ${isEquipped ? 'equipped' : (isOwned ? 'owned' : '')}">
+          <div class="item-icon">${item.icon}</div>
+          <div class="item-info">
+            <div class="item-name">${item.name}</div>
+            <div class="item-desc">${item.desc}</div>
+            ${ownedBaitTxt}
           </div>
-          <div class="fish-val">+${e.value}💰</div>
-        </div>`).join('')}
-      </div>
-      <button class="btn-sell-all" onclick="G.sellAll()">💰 Vendi tutto — +${total}</button>`;
+          <div class="item-actions">
+            ${actionBtn}
+          </div>
+        </div>
+      `;
+    });
+    
+    contentContainer.innerHTML = html;
   },
 
-  sellAll() {
-    if (!PLAYER.inventory.length) { G.notify('Nessun pesce!', 'danger'); return; }
-    const total = PLAYER.inventory.reduce((a,i) => a+i.value, 0);
-    PLAYER.coins += total;
-    PLAYER.inventory = [];
-    G.notify(`💰 Venduto tutto! +${total} monete!`, 'gold');
-    G.closeModal('inv');
-    G.updateHUD();
+  setShopTab(t) { this.activeShopTab = t; this.renderShop(); },
+
+  buyItem(cat, id, price) {
+    if(STATE.coins >= price) {
+      STATE.coins -= price;
+      STATE.ownedItems[cat].push(id);
+      STATE.equipped[cat] = id; // auto equipaggia all'acquisto
+      this.showNotif("Acquisto completato!", "success");
+      
+      // AUTO-SAVE IMMEDIATO SUL CAMBIO STATO ECONOMICO CRUCIALE
+      this.saveGame();
+      
+      this.syncHud();
+      this.renderShop();
+    }
   },
 
-  // ── HUD ────────────────────────────────────────────────
-  updateHUD() {
-    document.getElementById('hudCoins').textContent    = `💰 ${PLAYER.coins}`;
-    document.getElementById('hudCaught').textContent   = PLAYER.totalCaught;
-    const rod  = RODS[PLAYER.equip.rod],  bait = BAITS[PLAYER.equip.bait];
-    const hook = HOOKS[PLAYER.equip.hook];
-    document.getElementById('hudEquipSummary').textContent =
-      `${rod.name.split(' ')[0]} · ${hook.name} · ${bait.icon}`;
-    const last = PLAYER.inventory[PLAYER.inventory.length-1];
-    document.getElementById('hudLastFish').textContent = last ? `${last.fish.icon} ${last.fish.name}` : '';
-    const sc = document.getElementById('shopCoins');
-    if (sc) sc.textContent = PLAYER.coins;
+  buyBait(id, price, qty) {
+    if(STATE.coins >= price) {
+      STATE.coins -= price;
+      STATE.baitQty[id] += qty;
+      if(!STATE.ownedItems.bait.includes(id)) STATE.ownedItems.bait.push(id);
+      this.showNotif(`Comprate ${qty} unità di esca!`, "success");
+      
+      // AUTO-SAVE IMMEDIATO SUL CAMBIO STATO ECONOMICO CRUCIALE
+      this.saveGame();
+      
+      this.syncHud();
+      this.renderShop();
+    }
   },
 
-  setStatus(msg) { document.getElementById('statusStrip').textContent = msg; },
-
-  notify(msg, type='') {
-    const area = document.getElementById('notifArea');
-    const el = document.createElement('div');
-    el.className = 'notif ' + type;
-    el.textContent = msg;
-    area.appendChild(el);
-    setTimeout(() => el.remove(), 3200);
+  equipItem(cat, id) {
+    STATE.equipped[cat] = id;
+    this.showNotif("Equipaggiamento aggiornato!");
+    
+    // AUTO-SAVE IMMEDIATO AL CAMBIO DI ATTREZZATURA
+    this.saveGame();
+    
+    this.syncHud();
+    this.renderShop();
   },
 
-  addLog(msg) {
-    STATE.log.unshift(msg);
-    if (STATE.log.length > 4) STATE.log.pop();
-    document.getElementById('fishLog').innerHTML = STATE.log.map(l => `<div>${l}</div>`).join('');
+  renderInventory() {
+    const container = document.getElementById('invContent');
+    if(STATE.inventory.length === 0) {
+      container.innerHTML = `
+        <div class="empty-inv">
+          🕳️ La tua borsa dei pesci è vuota.<br>
+          Lancia la lenza e cattura qualcosa da vendere!
+        </div>`;
+      return;
+    }
+    
+    let totalValue = 0;
+    let html = `<div class="inv-summary">Pesci pronti per il mercato di Porto:</div><div class="inv-fish-list">`;
+    
+    STATE.inventory.forEach(f => {
+      totalValue += f.value;
+      html += `
+        <div class="inv-fish">
+          <div class="fish-icon">${f.icon}</div>
+          <div class="fish-info">
+            <div class="fish-name">${f.name} <span class="rarity-badge r-${f.rarity}">${f.rarity}</span></div>
+            <div class="fish-sub">Peso: ${f.kg.toFixed(2)} Kg</div>
+          </div>
+          <div class="fish-val">💰 ${f.value}</div>
+        </div>
+      `;
+    });
+    
+    html += `</div>`;
+    html += `<button class="btn-sell-all" onclick="G.sellAllFish()">💰 VENDI TUTTO AL MERCATO (+💰${totalValue})</button>`;
+    
+    container.innerHTML = html;
   },
+
+  sellAllFish() {
+    if(STATE.inventory.length === 0) return;
+    
+    let gained = 0;
+    STATE.inventory.forEach(f => gained += f.value);
+    
+    STATE.coins += gained;
+    STATE.inventory = []; // Svuota cesto pescato
+    
+    this.logMsg(`Hai venduto il pescato al mercato ittico per un totale di 💰${gained} monete.`);
+    this.showNotif(`Pescato venduto! +💰${gained}`, "success");
+    
+    // AUTO-SAVE IMMEDIATO SULLA VENDITA E INTROITO MONETE
+    this.saveGame();
+
+    this.syncHud();
+    this.closeModal('inv');
+  },
+
+  renderEquip() {
+    const tabsContainer = document.getElementById('equipTabs');
+    const container = document.getElementById('equipContent');
+    
+    // Aggiunta comoda della scheda di gestione file di salvataggio local/cloud
+    const categories = [
+      { id: 'rod', name: 'Canne 🎣' },
+      { id: 'line', name: 'Lenza 〰️' },
+      { id: 'hook', name: 'Ami 🪝' },
+      { id: 'bait', name: 'Esche 🪱' },
+      { id: 'save', name: 'Salvataggi 💾' }
+    ];
+    
+    tabsContainer.innerHTML = categories.map(c => `
+      <button class="tab-btn ${this.activeEquipTab === c.id ? 'active' : ''}" onclick="G.setEquipTab('${c.id}')">${c.name}</button>
+    `).join('');
+
+    if (this.activeEquipTab === 'save') {
+      // Pannello di controllo dei salvataggi (Requisiti Commerciali)
+      container.innerHTML = `
+        <div class="save-controls">
+          <div class="inv-summary" style="margin-bottom:6px;">Gestione Dati di Gioco (Local Storage)</div>
+          <p style="font-size:11px; color:#6a8aba; line-height:1.5; margin-bottom:10px;">
+            Il gioco si salva da solo ad ogni azione. Puoi esportare il tuo file per portarlo su un altro PC o browser.
+          </p>
+          <button class="btn-save-action btn-save-export" onclick="G.exportSave()">📤 ESPORTA SALVATAGGIO (.json)</button>
+          <button class="btn-save-action btn-save-import">
+            📥 IMPORTA SALVATAGGIO (.json)
+            <input type="file" id="importFile" accept=".json" onchange="G.importSave(event)">
+          </button>
+          <button class="btn-save-action btn-save-reset" onclick="G.resetSave()">⚠️ CANCELLA DATI E RICOMINCIA</button>
+        </div>
+      `;
+      return;
+    }
+    
+    let dataSource = {};
+    if(this.activeEquipTab === 'rod') dataSource = RODS;
+    if(this.activeEquipTab === 'line') dataSource = LINES;
+    if(this.activeEquipTab === 'hook') dataSource = HOOKS;
+    if(this.activeEquipTab === 'bait') dataSource = BAITS;
+    
+    let html = `<div class="equip-grid">`;
+    let itemsRendered = 0;
+    
+    Object.values(dataSource).forEach(item => {
+      // Mostra solo elementi effettivamente acquistati/sbloccati
+      if(!STATE.ownedItems[this.activeEquipTab].includes(item.id)) return;
+      itemsRendered++;
+      
+      const isEquipped = STATE.equipped[this.activeEquipTab] === item.id;
+      let qtyTxt = (this.activeEquipTab === 'bait') ? `<br>Disponibili: ${STATE.baitQty[item.id]}` : '';
+      
+      html += `
+        <div class="equip-card ${isEquipped ? 'selected' : ''}" onclick="G.equipItem('${this.activeEquipTab}', '${item.id}')">
+          <div class="ec-icon">${item.icon}</div>
+          <div class="ec-name">${item.name}</div>
+          <div class="ec-sub">${isEquipped ? '<b>IN USO</b>' : 'Clicca per usare'}${qtyTxt}</div>
+        </div>
+      `;
+    });
+    
+    html += `</div>`;
+    if(itemsRendered === 0) html = `<div class="empty-inv">Nessun elemento sbloccato in questa categoria.</div>`;
+    
+    container.innerHTML = html;
+  },
+
+  setEquipTab(t) { this.activeEquipTab = t; this.renderEquip(); }
 };
 
-// ── 9. KEYBOARD (desktop) ──────────────────────────────────
+// ── 6. CONTROL BINDINGS & KEYBOARD LISTENERS ────────────────
+window.addEventListener('load', () => G.init());
+
+// Tasti di scelta rapida per accessibilità Desktop
 window.addEventListener('keydown', e => {
   if (e.code === 'Space' || e.code === 'Enter') {
     e.preventDefault();
@@ -1224,199 +1510,34 @@ window.addEventListener('keydown', e => {
   if (e.key === 'Escape') { G.closeModal('shop'); G.closeModal('inv'); G.closeModal('equip'); }
 });
 
-// Tap on canvas during hooking triggers pull
+// Click o Touch sul Canvas di sfondo per interazione nativa rapida
+const canvas = document.getElementById('gameCanvas');
 canvas.addEventListener('touchstart', e => {
   e.preventDefault();
   if (STATE.phase === 'hooking') G.startMinigame();
-  else if (STATE.phase === 'minigame') G.miniTap(e);
 }, { passive: false });
 canvas.addEventListener('mousedown', e => {
   if (STATE.phase === 'hooking') G.startMinigame();
 });
 
-// Close modal on backdrop click
+// Chiusura automatica dei popup cliccando sullo sfondo
 document.querySelectorAll('.modal-bg').forEach(bg => {
   bg.addEventListener('click', e => {
     if (e.target === bg) { G.closeModal('shop'); G.closeModal('inv'); G.closeModal('equip'); }
   });
 });
 
-// Swipe-down to close modals
+// Swipe down mobile per chiudere i fogli modali
 let touchStartY = 0;
 document.querySelectorAll('.modal').forEach(m => {
   m.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, {passive:true});
   m.addEventListener('touchend', e => {
-    if (e.changedTouches[0].clientY - touchStartY > 80) {
+    let touchEndY = e.changedTouches[0].clientY;
+    if (touchEndY - touchStartY > 60) {
       G.closeModal('shop'); G.closeModal('inv'); G.closeModal('equip');
     }
   }, {passive:true});
 });
-
-// ── 10. INIT ──────────────────────────────────────────────
-G.updateHUD();
-G.setStatus('Premi 🎣 per pescare!');
-
-// ============================================================
-// 💾 SISTEMA DI SALVATAGGIO (SAVE SYSTEM)
-// ============================================================
-
-const SAVE_KEY = "deep_blue_fisher_save";
-const SAVE_VERSION = 1;
-
-// Struttura dello stato globale di salvataggio
-let gameState = {
-  saveVersion: SAVE_VERSION,
-  coins: 0,
-  inventory: [],
-  stats: {
-    totalCaught: 0,
-    lastFishName: ""
-  },
-  owned: {
-    rods: ['rod_bamboo'],
-    lines: ['line_light'],
-    hooks: ['hook_small'],
-    baits: { bait_worm: 999 }
-  },
-  equipped: {
-    rod: 'rod_bamboo',
-    line: 'line_light',
-    hook: 'hook_small',
-    bait: 'bait_worm'
-  }
-};
-
-// 1. Funzione per salvare la partita
-function saveGame() {
-  try {
-    // Sincronizza le tue variabili di gioco correnti con gameState prima di salvare
-    // (Assicurati che queste variabili corrispondano a quelle del tuo motore di gioco)
-    if (typeof STATE !== 'undefined') {
-       gameState.coins = STATE.coins || gameState.coins;
-       gameState.inventory = STATE.inventory || gameState.inventory;
-       gameState.stats.totalCaught = STATE.stats?.totalCaught || gameState.stats.totalCaught;
-       gameState.owned = STATE.owned || gameState.owned;
-       gameState.equipped = STATE.equipped || gameState.equipped;
-    }
-
-    gameState.saveVersion = SAVE_VERSION;
-    localStorage.setItem(SAVE_KEY, JSON.stringify(gameState));
-    console.log("💾 Partita salvata automaticamente.");
-  } catch (error) {
-    console.error("Errore durante il salvataggio:", error);
-  }
-}
-
-// 2. Funzione per caricare la partita
-function loadGame() {
-  try {
-    const savedData = localStorage.getItem(SAVE_KEY);
-    if (savedData) {
-      const parsedData = JSON.parse(savedData);
-      
-      // Unisce i salvataggi con i valori di default in caso manchino dei campi nuovi
-      gameState = {
-        ...gameState,
-        ...parsedData,
-        stats: { ...gameState.stats, ...(parsedData.stats || {}) },
-        owned: { ...gameState.owned, ...(parsedData.owned || {}) },
-        equipped: { ...gameState.equipped, ...(parsedData.equipped || {}) }
-      };
-
-      // Ripristina le variabili del motore di gioco
-      if (typeof STATE !== 'undefined') {
-         STATE.coins = gameState.coins;
-         STATE.inventory = gameState.inventory;
-         STATE.stats = gameState.stats;
-         STATE.owned = gameState.owned;
-         STATE.equipped = gameState.equipped;
-      }
-      
-      console.log("💾 Salvataggio caricato con successo!");
-      return true;
-    }
-  } catch (error) {
-    console.warn("⚠️ Nessun salvataggio valido o dati corrotti. Inizio nuova partita.");
-  }
-  return false;
-}
-
-// 3. Funzione per resettare i progressi
-function resetSave() {
-  if (confirm("Vuoi davvero cancellare TUTTI i tuoi progressi? Questa azione non si può annullare!")) {
-    localStorage.removeItem(SAVE_KEY);
-    location.reload();
-  }
-}
-
-// 4. Esporta salvataggio in un file JSON
-function exportSave() {
-  saveGame();
-  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(gameState));
-  const a = document.createElement('a');
-  a.setAttribute("href", dataStr);
-  a.setAttribute("download", `deep_blue_fisher_save_${new Date().toISOString().slice(0, 10)}.json`);
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-}
-
-// 5. Importa salvataggio da un file JSON
-function importSave() {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = '.json';
-  
-  input.onchange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const importedData = JSON.parse(event.target.result);
-        if (importedData && importedData.saveVersion !== undefined) {
-          localStorage.setItem(SAVE_KEY, JSON.stringify(importedData));
-          alert("✅ Salvataggio importato con successo! Il gioco verrà riavviato.");
-          location.reload();
-        } else {
-          alert("❌ File di salvataggio non valido.");
-        }
-      } catch (error) {
-        alert("❌ Errore durante l'importazione. Il file potrebbe essere corrotto.");
-      }
-    };
-    reader.readAsText(file);
-  };
-  input.click();
-}
-
-// ============================================================
-// AUTOMAZIONE E BOOT
-// ============================================================
-
-window.addEventListener('DOMContentLoaded', () => {
-  // Al caricamento, cerca un salvataggio. Altrimenti inizia da zero.
-  const hasSave = loadGame();
-  if (!hasSave) {
-    console.log("Nessun salvataggio trovato. Creazione nuovo salvataggio...");
-    saveGame(); 
-  }
-  
-  // Aggiorna la grafica del gioco in base ai dati appena caricati (se la funzione esiste nel tuo codice)
-  if (typeof updateHUD === 'function') updateHUD();
-  if (typeof G !== 'undefined' && typeof G.updateHUD === 'function') G.updateHUD();
-});
-
-// Autosave ogni 30 secondi
-setInterval(saveGame, 30000); 
-
-// Autosave istantaneo alla chiusura/ricarica della pagina
-window.addEventListener('beforeunload', saveGame);
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'hidden') saveGame();
-});
-
 </script>
 </body>
 </html>
