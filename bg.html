@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Background Remover - Batch & Local</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.4/heic2any.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AI Background Remover</h1>
+            <p>Rimuovi lo sfondo dalle tue immagini localmente nel browser. Nessun dato lascia il tuo dispositivo.</p>
+        </header>
+
+        <div id="model-status-container" class="card">
+            <div class="status-header">
+                <span id="model-status-text">Inizializzazione modello IA...</span>
+                <span id="model-progress-percent">0%</span>
+            </div>
+            <div class="progress-bar-container">
+                <div id="model-progress-bar" class="progress-bar" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <div id="drop-zone" class="drop-zone disabled">
+            <div class="drop-zone-content">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <p>Trascina qui le tue immagini o <label for="file-input" class="file-label">sfoglia i file</label></p>
+                <span class="file-types">Supporta PNG, JPG, WEBP e HEIC</span>
+                <input type="file" id="file-input" multiple accept="image/*,.heic" disabled>
+            </div>
+        </div>
+
+        <div id="process-container" class="card hidden">
+            <h2>Elaborazione in corso</h2>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <span class="stat-label">Elaborate</span>
+                    <span id="stat-processed">0</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Rimanenti</span>
+                    <span id="stat-remaining">0</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Tempo Stimato Rimasto</span>
+                    <span id="stat-eta">--:--</span>
+                </div>
+            </div>
+
+            <div class="current-file-info">
+                <p>Elaborazione attuale: <span id="current-file-name">-</span></p>
+            </div>
+
+            <div class="progress-bar-container">
+                <div id="batch-progress-bar" class="progress-bar" style="width: 0%"></div>
+            </div>
+            <div class="progress-text">
+                <span id="batch-progress-percent">0%</span>
+            </div>
+        </div>
+
+        <div id="result-container" class="card hidden">
+            <div class="result-header">
+                <h2>Elaborazione Completata!</h2>
+                <button id="download-all-btn" class="btn btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Scarica tutto (.ZIP)
+                </button>
+            </div>
+            <div id="preview-grid" class="preview-grid"></div>
+        </div>
+    </div>
+</body>
+</html>
