@@ -4,9 +4,269 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Background Remover - Batch & Local</title>
-    <link rel="stylesheet" href="style.css">
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.4/heic2any.min.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --success: #10b981;
+            --border-color: #334155;
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            padding: 2rem 1rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #60a5fa, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            color: var(--text-muted);
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Stato del Modello */
+        .status-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+        }
+
+        /* Barre di Avanzamento */
+        .progress-bar-container {
+            background-color: var(--border-color);
+            border-radius: 6px;
+            height: 10px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background-color: var(--accent);
+            height: 100%;
+            width: 0%;
+            transition: width 0.2s ease;
+        }
+
+        /* Area di Drop */
+        .drop-zone {
+            border: 2px dashed var(--border-color);
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 3.5rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.3s ease, background-color 0.3s ease;
+        }
+
+        .drop-zone.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .drop-zone.drag-over {
+            border-color: var(--accent);
+            background-color: #1e293b99;
+        }
+
+        .drop-zone-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .drop-zone svg {
+            stroke: var(--text-muted);
+        }
+
+        .file-label {
+            color: var(--accent);
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .file-types {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        /* Statistiche */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .stat-box {
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+
+        #stat-processed, #stat-remaining, #stat-eta {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        .current-file-info {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .progress-text {
+            text-align: right;
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        /* Risultati e Griglia */
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #059669;
+        }
+
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 1rem;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .preview-item {
+            position: relative;
+            aspect-ratio: 1;
+            background-color: #0f172a;
+            background-image: linear-gradient(45deg, #1e293b 25%, transparent 25%), 
+                              linear-gradient(-45deg, #1e293b 25%, transparent 25%), 
+                              linear-gradient(45deg, transparent 75%, #1e293b 75%), 
+                              linear-gradient(-45deg, transparent 75%, #1e293b 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .preview-grid::-webkit-scrollbar {
+            width: 6px;
+        }
+        .preview-grid::-webkit-scrollbar-track {
+            background: var(--card-bg);
+        }
+        .preview-grid::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        @media (max-width: 600px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -74,5 +334,247 @@
             <div id="preview-grid" class="preview-grid"></div>
         </div>
     </div>
+
+    <script type="module">
+        import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2';
+
+        // Evita il fallback a percorsi locali cercando i modelli WASM direttamente sui server remoti di HuggingFace
+        env.allowLocalModels = false;
+
+        // Elementi del DOM
+        const modelStatusContainer = document.getElementById('model-status-container');
+        const modelStatusText = document.getElementById('model-status-text');
+        const modelProgressBar = document.getElementById('model-progress-bar');
+        const modelProgressPercent = document.getElementById('model-progress-percent');
+
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+
+        const processContainer = document.getElementById('process-container');
+        const statProcessed = document.getElementById('stat-processed');
+        const statRemaining = document.getElementById('stat-remaining');
+        const statEta = document.getElementById('stat-eta');
+        const currentFileName = document.getElementById('current-file-name');
+        const batchProgressBar = document.getElementById('batch-progress-bar');
+        const batchProgressPercent = document.getElementById('batch-progress-percent');
+
+        const resultContainer = document.getElementById('result-container');
+        const downloadAllBtn = document.getElementById('download-all-btn');
+        const previewGrid = document.getElementById('preview-grid');
+
+        // Stati di esecuzione dell'applicazione
+        let segmenter = null;
+        let processedImages = []; 
+        let processingQueue = [];
+        let totalInBatch = 0;
+        let processDurations = [];
+
+        // Inizializzazione del modello AI
+        async function initModel() {
+            try {
+                segmenter = await pipeline('image-segmentation', 'briaai/RMBG-1.4', {
+                    progress_callback: (data) => {
+                        if (data.status === 'progress') {
+                            const progress = Math.round(data.progress);
+                            modelProgressBar.style.width = `${progress}%`;
+                            modelProgressPercent.textContent = `${progress}%`;
+                        } else if (data.status === 'ready') {
+                            modelStatusText.textContent = 'Modello caricato con successo!';
+                            modelProgressBar.style.width = '100%';
+                            modelProgressPercent.textContent = '100%';
+                            setTimeout(() => {
+                                modelStatusContainer.classList.add('hidden');
+                                dropZone.classList.remove('disabled');
+                                fileInput.removeAttribute('disabled');
+                            }, 800);
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error("Errore durante il caricamento del modello:", error);
+                modelStatusText.textContent = "Errore nel caricamento del modello AI.";
+            }
+        }
+
+        // Setup Event Listeners
+        function setupEventListeners() {
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    if (!dropZone.classList.contains('disabled')) {
+                        dropZone.classList.add('drag-over');
+                    }
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('drag-over');
+                }, false);
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                if (dropZone.classList.contains('disabled')) return;
+                const dt = e.dataTransfer;
+                const files = Array.from(dt.files);
+                if (files.length > 0) handleFiles(files);
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                const files = Array.from(e.target.files);
+                if (files.length > 0) handleFiles(files);
+            });
+
+            downloadAllBtn.addEventListener('click', downloadAllAsZip);
+        }
+
+        // Gestione coda file inseriti
+        async function handleFiles(files) {
+            resultContainer.classList.add('hidden');
+            previewGrid.innerHTML = '';
+            processedImages = [];
+            processDurations = [];
+            
+            processingQueue = files.filter(file => {
+                const name = file.name.toLowerCase();
+                return file.type.startsWith('image/') || name.endsWith('.heic');
+            });
+
+            if (processingQueue.length === 0) return;
+
+            totalInBatch = processingQueue.length;
+            processContainer.classList.remove('hidden');
+            
+            updateBatchUI(0);
+            processNextInQueue();
+        }
+
+        // Coda FIFO asincrona sequenziale
+        async function processNextInQueue() {
+            if (processingQueue.length === 0) {
+                processContainer.classList.add('hidden');
+                resultContainer.classList.remove('hidden');
+                return;
+            }
+
+            const currentProcessedIndex = totalInBatch - processingQueue.length;
+            updateBatchUI(currentProcessedIndex);
+
+            let currentFile = processingQueue.shift();
+            currentFileName.textContent = currentFile.name;
+            const itemStartTime = Date.now();
+
+            try {
+                // Gestione dei file HEIC Apple
+                if (currentFile.name.toLowerCase().endsWith('.heic')) {
+                    currentFileName.textContent = `[Conversione HEIC...] ${currentFile.name}`;
+                    const convertedBlob = await heic2any({
+                        blob: currentFile,
+                        toType: 'image/png'
+                    });
+                    const actualBlob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
+                    const newName = currentFile.name.replace(/\.[^/.]+$/, "") + ".png";
+                    currentFile = new File([actualBlob], newName, { type: actualBlob.type });
+                }
+
+                currentFileName.textContent = `[Rimozione Sfondo...] ${currentFile.name}`;
+
+                const objectURL = URL.createObjectURL(currentFile);
+                const output = await segmenter(objectURL);
+                URL.revokeObjectURL(objectURL);
+
+                const outputBlob = await output.toBlob();
+                const finalName = currentFile.name.replace(/\.[^/.]+$/, "") + "_no_bg.png";
+
+                processedImages.push({ name: finalName, blob: outputBlob });
+
+                const itemDuration = (Date.now() - itemStartTime) / 1000;
+                processDurations.push(itemDuration);
+
+                appendPreviewImage(outputBlob);
+
+            } catch (error) {
+                console.error(`Errore su ${currentFile.name}:`, error);
+            }
+
+            setTimeout(processNextInQueue, 50);
+        }
+
+        function updateBatchUI(processedCount) {
+            const remainingCount = totalInBatch - processedCount;
+            statProcessed.textContent = processedCount;
+            statRemaining.textContent = remainingCount;
+
+            const percent = Math.round((processedCount / totalInBatch) * 100);
+            batchProgressBar.style.width = `${percent}%`;
+            batchProgressPercent.textContent = `${percent}%`;
+
+            if (processDurations.length > 0 && remainingCount > 0) {
+                const avgDuration = processDurations.reduce((a, b) => a + b, 0) / processDurations.length;
+                const totalEtaSeconds = Math.round(avgDuration * remainingCount);
+                
+                const minutes = Math.floor(totalEtaSeconds / 60);
+                const seconds = totalEtaSeconds % 60;
+                statEta.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            } else if (remainingCount === 0) {
+                statEta.textContent = "00:00";
+            } else {
+                statEta.textContent = "--:--";
+            }
+        }
+
+        function appendPreviewImage(blob) {
+            const imgUrl = URL.createObjectURL(blob);
+            const wrapper = document.createElement('div');
+            wrapper.className = 'preview-item';
+            
+            const img = document.createElement('img');
+            img.src = imgUrl;
+            img.onload = () => URL.revokeObjectURL(imgUrl);
+
+            wrapper.appendChild(img);
+            previewGrid.appendChild(wrapper);
+        }
+
+        // Compressione ZIP asincrona
+        async function downloadAllAsZip() {
+            if (processedImages.length === 0) return;
+
+            downloadAllBtn.disabled = true;
+            const originalText = downloadAllBtn.innerHTML;
+            downloadAllBtn.textContent = 'Creazione file ZIP...';
+
+            const zip = new JSZip();
+            processedImages.forEach(item => {
+                zip.file(item.name, item.blob);
+            });
+
+            try {
+                const content = await zip.generateAsync({ type: 'blob' });
+                const zipUrl = URL.createObjectURL(content);
+                
+                const downloadLink = document.createElement('a');
+                downloadLink.href = zipUrl;
+                downloadLink.download = `immagini_senza_sfondo_${Date.now()}.zip`;
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                
+                document.body.removeChild(downloadLink);
+                URL.revokeObjectURL(zipUrl);
+            } catch (err) {
+                console.error("Impossibile generare il file ZIP", err);
+            } finally {
+                downloadAllBtn.disabled = false;
+                downloadAllBtn.innerHTML = originalText;
+            }
+        }
+
+        // Avvio dell'app al caricamento del DOM
+        window.addEventListener('DOMContentLoaded', () => {
+            initModel();
+            setupEventListeners();
+        });
+    </script>
 </body>
 </html>
