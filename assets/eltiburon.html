@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz da Tavolo — Cultura Generale</title>
+<style>
+  :root{
+    --ink:#171a2e;
+    --ink-2:#20244a;
+    --parchment:#f3ead9;
+    --gold:#e3ab3f;
+    --gold-dark:#b9812a;
+    --coral:#e0553f;
+    --sage:#4f9d6e;
+    --line: rgba(243,234,217,0.14);
+    --font-display:'Cormorant Garamond', 'Georgia', serif;
+    --font-body:'Work Sans', 'Segoe UI', sans-serif;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Work+Sans:wght@400;500;600;700&display=swap');
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 15% 10%, rgba(227,171,63,0.10), transparent 45%),
+      radial-gradient(circle at 85% 90%, rgba(224,85,63,0.10), transparent 45%),
+      var(--ink);
+    color:var(--parchment);
+    font-family:var(--font-body);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:32px 16px 64px;
+  }
+
+  .wrap{width:100%;max-width:880px;}
+
+  .masthead{
+    text-align:center;
+    margin-bottom:36px;
+  }
+  .masthead .eyebrow{
+    letter-spacing:0.35em;
+    text-transform:uppercase;
+    font-size:11px;
+    color:var(--gold);
+    font-weight:600;
+  }
+  .masthead h1{
+    font-family:var(--font-display);
+    font-weight:700;
+    font-size:clamp(38px, 7vw, 62px);
+    margin:6px 0 4px;
+    line-height:1.02;
+  }
+  .masthead .sub{
+    color:rgba(243,234,217,0.6);
+    font-size:15px;
+  }
+
+  .panel{
+    background:var(--ink-2);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:32px;
+    box-shadow:0 24px 60px -20px rgba(0,0,0,0.55);
+  }
+
+  /* ---- SETUP SCREEN ---- */
+  .count-row{
+    display:flex;
+    gap:10px;
+    justify-content:center;
+    margin:18px 0 28px;
+    flex-wrap:wrap;
+  }
+  .count-btn{
+    width:52px;height:52px;
+    border-radius:50%;
+    border:1.5px solid var(--line);
+    background:transparent;
+    color:var(--parchment);
+    font-family:var(--font-display);
+    font-size:22px;
+    font-weight:700;
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .count-btn:hover{border-color:var(--gold);}
+  .count-btn.active{
+    background:var(--gold);
+    border-color:var(--gold);
+    color:var(--ink);
+  }
+
+  .name-list{display:flex;flex-direction:column;gap:12px;margin-bottom:26px;}
+  .name-row{
+    display:flex;align-items:center;gap:14px;
+  }
+  .name-row .tag{
+    width:30px;height:30px;flex:0 0 30px;
+    border-radius:50%;
+    background:var(--gold);
+    color:var(--ink);
+    font-weight:700;
+    font-family:var(--font-display);
+    display:flex;align-items:center;justify-content:center;
+    font-size:15px;
+  }
+  .name-row input{
+    flex:1;
+    background:rgba(243,234,217,0.06);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:12px 14px;
+    color:var(--parchment);
+    font-family:var(--font-body);
+    font-size:15px;
+    outline:none;
+    transition:border-color .15s ease;
+  }
+  .name-row input:focus{border-color:var(--gold);}
+
+  .cat-title{
+    font-family:var(--font-display);
+    font-size:14px;
+    letter-spacing:0.2em;
+    text-transform:uppercase;
+    color:rgba(243,234,217,0.55);
+    margin:6px 0 12px;
+  }
+  .cat-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(150px,1fr));
+    gap:10px;
+    margin-bottom:30px;
+  }
+  .cat-chip{
+    display:flex;align-items:center;gap:8px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:10px 14px;
+    font-size:14px;
+    color:rgba(243,234,217,0.85);
+  }
+  .cat-chip .dot{width:8px;height:8px;border-radius:50%;flex:0 0 8px;}
+
+  .primary-btn{
+    display:block;
+    width:100%;
+    background:var(--gold);
+    color:var(--ink);
+    border:none;
+    border-radius:12px;
+    padding:16px;
+    font-family:var(--font-body);
+    font-weight:700;
+    font-size:16px;
+    letter-spacing:0.02em;
+    cursor:pointer;
+    transition:transform .1s ease, background .15s ease;
+  }
+  .primary-btn:hover{background:var(--gold-dark);}
+  .primary-btn:active{transform:scale(0.98);}
+  .primary-btn:disabled{opacity:0.4;cursor:not-allowed;}
+
+  .ghost-btn{
+    background:transparent;
+    border:1.5px solid var(--line);
+    color:var(--parchment);
+    border-radius:10px;
+    padding:12px 20px;
+    font-family:var(--font-body);
+    font-weight:600;
+    font-size:14px;
+    cursor:pointer;
+    transition:border-color .15s ease;
+  }
+  .ghost-btn:hover{border-color:var(--gold);}
+
+  /* ---- GAME SCREEN ---- */
+  .scoreboard{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:26px;
+  }
+  .score-pill{
+    flex:1;min-width:120px;
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:12px 14px;
+    background:rgba(243,234,217,0.03);
+    transition:all .2s ease;
+  }
+  .score-pill.current{
+    border-color:var(--gold);
+    background:rgba(227,171,63,0.10);
+  }
+  .score-pill .pname{
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color:rgba(243,234,217,0.6);
+    margin-bottom:4px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .score-pill .pscore{
+    font-family:var(--font-display);
+    font-weight:700;
+    font-size:26px;
+  }
+  .score-pill .pscore.neg{color:var(--coral);}
+
+  .turn-banner{
+    text-align:center;
+    margin-bottom:22px;
+    font-size:14px;
+    color:rgba(243,234,217,0.6);
+  }
+  .turn-banner b{color:var(--gold);}
+
+  .card-stage{
+    perspective:1400px;
+    margin-bottom:26px;
+  }
+  .card{
+    position:relative;
+    width:100%;
+    min-height:320px;
+    transform-style:preserve-3d;
+    transition:transform .6s cubic-bezier(.4,.2,.2,1);
+  }
+  .card.flipped{transform:rotateY(180deg);}
+  .card-face{
+    position:absolute;
+    inset:0;
+    backface-visibility:hidden;
+    border-radius:16px;
+    padding:36px 32px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    border:1px solid var(--line);
+  }
+  .card-front{
+    background:linear-gradient(160deg, #262a52, #1c1f3d);
+  }
+  .card-back{
+    background:linear-gradient(160deg, #2c2f2a, #1c1f3d);
+    transform:rotateY(180deg);
+  }
+  .card-meta{
+    display:flex;gap:10px;align-items:center;
+    margin-bottom:18px;
+  }
+  .badge{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.12em;
+    font-weight:700;
+    padding:6px 12px;
+    border-radius:20px;
+  }
+  .badge.cat{background:rgba(227,171,63,0.15);color:var(--gold);}
+  .badge.diff-facile{background:rgba(79,157,110,0.18);color:var(--sage);}
+  .badge.diff-media{background:rgba(227,171,63,0.18);color:var(--gold);}
+  .badge.diff-difficile{background:rgba(224,85,63,0.18);color:var(--coral);}
+  .card-q{
+    font-family:var(--font-display);
+    font-size:clamp(22px,3.4vw,30px);
+    font-weight:600;
+    line-height:1.3;
+  }
+  .card-a-label{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.2em;
+    color:rgba(243,234,217,0.5);
+    margin-bottom:10px;
+  }
+  .card-a{
+    font-family:var(--font-display);
+    font-size:clamp(24px,4vw,34px);
+    font-weight:700;
+    color:var(--gold);
+  }
+
+  .action-row{
+    display:flex;
+    gap:12px;
+    justify-content:center;
+  }
+  .judge-row{
+    display:flex;
+    gap:14px;
+    justify-content:center;
+  }
+  .judge-btn{
+    flex:1;
+    max-width:220px;
+    border:none;
+    border-radius:12px;
+    padding:16px;
+    font-family:var(--font-body);
+    font-weight:700;
+    font-size:15px;
+    cursor:pointer;
+    transition:transform .1s ease;
+  }
+  .judge-btn:active{transform:scale(0.97);}
+  .judge-btn.right{background:var(--sage);color:#0f2417;}
+  .judge-btn.wrong{background:var(--coral);color:#2c0e08;}
+  .pts-hint{
+    text-align:center;
+    font-size:12px;
+    color:rgba(243,234,217,0.5);
+    margin-bottom:14px;
+  }
+
+  .flip-hint{
+    text-align:center;
+    font-size:12px;
+    color:rgba(243,234,217,0.4);
+    margin-top:12px;
+  }
+
+  /* ---- END SCREEN ---- */
+  .podium{
+    display:flex;flex-direction:column;gap:10px;margin:24px 0 30px;
+  }
+  .rank-row{
+    display:flex;align-items:center;gap:16px;
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:14px 18px;
+  }
+  .rank-row.first{border-color:var(--gold);background:rgba(227,171,63,0.08);}
+  .rank-num{
+    font-family:var(--font-display);
+    font-size:24px;font-weight:700;
+    color:var(--gold);
+    width:34px;
+  }
+  .rank-name{flex:1;font-weight:600;font-size:16px;}
+  .rank-score{font-family:var(--font-display);font-weight:700;font-size:22px;}
+
+  .hidden{display:none !important;}
+
+  footer{
+    margin-top:30px;
+    text-align:center;
+    font-size:12px;
+    color:rgba(243,234,217,0.35);
+  }
+
+  @media (max-width:520px){
+    .panel{padding:22px;}
+    .judge-row{flex-direction:column;}
+    .judge-btn{max-width:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <div class="eyebrow">Serata quiz</div>
+    <h1>Quattro Categorie</h1>
+    <div class="sub">Mitologia greca · Film Disney · Macchine · Guerre Mondiali</div>
+  </div>
+
+  <!-- ===================== SETUP SCREEN ===================== -->
+  <div class="panel" id="setup-screen">
+    <div class="cat-title">Quanti giocatori?</div>
+    <div class="count-row" id="count-row"></div>
+
+    <div class="cat-title">Nomi dei giocatori</div>
+    <div class="name-list" id="name-list"></div>
+
+    <div class="cat-title">Categorie in gioco</div>
+    <div class="cat-grid">
+      <div class="cat-chip"><span class="dot" style="background:#e3ab3f"></span>Mitologia greca</div>
+      <div class="cat-chip"><span class="dot" style="background:#e0553f"></span>Film Disney</div>
+      <div class="cat-chip"><span class="dot" style="background:#4f9d6e"></span>Macchine</div>
+      <div class="cat-chip"><span class="dot" style="background:#8f7bd1"></span>Guerre Mondiali</div>
+    </div>
+
+    <button class="primary-btn" id="start-btn">Inizia il quiz</button>
+  </div>
+
+  <!-- ===================== GAME SCREEN ===================== -->
+  <div class="panel hidden" id="game-screen">
+    <div class="scoreboard" id="scoreboard"></div>
+
+    <div class="turn-banner">Tocca a <b id="turn-name">—</b> · domande rimaste: <span id="remaining">120</span></div>
+
+    <div class="card-stage">
+      <div class="card" id="card">
+        <div class="card-face card-front">
+          <div class="card-meta">
+            <span class="badge cat" id="badge-cat">Categoria</span>
+            <span class="badge" id="badge-diff">Difficoltà</span>
+          </div>
+          <div class="card-q" id="card-question">Domanda…</div>
+        </div>
+        <div class="card-face card-back">
+          <div class="card-a-label">Risposta corretta</div>
+          <div class="card-a" id="card-answer">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="pre-flip" class="action-row">
+      <button class="primary-btn" id="flip-btn">Gira la carta e scopri la risposta</button>
+    </div>
+
+    <div id="post-flip" class="hidden">
+      <div class="pts-hint" id="pts-hint">Punti in palio: +1 / -1</div>
+      <div class="judge-row">
+        <button class="judge-btn right" id="btn-right">✓ Risposta giusta</button>
+        <button class="judge-btn wrong" id="btn-wrong">✗ Risposta sbagliata</button>
+      </div>
+    </div>
+
+    <div class="flip-hint">Il giocatore risponde ad alta voce prima di girare la carta</div>
+  </div>
+
+  <!-- ===================== END SCREEN ===================== -->
+  <div class="panel hidden" id="end-screen">
+    <div class="cat-title" style="text-align:center;">Partita conclusa</div>
+    <h1 style="font-family:var(--font-display);text-align:center;margin:6px 0 18px;font-size:32px;">Classifica finale</h1>
+    <div class="podium" id="podium"></div>
+    <button class="primary-btn" id="restart-btn">Gioca ancora</button>
+  </div>
+
+  <footer>120 domande · 4 categorie · 3 livelli di difficoltà</footer>
+</div>
+
+<script>
+/* ============================================================
+   BANCA DATI DOMANDE
+   ============================================================ */
+const QUESTIONS = {
+  mitologia: {
+    label: "Mitologia greca",
+    color: "#e3ab3f",
+    facile: [
+      ["Chi è il re degli dei dell'Olimpo?", "Zeus"],
+      ["Chi è la dea greca della saggezza e della guerra strategica?", "Atena"],
+      ["Chi è il dio del mare nella mitologia greca?", "Poseidone"],
+      ["Come si chiama il cavallo alato della mitologia greca?", "Pegaso"],
+      ["Chi è la dea dell'amore e della bellezza?", "Afrodite"],
+      ["Chi è il dio della guerra nella mitologia greca?", "Ares"],
+      ["Come si chiama il gigante mitologico con un solo occhio?", "Ciclope"],
+      ["Chi è il messaggero alato degli dei?", "Ermes"],
+      ["Come si chiama la moglie di Zeus, regina degli dei?", "Era"],
+      ["Chi è il dio greco del sole e della musica?", "Apollo"],
+    ],
+    media: [
+      ["Quale eroe uccise la Medusa usando uno scudo come specchio?", "Perseo"],
+      ["In quale città si trovava il labirinto del Minotauro?", "Creta (Cnosso)"],
+      ["Chi è il re di Itaca, protagonista dell'Odissea?", "Ulisse (Odisseo)"],
+      ["Cosa aprì Pandora scatenando tutti i mali nel mondo?", "Il vaso (la scatola) di Pandora"],
+      ["Quale titano fu condannato a reggere il cielo sulle spalle?", "Atlante"],
+      ["Come si chiamano le tre sorelle con serpenti al posto dei capelli, tra cui Medusa?", "Le Gorgoni"],
+      ["Chi è il dio greco degli inferi?", "Ade"],
+      ["Come si chiama il fiume infernale su cui Caronte traghetta le anime?", "Stige (o Acheronte)"],
+      ["Quale eroe compì dodici fatiche, tra cui uccidere il leone di Nemea?", "Eracle (Ercole)"],
+      ["Chi volò troppo vicino al sole con ali di cera, precipitando in mare?", "Icaro"],
+    ],
+    difficile: [
+      ["Come si chiama la madre di Achille, una Nereide?", "Teti"],
+      ["Qual è l'unico punto vulnerabile del corpo di Achille, diventato proverbiale?", "Il tallone (tallone d'Achille)"],
+      ["Chi tesseva una tela di giorno e la disfaceva di notte per non risposarsi?", "Penelope"],
+      ["Chi è il dio fabbro, zoppo, marito di Afrodite?", "Efesto"],
+      ["Come si chiama la dea greca della vendetta e della giusta ira?", "Nemesi"],
+      ["Come si chiamano le divinità vendicatrici alate con serpenti, dette anche Furie?", "Erinni"],
+      ["Chi risolse l'enigma della Sfinge davanti a Tebe?", "Edipo"],
+      ["Qual è il nome del fiume infernale che Caronte attraversa con la sua barca?", "Acheronte"],
+      ["Chi è il figlio di Zeus e Alcmena celebre per la forza sovrumana?", "Eracle"],
+      ["Quale dea della discordia scatenò la guerra di Troia lanciando il pomo d'oro?", "Eris"],
+    ],
+  },
+
+  disney: {
+    label: "Film Disney",
+    color: "#e0553f",
+    facile: [
+      ["Come si chiama la sirenetta protagonista del film Disney?", "Ariel"],
+      ["Qual è il nome del leoncino protagonista de 'Il Re Leone'?", "Simba"],
+      ["Come si chiama la principessa con i capelli lunghissimi in 'Rapunzel - L'intreccio della torre'?", "Rapunzel"],
+      ["Qual è il nome del pupazzo di neve in 'Frozen'?", "Olaf"],
+      ["Come si chiama il protagonista del film 'Aladdin'?", "Aladdin"],
+      ["Qual è il nome della principessa che dorme per cent'anni ne 'La Bella Addormentata'?", "Aurora"],
+      ["Come si chiama il pesciolino protagonista di 'Alla ricerca di Nemo'?", "Nemo"],
+      ["Qual è il nome del cerbiatto protagonista di 'Bambi'?", "Bambi"],
+      ["Come si chiama la fatina amica di Peter Pan?", "Trilly"],
+      ["Qual è il nome della principessa protagonista di 'Biancaneve e i sette nani'?", "Biancaneve"],
+    ],
+    media: [
+      ["Come si chiama il granchio amico e consigliere di Ariel?", "Sebastian"],
+      ["Come si chiama il capitano pirata nemico giurato di Peter Pan?", "Capitan Uncino"],
+      ["Qual è il nome dello spirito magico che esce dalla lampada in 'Aladdin'?", "Genio"],
+      ["Come si chiama la sorella maggiore di Anna in 'Frozen'?", "Elsa"],
+      ["Come si chiama il malvagio zio di Simba ne 'Il Re Leone'?", "Scar"],
+      ["Come si chiama il burattino di legno che sogna di diventare un bambino vero?", "Pinocchio"],
+      ["Qual è il nome della gatta elegante protagonista de 'Gli Aristogatti'?", "Duchessa"],
+      ["Come si chiama la principessa guerriera scozzese protagonista di 'Ribelle - The Brave'?", "Merida"],
+      ["Qual è il nome del robottino protagonista del film 'Wall-E'?", "Wall-E"],
+      ["Come si chiama il fantasma... errore, chiedo: qual è il nome del principe ranocchio in 'La Principessa e il Ranocchio'?", "Naveen"],
+    ],
+    difficile: [
+      ["Come si chiama la matrigna cattiva di Cenerentola?", "Lady Tremaine"],
+      ["Qual è il nome del cavallo di Rapunzel nel film Disney?", "Massimo"],
+      ["Come si chiamano i due topolini amici di Cenerentola?", "Gus e Jaq"],
+      ["Qual è il nome del paese immaginario dove vive Peter Pan?", "Isola che non c'è"],
+      ["Chi funge da coscienza narrante in 'Pinocchio', un grillo parlante?", "Jiminy Cricket (il Grillo Parlante)"],
+      ["Come si chiama il regno immaginario in cui è ambientato 'Frozen'?", "Arendelle"],
+      ["Come si chiama il re del mare, padre di Ariel?", "Re Tritone"],
+      ["Qual è il nome della strega del mare ne 'La Sirenetta'?", "Ursula"],
+      ["Come si chiama il candelabro maggiordomo ne 'La Bella e la Bestia'?", "Lumière"],
+      ["Come si chiama il piccolo drago amico e guardiano di Mulan?", "Mushu"],
+    ],
+  },
+
+  macchine: {
+    label: "Macchine",
+    color: "#4f9d6e",
+    facile: [
+      ["Quale casa automobilistica italiana produce la Panda?", "Fiat"],
+      ["Come si chiama lo strumento che indica la velocità dell'auto?", "Tachimetro"],
+      ["Quale marca automobilistica ha come simbolo il cavallino rampante?", "Ferrari"],
+      ["Come si chiama il carburante utilizzato dai motori diesel?", "Gasolio"],
+      ["Quale marca tedesca ha come simbolo quattro anelli intrecciati?", "Audi"],
+      ["Come si chiama il dispositivo di sicurezza che si gonfia in caso di incidente?", "Airbag"],
+      ["Quale casa automobilistica produce la storica Fiat 500?", "Fiat"],
+      ["Come si chiama la leva usata per cambiare marcia in un'auto manuale?", "Leva del cambio"],
+      ["Quale marca automobilistica ha come simbolo una stella a tre punte?", "Mercedes-Benz"],
+      ["Come si chiama il dispositivo che permette di frenare l'automobile?", "Freno"],
+    ],
+    media: [
+      ["In che anno circa Henry Ford lanciò la celebre Ford Model T?", "1908"],
+      ["Come si chiama il sistema che impedisce alle ruote di bloccarsi durante la frenata?", "ABS"],
+      ["Quale casa automobilistica giapponese produce la Skyline GT-R?", "Nissan"],
+      ["Che tipo di motore utilizza le auto completamente elettriche invece del carburante fossile?", "Motore elettrico"],
+      ["In quale paese fu costruita la prima automobile a motore a scoppio da Karl Benz?", "Germania"],
+      ["Come si chiama il gruppo meccanico che trasmette la potenza del motore alle ruote?", "Trasmissione (cambio)"],
+      ["Quale casa automobilistica italiana produce modelli come la Aventador e la Huracán?", "Lamborghini"],
+      ["Come si chiama il sistema elettronico che aiuta a mantenere la stabilità dell'auto in curva?", "ESP (controllo elettronico di stabilità)"],
+      ["Quale casa automobilistica svedese è storicamente associata alla sicurezza dei veicoli?", "Volvo"],
+      ["Come si chiamava il primo veicolo a motore costruito da Karl Benz nel 1886?", "Benz Patent-Motorwagen"],
+    ],
+    difficile: [
+      ["Chi fondò la casa automobilistica Ferrari?", "Enzo Ferrari"],
+      ["In che anno fu fondata la Volkswagen?", "1937"],
+      ["Come si chiama la disposizione dei cilindri a forma di 'V', tipica dei motori sportivi?", "Motore a V"],
+      ["Quale ingegnere italiano progettò la Fiat 500 originale del 1957?", "Dante Giacosa"],
+      ["Come si chiama il tipo di sospensione che regola automaticamente l'altezza da terra dell'auto?", "Sospensioni pneumatiche (attive)"],
+      ["In che anno la Toyota lanciò la Prius, la prima ibrida di produzione di massa?", "1997"],
+      ["Quale pilota tedesco ha vinto sette titoli mondiali di Formula 1?", "Michael Schumacher"],
+      ["Come si chiama la perdita di aderenza dell'anteriore in curva, tipica del sottosterzo?", "Sottosterzo"],
+      ["Quale storica casa automobilistica tedesca produce il motore 'boxer' della 911?", "Porsche"],
+      ["Come si chiama la tecnologia che inietta direttamente la benzina nei cilindri nei motori moderni?", "Iniezione diretta"],
+    ],
+  },
+
+  guerre: {
+    label: "Guerre Mondiali",
+    color: "#8f7bd1",
+    facile: [
+      ["In che anno iniziò la Prima Guerra Mondiale?", "1914"],
+      ["In che anno terminò la Seconda Guerra Mondiale?", "1945"],
+      ["Chi era il dittatore dell'Italia fascista durante la Seconda Guerra Mondiale?", "Benito Mussolini"],
+      ["Chi era il dittatore della Germania nazista?", "Adolf Hitler"],
+      ["Come si chiama l'attentato che scatenò la Prima Guerra Mondiale nel 1914?", "Attentato di Sarajevo"],
+      ["Quale attacco giapponese portò gli Stati Uniti a entrare nella Seconda Guerra Mondiale?", "Attacco di Pearl Harbor"],
+      ["In che anno iniziò la Seconda Guerra Mondiale?", "1939"],
+      ["Quale nazione fu invasa dalla Germania nel settembre 1939, dando inizio alla guerra?", "Polonia"],
+      ["Quale evento del 1945 pose fine alla guerra nel Pacifico?", "Le bombe atomiche su Hiroshima e Nagasaki"],
+      ["Come si chiamava l'alleanza militare tra Italia, Germania e Giappone?", "Patto Tripartito (Asse)"],
+    ],
+    media: [
+      ["Come venivano chiamati i lunghi fossati fortificati tipici del fronte occidentale nella Prima Guerra Mondiale?", "Trincee"],
+      ["Quale trattato di pace, firmato nel 1919, pose fine alla Prima Guerra Mondiale?", "Trattato di Versailles"],
+      ["Come si chiamava lo sbarco alleato in Normandia del giugno 1944?", "D-Day (Operazione Overlord)"],
+      ["Quale battaglia del 1942-43 segnò la svolta sul fronte orientale contro la Germania?", "Battaglia di Stalingrado"],
+      ["Come si chiamava il più noto campo di concentramento e sterminio nazista in Polonia?", "Auschwitz"],
+      ["Chi era il primo ministro britannico durante gran parte della Seconda Guerra Mondiale?", "Winston Churchill"],
+      ["Come si chiamava l'operazione tedesca di invasione dell'Unione Sovietica nel 1941?", "Operazione Barbarossa"],
+      ["Quale transatlantico britannico fu affondato da un sommergibile tedesco nel 1915?", "Lusitania"],
+      ["Chi era il presidente degli Stati Uniti per gran parte della Seconda Guerra Mondiale?", "Franklin Delano Roosevelt"],
+      ["Quale battaglia navale del 1942 segnò la svolta nella guerra del Pacifico?", "Battaglia delle Midway"],
+    ],
+    difficile: [
+      ["Come si chiamava il piano tedesco che aggirò la linea Maginot attraverso le Ardenne nel 1940?", "Fall Gelb (attacco attraverso le Ardenne)"],
+      ["Chi comandava le forze alleate durante lo sbarco in Normandia?", "Dwight Eisenhower"],
+      ["Come si chiamava la conferenza del 1945 in cui Roosevelt, Churchill e Stalin decisero il destino dell'Europa?", "Conferenza di Yalta"],
+      ["Quale generale tedesco era soprannominato 'la Volpe del Deserto'?", "Erwin Rommel"],
+      ["Come si chiamava l'insurrezione della resistenza polacca a Varsavia nel 1944?", "Insurrezione di Varsavia"],
+      ["Qual era il nome in codice dell'invasione alleata della Sicilia nel 1943?", "Operazione Husky"],
+      ["Chi era il capo del governo italiano che firmò l'armistizio con gli Alleati nel 1943?", "Pietro Badoglio"],
+      ["Quale città giapponese fu colpita dalla seconda bomba atomica, tre giorni dopo Hiroshima?", "Nagasaki"],
+      ["Come si chiamava il patto di non aggressione segreto tra Germania e Unione Sovietica del 1939?", "Patto Molotov-Ribbentrop"],
+      ["Chi era il maresciallo sovietico che guidò la presa di Berlino nel 1945?", "Georgij Zhukov"],
+    ],
+  },
+};
+
+const DIFF_POINTS = { facile: 1, media: 3, difficile: 5 };
+const DIFF_LABEL = { facile: "Facile", media: "Media", difficile: "Difficile" };
+
+/* ============================================================
+   STATO DI GIOCO
+   ============================================================ */
+let playerCount = 2;
+let players = []; // {name, score}
+let currentPlayerIndex = 0;
+let deck = []; // domande rimanenti, mescolate
+let currentQ = null;
+
+/* ============================================================
+   SETUP SCREEN
+   ============================================================ */
+const countRow = document.getElementById('count-row');
+const nameList = document.getElementById('name-list');
+
+function renderCountButtons(){
+  countRow.innerHTML = '';
+  for(let i=1;i<=6;i++){
+    const btn = document.createElement('button');
+    btn.className = 'count-btn' + (i===playerCount ? ' active' : '');
+    btn.textContent = i;
+    btn.addEventListener('click', () => {
+      playerCount = i;
+      renderCountButtons();
+      renderNameInputs();
+    });
+    countRow.appendChild(btn);
+  }
+}
+
+function renderNameInputs(){
+  const existing = Array.from(nameList.querySelectorAll('input')).map(i => i.value);
+  nameList.innerHTML = '';
+  for(let i=0;i<playerCount;i++){
+    const row = document.createElement('div');
+    row.className = 'name-row';
+    const tag = document.createElement('div');
+    tag.className = 'tag';
+    tag.textContent = i+1;
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = 'Nome giocatore ' + (i+1);
+    input.value = existing[i] || '';
+    input.maxLength = 20;
+    row.appendChild(tag);
+    row.appendChild(input);
+    nameList.appendChild(row);
+  }
+}
+
+renderCountButtons();
+renderNameInputs();
+
+document.getElementById('start-btn').addEventListener('click', () => {
+  const inputs = Array.from(nameList.querySelectorAll('input'));
+  players = inputs.map((inp, i) => ({
+    name: inp.value.trim() || ('Giocatore ' + (i+1)),
+    score: 0,
+  }));
+  buildDeck();
+  currentPlayerIndex = 0;
+  document.getElementById('setup-screen').classList.add('hidden');
+  document.getElementById('game-screen').classList.remove('hidden');
+  renderScoreboard();
+  nextQuestion();
+});
+
+/* ============================================================
+   MAZZO DI DOMANDE
+   ============================================================ */
+function buildDeck(){
+  deck = [];
+  for(const [catKey, catData] of Object.entries(QUESTIONS)){
+    for(const diff of ['facile','media','difficile']){
+      for(const [q,a] of catData[diff]){
+        deck.push({ catKey, catLabel: catData.label, color: catData.color, diff, q, a });
+      }
+    }
+  }
+  // shuffle (Fisher-Yates)
+  for(let i=deck.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+}
+
+/* ============================================================
+   SCOREBOARD
+   ============================================================ */
+const scoreboardEl = document.getElementById('scoreboard');
+function renderScoreboard(){
+  scoreboardEl.innerHTML = '';
+  players.forEach((p, idx) => {
+    const pill = document.createElement('div');
+    pill.className = 'score-pill' + (idx === currentPlayerIndex ? ' current' : '');
+    const nameDiv = document.createElement('div');
+    nameDiv.className = 'pname';
+    nameDiv.textContent = p.name;
+    const scoreDiv = document.createElement('div');
+    scoreDiv.className = 'pscore' + (p.score < 0 ? ' neg' : '');
+    scoreDiv.textContent = p.score;
+    pill.appendChild(nameDiv);
+    pill.appendChild(scoreDiv);
+    scoreboardEl.appendChild(pill);
+  });
+}
+
+/* ============================================================
+   FLUSSO DI GIOCO
+   ============================================================ */
+const cardEl = document.getElementById('card');
+const badgeCat = document.getElementById('badge-cat');
+const badgeDiff = document.getElementById('badge-diff');
+const cardQuestion = document.getElementById('card-question');
+const cardAnswer = document.getElementById('card-answer');
+const preFlip = document.getElementById('pre-flip');
+const postFlip = document.getElementById('post-flip');
+const ptsHint = document.getElementById('pts-hint');
+const turnName = document.getElementById('turn-name');
+const remainingEl = document.getElementById('remaining');
+
+function nextQuestion(){
+  if(deck.length === 0){
+    showEndScreen();
+    return;
+  }
+  currentQ = deck.pop();
+  remainingEl.textContent = deck.length;
+
+  turnName.textContent = players[currentPlayerIndex].name;
+
+  cardEl.classList.remove('flipped');
+  preFlip.classList.remove('hidden');
+  postFlip.classList.add('hidden');
+
+  badgeCat.textContent = currentQ.catLabel;
+  badgeCat.style.background = hexToRgba(currentQ.color, 0.15);
+  badgeCat.style.color = currentQ.color;
+
+  badgeDiff.textContent = DIFF_LABEL[currentQ.diff];
+  badgeDiff.className = 'badge diff-' + currentQ.diff;
+
+  cardQuestion.textContent = currentQ.q;
+  cardAnswer.textContent = currentQ.a;
+
+  const pts = DIFF_POINTS[currentQ.diff];
+  ptsHint.textContent = `Punti in palio: +${pts} / -${pts}`;
+
+  renderScoreboard();
+}
+
+function hexToRgba(hex, alpha){
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+document.getElementById('flip-btn').addEventListener('click', () => {
+  cardEl.classList.add('flipped');
+  preFlip.classList.add('hidden');
+  postFlip.classList.remove('hidden');
+});
+
+function judge(isCorrect){
+  const pts = DIFF_POINTS[currentQ.diff];
+  players[currentPlayerIndex].score += isCorrect ? pts : -pts;
+  currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+  renderScoreboard();
+  nextQuestion();
+}
+
+document.getElementById('btn-right').addEventListener('click', () => judge(true));
+document.getElementById('btn-wrong').addEventListener('click', () => judge(false));
+
+/* ============================================================
+   FINE PARTITA
+   ============================================================ */
+function showEndScreen(){
+  document.getElementById('game-screen').classList.add('hidden');
+  document.getElementById('end-screen').classList.remove('hidden');
+
+  const ranked = [...players].sort((a,b) => b.score - a.score);
+  const podium = document.getElementById('podium');
+  podium.innerHTML = '';
+  ranked.forEach((p, idx) => {
+    const row = document.createElement('div');
+    row.className = 'rank-row' + (idx === 0 ? ' first' : '');
+    const num = document.createElement('div');
+    num.className = 'rank-num';
+    num.textContent = idx+1;
+    const name = document.createElement('div');
+    name.className = 'rank-name';
+    name.textContent = p.name;
+    const score = document.createElement('div');
+    score.className = 'rank-score';
+    score.textContent = p.score;
+    if(p.score < 0) score.style.color = 'var(--coral)';
+    row.appendChild(num);
+    row.appendChild(name);
+    row.appendChild(score);
+    podium.appendChild(row);
+  });
+}
+
+document.getElementById('restart-btn').addEventListener('click', () => {
+  document.getElementById('end-screen').classList.add('hidden');
+  document.getElementById('setup-screen').classList.remove('hidden');
+});
+</script>
+</body>
+</html>
