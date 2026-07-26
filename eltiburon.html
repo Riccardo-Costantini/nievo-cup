@@ -133,19 +133,47 @@
   }
   .cat-grid{
     display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(150px,1fr));
+    grid-template-columns:repeat(auto-fit, minmax(180px,1fr));
     gap:10px;
-    margin-bottom:30px;
+    margin-bottom:12px;
   }
   .cat-chip{
-    display:flex;align-items:center;gap:8px;
-    border:1px solid var(--line);
+    display:flex;align-items:center;gap:10px;
+    border:1.5px solid var(--line);
     border-radius:10px;
-    padding:10px 14px;
+    padding:12px 14px;
     font-size:14px;
+    font-weight:600;
     color:rgba(243,234,217,0.85);
+    cursor:pointer;
+    transition:border-color .15s ease, background .15s ease;
+    user-select:none;
   }
-  .cat-chip .dot{width:8px;height:8px;border-radius:50%;flex:0 0 8px;}
+  .cat-chip:hover{border-color:rgba(227,171,63,0.5);}
+  .cat-chip.selected{
+    background:rgba(227,171,63,0.08);
+  }
+  .cat-chip .dot{width:10px;height:10px;border-radius:50%;flex:0 0 10px;}
+  .cat-chip .check{
+    margin-left:auto;
+    width:18px;height:18px;
+    border-radius:5px;
+    border:1.5px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px;
+    flex:0 0 18px;
+  }
+  .cat-chip.selected .check{
+    background:var(--gold);
+    border-color:var(--gold);
+    color:var(--ink);
+  }
+  .cat-note{
+    font-size:12px;
+    color:rgba(243,234,217,0.4);
+    margin-bottom:24px;
+  }
+  .cat-note.warn{color:var(--coral);}
 
   .primary-btn{
     display:block;
@@ -165,20 +193,6 @@
   .primary-btn:hover{background:var(--gold-dark);}
   .primary-btn:active{transform:scale(0.98);}
   .primary-btn:disabled{opacity:0.4;cursor:not-allowed;}
-
-  .ghost-btn{
-    background:transparent;
-    border:1.5px solid var(--line);
-    color:var(--parchment);
-    border-radius:10px;
-    padding:12px 20px;
-    font-family:var(--font-body);
-    font-weight:600;
-    font-size:14px;
-    cursor:pointer;
-    transition:border-color .15s ease;
-  }
-  .ghost-btn:hover{border-color:var(--gold);}
 
   /* ---- GAME SCREEN ---- */
   .scoreboard{
@@ -268,7 +282,6 @@
     padding:6px 12px;
     border-radius:20px;
   }
-  .badge.cat{background:rgba(227,171,63,0.15);color:var(--gold);}
   .badge.diff-facile{background:rgba(79,157,110,0.18);color:var(--sage);}
   .badge.diff-media{background:rgba(227,171,63,0.18);color:var(--gold);}
   .badge.diff-difficile{background:rgba(224,85,63,0.18);color:var(--coral);}
@@ -384,13 +397,9 @@
     <div class="cat-title">Nomi dei giocatori</div>
     <div class="name-list" id="name-list"></div>
 
-    <div class="cat-title">Categorie in gioco</div>
-    <div class="cat-grid">
-      <div class="cat-chip"><span class="dot" style="background:#e3ab3f"></span>Mitologia greca</div>
-      <div class="cat-chip"><span class="dot" style="background:#e0553f"></span>Film Disney</div>
-      <div class="cat-chip"><span class="dot" style="background:#4f9d6e"></span>Macchine</div>
-      <div class="cat-chip"><span class="dot" style="background:#8f7bd1"></span>Guerre Mondiali</div>
-    </div>
+    <div class="cat-title">Scegli le categorie da giocare</div>
+    <div class="cat-grid" id="cat-grid"></div>
+    <div class="cat-note" id="cat-note">Seleziona almeno una categoria — 30 domande per categoria.</div>
 
     <button class="primary-btn" id="start-btn">Inizia il quiz</button>
   </div>
@@ -399,13 +408,13 @@
   <div class="panel hidden" id="game-screen">
     <div class="scoreboard" id="scoreboard"></div>
 
-    <div class="turn-banner">Tocca a <b id="turn-name">—</b> · domande rimaste: <span id="remaining">120</span></div>
+    <div class="turn-banner">Tocca a <b id="turn-name">—</b> · domande rimaste: <span id="remaining">0</span></div>
 
     <div class="card-stage">
       <div class="card" id="card">
         <div class="card-face card-front">
           <div class="card-meta">
-            <span class="badge cat" id="badge-cat">Categoria</span>
+            <span class="badge" id="badge-cat">Categoria</span>
             <span class="badge" id="badge-diff">Difficoltà</span>
           </div>
           <div class="card-q" id="card-question">Domanda…</div>
@@ -440,52 +449,52 @@
     <button class="primary-btn" id="restart-btn">Gioca ancora</button>
   </div>
 
-  <footer>120 domande · 4 categorie · 3 livelli di difficoltà</footer>
+  <footer>Fino a 120 domande · 4 categorie selezionabili · 3 livelli di difficoltà</footer>
 </div>
 
 <script>
 /* ============================================================
-   BANCA DATI DOMANDE
+   BANCA DATI DOMANDE (set inedito)
    ============================================================ */
 const QUESTIONS = {
   mitologia: {
     label: "Mitologia greca",
     color: "#e3ab3f",
     facile: [
-      ["Chi è il re degli dei dell'Olimpo?", "Zeus"],
-      ["Chi è la dea greca della saggezza e della guerra strategica?", "Atena"],
-      ["Chi è il dio del mare nella mitologia greca?", "Poseidone"],
-      ["Come si chiama il cavallo alato della mitologia greca?", "Pegaso"],
-      ["Chi è la dea dell'amore e della bellezza?", "Afrodite"],
-      ["Chi è il dio della guerra nella mitologia greca?", "Ares"],
-      ["Come si chiama il gigante mitologico con un solo occhio?", "Ciclope"],
-      ["Chi è il messaggero alato degli dei?", "Ermes"],
-      ["Come si chiama la moglie di Zeus, regina degli dei?", "Era"],
-      ["Chi è il dio greco del sole e della musica?", "Apollo"],
+      ["Chi è la dea greca della caccia e della luna?", "Artemide"],
+      ["Chi è il dio del vino e dei baccanali?", "Dioniso"],
+      ["Come si chiama il regno sotterraneo dei morti nella mitologia greca?", "Ade (gli Inferi)"],
+      ["Chi è la dea del focolare domestico?", "Estia"],
+      ["Come si chiama l'eroe più forte della mitologia greca, famoso per le dodici fatiche?", "Eracle (Ercole)"],
+      ["Chi è il dio del fuoco e dei fabbri, marito di Afrodite?", "Efesto"],
+      ["Come si chiama il monte su cui vivono gli dei greci?", "Olimpo"],
+      ["Chi è la dea del raccolto e dell'agricoltura?", "Demetra"],
+      ["Chi è il padre di Zeus, un titano detronizzato dal figlio?", "Crono"],
+      ["Come si chiama la dea dell'arcobaleno e messaggera degli dei?", "Iris"],
     ],
     media: [
-      ["Quale eroe uccise la Medusa usando uno scudo come specchio?", "Perseo"],
-      ["In quale città si trovava il labirinto del Minotauro?", "Creta (Cnosso)"],
-      ["Chi è il re di Itaca, protagonista dell'Odissea?", "Ulisse (Odisseo)"],
-      ["Cosa aprì Pandora scatenando tutti i mali nel mondo?", "Il vaso (la scatola) di Pandora"],
-      ["Quale titano fu condannato a reggere il cielo sulle spalle?", "Atlante"],
-      ["Come si chiamano le tre sorelle con serpenti al posto dei capelli, tra cui Medusa?", "Le Gorgoni"],
-      ["Chi è il dio greco degli inferi?", "Ade"],
-      ["Come si chiama il fiume infernale su cui Caronte traghetta le anime?", "Stige (o Acheronte)"],
-      ["Quale eroe compì dodici fatiche, tra cui uccidere il leone di Nemea?", "Eracle (Ercole)"],
-      ["Chi volò troppo vicino al sole con ali di cera, precipitando in mare?", "Icaro"],
+      ["Chi era l'architetto e inventore che costruì il Labirinto di Creta?", "Dedalo"],
+      ["Come si chiama il mostro con corpo di leone, testa di capra e coda di serpente?", "Chimera"],
+      ["Chi è la maga che trasformò i compagni di Ulisse in maiali?", "Circe"],
+      ["Come si chiamano le creature marine il cui canto ammaliava i marinai nell'Odissea?", "Sirene"],
+      ["Chi è il saggio centauro che fece da maestro a molti eroi greci?", "Chirone"],
+      ["Come si chiama la profetessa condannata a non essere mai creduta?", "Cassandra"],
+      ["Chi rubò il fuoco agli dei per donarlo agli uomini?", "Prometeo"],
+      ["Come si chiama il cane a tre teste che sorveglia le porte degli Inferi?", "Cerbero"],
+      ["Chi è la regina delle Amazzoni sconfitta da Eracle?", "Ippolita"],
+      ["In quale isola Teseo abbandonò Arianna dopo aver sconfitto il Minotauro?", "Nasso"],
     ],
     difficile: [
-      ["Come si chiama la madre di Achille, una Nereide?", "Teti"],
-      ["Qual è l'unico punto vulnerabile del corpo di Achille, diventato proverbiale?", "Il tallone (tallone d'Achille)"],
-      ["Chi tesseva una tela di giorno e la disfaceva di notte per non risposarsi?", "Penelope"],
-      ["Chi è il dio fabbro, zoppo, marito di Afrodite?", "Efesto"],
-      ["Come si chiama la dea greca della vendetta e della giusta ira?", "Nemesi"],
-      ["Come si chiamano le divinità vendicatrici alate con serpenti, dette anche Furie?", "Erinni"],
-      ["Chi risolse l'enigma della Sfinge davanti a Tebe?", "Edipo"],
-      ["Qual è il nome del fiume infernale che Caronte attraversa con la sua barca?", "Acheronte"],
-      ["Chi è il figlio di Zeus e Alcmena celebre per la forza sovrumana?", "Eracle"],
-      ["Quale dea della discordia scatenò la guerra di Troia lanciando il pomo d'oro?", "Eris"],
+      ["In quale fiume Teti immerse Achille per renderlo invulnerabile?", "Stige"],
+      ["Chi era il traghettatore delle anime nell'oltretomba greco?", "Caronte"],
+      ["Quale re fu condannato a spingere in eterno un masso su una collina?", "Sisifo"],
+      ["Come si chiama il supplizio di un re condannato a non poter mai bere né mangiare pur avendo cibo e acqua vicini?", "Il supplizio di Tantalo"],
+      ["Come si chiama la dea alata della vittoria?", "Nike"],
+      ["Chi, secondo il mito tebano, uccise il padre e sposò la madre senza saperlo?", "Edipo"],
+      ["Come si chiamano le nove dee protettrici delle arti e delle scienze?", "Muse"],
+      ["Chi guidò la spedizione degli Argonauti alla ricerca del Vello d'Oro?", "Giasone"],
+      ["Quale ninfa, punita da Era, poteva solo ripetere le ultime parole altrui?", "Eco"],
+      ["Come si chiama il gigante dai cento occhi incaricato da Era di sorvegliare Io?", "Argo (Argo Panoptes)"],
     ],
   },
 
@@ -493,40 +502,40 @@ const QUESTIONS = {
     label: "Film Disney",
     color: "#e0553f",
     facile: [
-      ["Come si chiama la sirenetta protagonista del film Disney?", "Ariel"],
-      ["Qual è il nome del leoncino protagonista de 'Il Re Leone'?", "Simba"],
-      ["Come si chiama la principessa con i capelli lunghissimi in 'Rapunzel - L'intreccio della torre'?", "Rapunzel"],
-      ["Qual è il nome del pupazzo di neve in 'Frozen'?", "Olaf"],
-      ["Come si chiama il protagonista del film 'Aladdin'?", "Aladdin"],
-      ["Qual è il nome della principessa che dorme per cent'anni ne 'La Bella Addormentata'?", "Aurora"],
-      ["Come si chiama il pesciolino protagonista di 'Alla ricerca di Nemo'?", "Nemo"],
-      ["Qual è il nome del cerbiatto protagonista di 'Bambi'?", "Bambi"],
-      ["Come si chiama la fatina amica di Peter Pan?", "Trilly"],
-      ["Qual è il nome della principessa protagonista di 'Biancaneve e i sette nani'?", "Biancaneve"],
+      ["Come si chiama l'elefantino dalle grandi orecchie protagonista di un film Disney?", "Dumbo"],
+      ["Qual è il nome del cucciolo di tigre amico di Winnie the Pooh?", "Tigro"],
+      ["Come si chiama la principessa protagonista del film 'Pocahontas'?", "Pocahontas"],
+      ["Qual è il nome del cane randagio protagonista di 'Lilli e il Vagabondo'?", "Biagio (il Vagabondo)"],
+      ["Come si chiama la protagonista guerriera del film 'Mulan'?", "Mulan"],
+      ["Qual è il nome del pupazzo cowboy protagonista di 'Toy Story'?", "Woody"],
+      ["Come si chiama la principessa protagonista del film 'Oceania'?", "Vaiana (Moana)"],
+      ["Qual è il nome dell'orsetto amico di tutti nel Bosco dei Cento Acri?", "Winnie the Pooh"],
+      ["Come si chiama la gattina elegante protagonista de 'Gli Aristogatti'?", "Duchessa"],
+      ["Qual è il nome del principe ranocchio in 'La Principessa e il Ranocchio'?", "Naveen"],
     ],
     media: [
-      ["Come si chiama il granchio amico e consigliere di Ariel?", "Sebastian"],
-      ["Come si chiama il capitano pirata nemico giurato di Peter Pan?", "Capitan Uncino"],
-      ["Qual è il nome dello spirito magico che esce dalla lampada in 'Aladdin'?", "Genio"],
-      ["Come si chiama la sorella maggiore di Anna in 'Frozen'?", "Elsa"],
-      ["Come si chiama il malvagio zio di Simba ne 'Il Re Leone'?", "Scar"],
-      ["Come si chiama il burattino di legno che sogna di diventare un bambino vero?", "Pinocchio"],
-      ["Qual è il nome della gatta elegante protagonista de 'Gli Aristogatti'?", "Duchessa"],
-      ["Come si chiama la principessa guerriera scozzese protagonista di 'Ribelle - The Brave'?", "Merida"],
-      ["Qual è il nome del robottino protagonista del film 'Wall-E'?", "Wall-E"],
-      ["Come si chiama il fantasma... errore, chiedo: qual è il nome del principe ranocchio in 'La Principessa e il Ranocchio'?", "Naveen"],
+      ["Come si chiama l'orologio parlante maggiordomo ne 'La Bella e la Bestia'?", "Orologino (Cogsworth)"],
+      ["Qual è il nome della teiera premurosa ne 'La Bella e la Bestia'?", "Signora Bric (Mrs. Potts)"],
+      ["Come si chiama il pappagallo scagnozzo di Jafar in 'Aladdin'?", "Iago"],
+      ["Qual è il nome della scimmietta amica di Aladdin?", "Abu"],
+      ["Come si chiama la renna fedele compagna di Kristoff in 'Frozen'?", "Sven"],
+      ["Qual è il nome del pesciolino giallo timido amico di Ariel?", "Flabbi (Flounder)"],
+      ["Come si chiama la balena che inghiotte Pinocchio e Geppetto?", "Monstro"],
+      ["Qual è il nome del maialino timoroso amico di Winnie the Pooh?", "Pimpi (Piglet)"],
+      ["Come si chiama il dio degli Inferi, antagonista del film 'Hercules'?", "Ade"],
+      ["Qual è il nome del fedele cavallo del principe Filippo ne 'La Bella Addormentata'?", "Samson"],
     ],
     difficile: [
-      ["Come si chiama la matrigna cattiva di Cenerentola?", "Lady Tremaine"],
-      ["Qual è il nome del cavallo di Rapunzel nel film Disney?", "Massimo"],
-      ["Come si chiamano i due topolini amici di Cenerentola?", "Gus e Jaq"],
-      ["Qual è il nome del paese immaginario dove vive Peter Pan?", "Isola che non c'è"],
-      ["Chi funge da coscienza narrante in 'Pinocchio', un grillo parlante?", "Jiminy Cricket (il Grillo Parlante)"],
-      ["Come si chiama il regno immaginario in cui è ambientato 'Frozen'?", "Arendelle"],
-      ["Come si chiama il re del mare, padre di Ariel?", "Re Tritone"],
-      ["Qual è il nome della strega del mare ne 'La Sirenetta'?", "Ursula"],
-      ["Come si chiama il candelabro maggiordomo ne 'La Bella e la Bestia'?", "Lumière"],
-      ["Come si chiama il piccolo drago amico e guardiano di Mulan?", "Mushu"],
+      ["Come si chiama la strega che rapisce e cresce Rapunzel nella torre?", "Madre Gothel"],
+      ["Come si chiama la fata turchina che dà vita al burattino Pinocchio?", "la Fata Turchina"],
+      ["Come si chiama il topolino sarto che aiuta Cenerentola a cucire il vestito da ballo?", "Gus (Gus Gus)"],
+      ["Come si chiama il giovane guerriero, figlio del capo villaggio, innamorato di Pocahontas?", "Kocoum"],
+      ["Nel film Disney 'Robin Hood', di che animale è rappresentato il protagonista Robin Hood?", "Una volpe"],
+      ["A quale paese scandinavo si è ispirato il regno di Arendelle in 'Frozen'?", "Norvegia"],
+      ["Come si chiama la strega malvagia che si trasforma in drago ne 'La Bella Addormentata'?", "Malefica"],
+      ["In quale film Disney compare Baloo, l'orso amico di Mowgli?", "Il Libro della Giungla"],
+      ["Come si chiama la tigre feroce antagonista de 'Il Libro della Giungla'?", "Shere Khan"],
+      ["Qual è il nome dell'orso spadaccino, fedele compagno di Robin Hood nel film Disney?", "Little John"],
     ],
   },
 
@@ -534,40 +543,40 @@ const QUESTIONS = {
     label: "Macchine",
     color: "#4f9d6e",
     facile: [
-      ["Quale casa automobilistica italiana produce la Panda?", "Fiat"],
-      ["Come si chiama lo strumento che indica la velocità dell'auto?", "Tachimetro"],
-      ["Quale marca automobilistica ha come simbolo il cavallino rampante?", "Ferrari"],
-      ["Come si chiama il carburante utilizzato dai motori diesel?", "Gasolio"],
-      ["Quale marca tedesca ha come simbolo quattro anelli intrecciati?", "Audi"],
-      ["Come si chiama il dispositivo di sicurezza che si gonfia in caso di incidente?", "Airbag"],
-      ["Quale casa automobilistica produce la storica Fiat 500?", "Fiat"],
-      ["Come si chiama la leva usata per cambiare marcia in un'auto manuale?", "Leva del cambio"],
-      ["Quale marca automobilistica ha come simbolo una stella a tre punte?", "Mercedes-Benz"],
-      ["Come si chiama il dispositivo che permette di frenare l'automobile?", "Freno"],
+      ["Quale casa automobilistica francese produce la Clio?", "Renault"],
+      ["Come si chiamano i dispositivi che illuminano la strada di notte su un'auto?", "Fari (fanali)"],
+      ["Quale marca automobilistica giapponese produce la Corolla?", "Toyota"],
+      ["Come si chiama il vano anteriore dove si trova solitamente il motore?", "Cofano"],
+      ["Quale marca automobilistica coreana produce il SUV Tucson?", "Hyundai"],
+      ["Come si chiama la ruota di riserva portata in caso di foratura?", "Ruota di scorta"],
+      ["Quale marca automobilistica americana produce la Mustang?", "Ford"],
+      ["Come si chiama la cintura che si allaccia per sicurezza in auto?", "Cintura di sicurezza"],
+      ["Quale marca automobilistica francese ha come simbolo un leone?", "Peugeot"],
+      ["Come si chiama il serbatoio dove si versa la benzina?", "Serbatoio del carburante"],
     ],
     media: [
-      ["In che anno circa Henry Ford lanciò la celebre Ford Model T?", "1908"],
-      ["Come si chiama il sistema che impedisce alle ruote di bloccarsi durante la frenata?", "ABS"],
-      ["Quale casa automobilistica giapponese produce la Skyline GT-R?", "Nissan"],
-      ["Che tipo di motore utilizza le auto completamente elettriche invece del carburante fossile?", "Motore elettrico"],
-      ["In quale paese fu costruita la prima automobile a motore a scoppio da Karl Benz?", "Germania"],
-      ["Come si chiama il gruppo meccanico che trasmette la potenza del motore alle ruote?", "Trasmissione (cambio)"],
-      ["Quale casa automobilistica italiana produce modelli come la Aventador e la Huracán?", "Lamborghini"],
-      ["Come si chiama il sistema elettronico che aiuta a mantenere la stabilità dell'auto in curva?", "ESP (controllo elettronico di stabilità)"],
-      ["Quale casa automobilistica svedese è storicamente associata alla sicurezza dei veicoli?", "Volvo"],
-      ["Come si chiamava il primo veicolo a motore costruito da Karl Benz nel 1886?", "Benz Patent-Motorwagen"],
+      ["Quale casa automobilistica britannica produce le auto di lusso Phantom e Ghost?", "Rolls-Royce"],
+      ["Come si chiama il sistema che spegne automaticamente il motore alle soste per ridurre i consumi?", "Start&Stop"],
+      ["Quale marca automobilistica ceca fa parte del gruppo Volkswagen?", "Škoda"],
+      ["Come si chiama il tipo di cambio che non richiede l'uso della frizione da parte del guidatore?", "Cambio automatico"],
+      ["Quale marca automobilistica italiana produce la Giulia e lo Stelvio?", "Alfa Romeo"],
+      ["Come si chiama il dispositivo che regola la temperatura all'interno dell'abitacolo?", "Climatizzatore"],
+      ["Quale città italiana è la sede storica della Fiat?", "Torino"],
+      ["Come si chiama il tipo di trazione in cui la potenza viene distribuita su tutte e quattro le ruote?", "Trazione integrale"],
+      ["Quale marca automobilistica britannica produce fuoristrada come il Defender?", "Land Rover"],
+      ["Come si chiama il carburante alternativo gassoso usato da alcune auto ecologiche, spesso abbreviato GPL?", "GPL (Gas di Petrolio Liquefatto)"],
     ],
     difficile: [
-      ["Chi fondò la casa automobilistica Ferrari?", "Enzo Ferrari"],
-      ["In che anno fu fondata la Volkswagen?", "1937"],
-      ["Come si chiama la disposizione dei cilindri a forma di 'V', tipica dei motori sportivi?", "Motore a V"],
-      ["Quale ingegnere italiano progettò la Fiat 500 originale del 1957?", "Dante Giacosa"],
-      ["Come si chiama il tipo di sospensione che regola automaticamente l'altezza da terra dell'auto?", "Sospensioni pneumatiche (attive)"],
-      ["In che anno la Toyota lanciò la Prius, la prima ibrida di produzione di massa?", "1997"],
-      ["Quale pilota tedesco ha vinto sette titoli mondiali di Formula 1?", "Michael Schumacher"],
-      ["Come si chiama la perdita di aderenza dell'anteriore in curva, tipica del sottosterzo?", "Sottosterzo"],
-      ["Quale storica casa automobilistica tedesca produce il motore 'boxer' della 911?", "Porsche"],
-      ["Come si chiama la tecnologia che inietta direttamente la benzina nei cilindri nei motori moderni?", "Iniezione diretta"],
+      ["Chi fondò la Toyota, nata originariamente come produttrice di telai tessili?", "Sakichi Toyoda"],
+      ["Come si chiama il motore ideato da Felix Wankel, con pistone rotante invece che a stantuffi?", "Motore Wankel (rotativo)"],
+      ["Quale pilota brasiliano, tre volte campione del mondo di F1, morì a Imola nel 1994?", "Ayrton Senna"],
+      ["Come si chiama la tecnologia che recupera energia durante la frenata nelle auto ibride ed elettriche?", "Frenata rigenerativa"],
+      ["Quale casa automobilistica ha prodotto la mitica Beetle, detta anche Maggiolino?", "Volkswagen"],
+      ["Come si chiama il coefficiente che misura la resistenza dell'aria su un veicolo?", "Coefficiente aerodinamico (Cx)"],
+      ["Quale marca automobilistica britannica produce l'iconica Mini?", "Mini"],
+      ["Come si chiama il sistema di accensione comandato elettronicamente nei motori a benzina moderni?", "Accensione elettronica"],
+      ["In che anno debuttò la prima Porsche 911?", "1963"],
+      ["Chi fondò la casa automobilistica Lamborghini, originariamente costruttore di trattori?", "Ferruccio Lamborghini"],
     ],
   },
 
@@ -575,40 +584,40 @@ const QUESTIONS = {
     label: "Guerre Mondiali",
     color: "#8f7bd1",
     facile: [
-      ["In che anno iniziò la Prima Guerra Mondiale?", "1914"],
-      ["In che anno terminò la Seconda Guerra Mondiale?", "1945"],
-      ["Chi era il dittatore dell'Italia fascista durante la Seconda Guerra Mondiale?", "Benito Mussolini"],
-      ["Chi era il dittatore della Germania nazista?", "Adolf Hitler"],
-      ["Come si chiama l'attentato che scatenò la Prima Guerra Mondiale nel 1914?", "Attentato di Sarajevo"],
-      ["Quale attacco giapponese portò gli Stati Uniti a entrare nella Seconda Guerra Mondiale?", "Attacco di Pearl Harbor"],
-      ["In che anno iniziò la Seconda Guerra Mondiale?", "1939"],
-      ["Quale nazione fu invasa dalla Germania nel settembre 1939, dando inizio alla guerra?", "Polonia"],
-      ["Quale evento del 1945 pose fine alla guerra nel Pacifico?", "Le bombe atomiche su Hiroshima e Nagasaki"],
-      ["Come si chiamava l'alleanza militare tra Italia, Germania e Giappone?", "Patto Tripartito (Asse)"],
+      ["Quali erano le due principali alleanze contrapposte nella Prima Guerra Mondiale?", "Triplice Intesa e Imperi Centrali"],
+      ["In che anno l'Italia entrò nella Prima Guerra Mondiale?", "1915"],
+      ["Come si chiamava il presidente statunitense che guidò gli USA nella Prima Guerra Mondiale?", "Woodrow Wilson"],
+      ["In che anno gli Stati Uniti entrarono nella Seconda Guerra Mondiale?", "1941"],
+      ["Come si chiamava il più tristemente noto campo di sterminio nazista, situato in Polonia?", "Auschwitz"],
+      ["Quale nazione europea fu governata dal regime fascista di Mussolini?", "Italia"],
+      ["Come si chiamava l'alleanza tra Regno Unito, Francia, Stati Uniti e Unione Sovietica nella Seconda Guerra Mondiale?", "Alleati"],
+      ["In quale continente si combatté la maggior parte della Prima Guerra Mondiale?", "Europa"],
+      ["Come si chiama la data dell'8 maggio 1945, giorno della fine della guerra in Europa?", "Giorno della Vittoria in Europa (V-E Day)"],
+      ["Quale evento del 1917 portò la Russia a ritirarsi dalla Prima Guerra Mondiale?", "La Rivoluzione russa"],
     ],
     media: [
-      ["Come venivano chiamati i lunghi fossati fortificati tipici del fronte occidentale nella Prima Guerra Mondiale?", "Trincee"],
-      ["Quale trattato di pace, firmato nel 1919, pose fine alla Prima Guerra Mondiale?", "Trattato di Versailles"],
-      ["Come si chiamava lo sbarco alleato in Normandia del giugno 1944?", "D-Day (Operazione Overlord)"],
-      ["Quale battaglia del 1942-43 segnò la svolta sul fronte orientale contro la Germania?", "Battaglia di Stalingrado"],
-      ["Come si chiamava il più noto campo di concentramento e sterminio nazista in Polonia?", "Auschwitz"],
-      ["Chi era il primo ministro britannico durante gran parte della Seconda Guerra Mondiale?", "Winston Churchill"],
-      ["Come si chiamava l'operazione tedesca di invasione dell'Unione Sovietica nel 1941?", "Operazione Barbarossa"],
-      ["Quale transatlantico britannico fu affondato da un sommergibile tedesco nel 1915?", "Lusitania"],
-      ["Chi era il presidente degli Stati Uniti per gran parte della Seconda Guerra Mondiale?", "Franklin Delano Roosevelt"],
-      ["Quale battaglia navale del 1942 segnò la svolta nella guerra del Pacifico?", "Battaglia delle Midway"],
+      ["Come si chiamava la strategia militare tedesca basata su attacchi rapidi e coordinati?", "Blitzkrieg (guerra lampo)"],
+      ["Quale sanguinosa battaglia del 1916, combattuta in Francia, è tra le più letali della Prima Guerra Mondiale?", "Battaglia della Somme (o di Verdun)"],
+      ["Come si chiamava l'operazione di evacuazione delle truppe alleate da una città francese nel 1940?", "Operazione Dynamo (Dunkerque)"],
+      ["Quale isola giapponese fu teatro di una sanguinosa battaglia nel 1945, celebre per la foto della bandiera issata?", "Iwo Jima"],
+      ["Come si chiamava il governo collaborazionista francese durante l'occupazione nazista?", "Regime di Vichy"],
+      ["Quale nazione neutrale, nota anche per le sue banche, ospitò importanti scambi diplomatici durante la guerra?", "Svizzera"],
+      ["Come si chiamava la resistenza armata italiana contro l'occupazione nazifascista?", "Resistenza (partigiani)"],
+      ["Quale città tedesca fu quasi completamente distrutta da un pesante bombardamento alleato nel febbraio 1945?", "Dresda"],
+      ["Come si chiamava lo sbarco alleato nel sud Italia nel settembre 1943, presso Salerno?", "Operazione Avalanche"],
+      ["Su quale nave da guerra americana fu firmata la resa del Giappone nel 1945?", "USS Missouri"],
     ],
     difficile: [
-      ["Come si chiamava il piano tedesco che aggirò la linea Maginot attraverso le Ardenne nel 1940?", "Fall Gelb (attacco attraverso le Ardenne)"],
-      ["Chi comandava le forze alleate durante lo sbarco in Normandia?", "Dwight Eisenhower"],
-      ["Come si chiamava la conferenza del 1945 in cui Roosevelt, Churchill e Stalin decisero il destino dell'Europa?", "Conferenza di Yalta"],
-      ["Quale generale tedesco era soprannominato 'la Volpe del Deserto'?", "Erwin Rommel"],
-      ["Come si chiamava l'insurrezione della resistenza polacca a Varsavia nel 1944?", "Insurrezione di Varsavia"],
-      ["Qual era il nome in codice dell'invasione alleata della Sicilia nel 1943?", "Operazione Husky"],
-      ["Chi era il capo del governo italiano che firmò l'armistizio con gli Alleati nel 1943?", "Pietro Badoglio"],
-      ["Quale città giapponese fu colpita dalla seconda bomba atomica, tre giorni dopo Hiroshima?", "Nagasaki"],
-      ["Come si chiamava il patto di non aggressione segreto tra Germania e Unione Sovietica del 1939?", "Patto Molotov-Ribbentrop"],
-      ["Chi era il maresciallo sovietico che guidò la presa di Berlino nel 1945?", "Georgij Zhukov"],
+      ["Come si chiamava il piano segreto nazista per lo sterminio sistematico degli ebrei d'Europa?", "Soluzione Finale (Endlösung)"],
+      ["Quale conferenza del 1943 riunì per la prima volta Roosevelt, Churchill e Stalin?", "Conferenza di Teheran"],
+      ["Come si chiama la controffensiva a sorpresa lanciata dai tedeschi nelle Ardenne nel dicembre 1944?", "Battaglia (Offensiva) delle Ardenne"],
+      ["Quale generale americano guidò la campagna nel Pacifico e in seguito l'occupazione del Giappone?", "Douglas MacArthur"],
+      ["Come si chiamava il prolungato bombardamento aereo tedesco su Londra nel 1940-41?", "Blitz (bombardamento di Londra)"],
+      ["Quale ammiraglio giapponese pianificò l'attacco a Pearl Harbor?", "Isoroku Yamamoto"],
+      ["Come si chiamava il progetto segreto statunitense per sviluppare la bomba atomica?", "Progetto Manhattan"],
+      ["Quale offensiva alleata del 1918 portò al crollo definitivo dell'esercito tedesco sul fronte occidentale?", "Offensiva dei Cento Giorni"],
+      ["Chi era il generale sovietico che diresse la strenua difesa di Stalingrado sul campo?", "Vasilij Chuikov"],
+      ["Quale impero, alleato della Germania nella Prima Guerra Mondiale, si dissolse dopo la sconfitta dando origine a molti nuovi stati?", "Impero Austro-Ungarico"],
     ],
   },
 };
@@ -622,6 +631,7 @@ const DIFF_LABEL = { facile: "Facile", media: "Media", difficile: "Difficile" };
 let playerCount = 2;
 let players = []; // {name, score}
 let currentPlayerIndex = 0;
+let selectedCats = new Set(Object.keys(QUESTIONS)); // tutte selezionate di default
 let deck = []; // domande rimanenti, mescolate
 let currentQ = null;
 
@@ -630,6 +640,9 @@ let currentQ = null;
    ============================================================ */
 const countRow = document.getElementById('count-row');
 const nameList = document.getElementById('name-list');
+const catGrid = document.getElementById('cat-grid');
+const catNote = document.getElementById('cat-note');
+const startBtn = document.getElementById('start-btn');
 
 function renderCountButtons(){
   countRow.innerHTML = '';
@@ -666,10 +679,49 @@ function renderNameInputs(){
   }
 }
 
+function renderCatGrid(){
+  catGrid.innerHTML = '';
+  Object.entries(QUESTIONS).forEach(([key, data]) => {
+    const chip = document.createElement('div');
+    chip.className = 'cat-chip' + (selectedCats.has(key) ? ' selected' : '');
+    chip.innerHTML = `
+      <span class="dot" style="background:${data.color}"></span>
+      <span>${data.label}</span>
+      <span class="check">${selectedCats.has(key) ? '✓' : ''}</span>
+    `;
+    chip.addEventListener('click', () => {
+      if(selectedCats.has(key)){
+        selectedCats.delete(key);
+      } else {
+        selectedCats.add(key);
+      }
+      renderCatGrid();
+      updateStartState();
+    });
+    catGrid.appendChild(chip);
+  });
+}
+
+function updateStartState(){
+  const count = selectedCats.size * 30;
+  if(selectedCats.size === 0){
+    catNote.textContent = 'Seleziona almeno una categoria per iniziare.';
+    catNote.classList.add('warn');
+    startBtn.disabled = true;
+  } else {
+    catNote.textContent = `${selectedCats.size} categorie selezionate — ${count} domande in gioco.`;
+    catNote.classList.remove('warn');
+    startBtn.disabled = false;
+  }
+}
+
 renderCountButtons();
 renderNameInputs();
+renderCatGrid();
+updateStartState();
 
-document.getElementById('start-btn').addEventListener('click', () => {
+startBtn.addEventListener('click', () => {
+  if(selectedCats.size === 0) return;
   const inputs = Array.from(nameList.querySelectorAll('input'));
   players = inputs.map((inp, i) => ({
     name: inp.value.trim() || ('Giocatore ' + (i+1)),
@@ -689,6 +741,7 @@ document.getElementById('start-btn').addEventListener('click', () => {
 function buildDeck(){
   deck = [];
   for(const [catKey, catData] of Object.entries(QUESTIONS)){
+    if(!selectedCats.has(catKey)) continue;
     for(const diff of ['facile','media','difficile']){
       for(const [q,a] of catData[diff]){
         deck.push({ catKey, catLabel: catData.label, color: catData.color, diff, q, a });
@@ -752,7 +805,7 @@ function nextQuestion(){
   postFlip.classList.add('hidden');
 
   badgeCat.textContent = currentQ.catLabel;
-  badgeCat.style.background = hexToRgba(currentQ.color, 0.15);
+  badgeCat.style.background = hexToRgba(currentQ.color, 0.18);
   badgeCat.style.color = currentQ.color;
 
   badgeDiff.textContent = DIFF_LABEL[currentQ.diff];
