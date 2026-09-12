@@ -1093,7 +1093,17 @@ function nextQuestion(){
 
   turnName.textContent = players[currentPlayerIndex].name;
 
+  // Disattiva temporaneamente la transizione CSS: la carta deve tornare
+  // al fronte ISTANTANEAMENTE, senza animare il rientro. Se lasciassimo
+  // l'animazione attiva, per una frazione di secondo si vedrebbe il retro
+  // (già aggiornato con la nuova risposta) ruotare via, rivelando la
+  // risposta della domanda successiva prima ancora che venga mostrata.
+  cardEl.style.transition = 'none';
   cardEl.classList.remove('flipped');
+  // Forza il reflow così il browser applica subito lo stato "non flippato"
+  // prima di ripristinare la transizione.
+  void cardEl.offsetWidth;
+
   preFlip.classList.remove('hidden');
   postFlip.classList.add('hidden');
 
@@ -1115,6 +1125,12 @@ function nextQuestion(){
   skipBtn.disabled = skipsLeft <= 0;
 
   renderScoreboard();
+
+  // Ripristina la transizione CSS al frame successivo, in modo che il
+  // prossimo tocco su "Gira la carta" torni ad animarsi normalmente.
+  requestAnimationFrame(() => {
+    cardEl.style.transition = '';
+  });
 }
 
 function hexToRgba(hex, alpha){
