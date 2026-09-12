@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Termini e Condizioni d'Uso - Nievo Cup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=Exo+2:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="shortcut icon" href="assets/images/loghi/favicon_nievo_cup.ico" type="image/x-icon" />
+  <style>
+    :root {
+      --gold: #feda00;
+      --gold-dim: rgba(254, 218, 0, 0.10);
+      --gold-border: rgba(254, 218, 0, 0.25);
+      --card-bg: rgba(11, 15, 23, 0.92);
+      --card-border: rgba(94, 100, 107, 0.30);
+      --text-main: #f3f4f6;
+      --text-sub: #9ca3af;
+    }
+
+    body.page-legal {
+      background-color: #0b0f17;
+      color: var(--text-main);
+      font-family: 'Exo 2', sans-serif;
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+    }
+
+    body.page-legal::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url('assets/images/sfondi/sfondo_tabellone.webp');
+      background-size: cover;
+      background-position: center;
+      z-index: -2;
+      opacity: 0.5;
+    }
+
+    body.page-legal::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(11, 15, 23, 0.85) 0%, rgba(11, 15, 23, 0.96) 100%);
+      z-index: -1;
+    }
+
+    .legal-container {
+      max-width: 900px;
+      margin: 2rem auto 4rem;
+      padding: 2.5rem;
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .legal-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      letter-spacing: 0.05em;
+      color: var(--gold);
+      margin-bottom: 0.2rem;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+
+    .legal-subtitle {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.95rem;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--gold-border);
+      padding-bottom: 0.8rem;
+    }
+
+    h2 {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--gold);
+      margin-top: 2rem;
+      margin-bottom: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-left: 3px solid var(--gold);
+      padding-left: 0.6rem;
+    }
+
+    p, li {
+      font-size: 0.95rem;
+      color: var(--text-main);
+      margin-bottom: 0.8rem;
+    }
+
+    ul, ol {
+      padding-left: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    li {
+      margin-bottom: 0.4rem;
+    }
+
+    .highlight-box {
+      background: var(--gold-dim);
+      border: 1px solid var(--gold-border);
+      border-radius: 12px;
+      padding: 1.2rem;
+      margin: 1.5rem 0;
+      font-size: 0.9rem;
+    }
+
+    footer.legal-footer {
+      text-align: center;
+      padding: 2rem 0;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.85rem;
+      color: var(--text-sub);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      margin-top: 3rem;
+    }
+
+    a {
+      color: var(--gold);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+      .legal-container {
+        padding: 1.5rem;
+        margin: 1rem;
+      }
+    }
+  </style>
+</head>
+<body class="page-legal">
+
+  <div class="header">
+    <div class="logo">
+      <a href="index.html">
+        <img src="assets/images/loghi/logo_nievo_white.png" alt="Nievo Cup Logo">
+      </a>
+    </div>
+    <div class="menu">
+      <div class="voce"><a href="partite.html"><p>Partite</p></a></div>
+      <div class="voce"><a href="gironi.html"><p>Gironi</p></a></div>
+      <div class="voce"><a href="tabellone.html"><p>Tabellone</p></a></div>
+      <div class="voce"><a href="squadre.html"><p>Squadre</p></a></div>
+    </div>
+  </div>
+
+  <div class="legal-container">
+    <h1 class="legal-title">TERMINI E CONDIZIONI D'USO</h1>
+    <div class="legal-subtitle">Regolamento d'uso della piattaforma web Nievo Cup</div>
+
+    <div class="highlight-box">
+      <strong>Nota Legale:</strong> L'accesso, la consultazione e l'utilizzo del sito web <code>nievocup.it</code> (e di tutti i relativi sottodomini, pagine e servizi) comportano l'accettazione incondizionata dei presenti Termini e Condizioni d'Uso. Qualora non si intenda accettare integralmente le presenti condizioni, si è invitati ad interrompere immediatamente la navigazione.
+    </div>
+
+    <h2>1. OGGETTO E SERVIZI INFORMATIVI</h2>
+    <p>Il presente sito web ha scopo informativo, divulgativo ed organizzativo per la <strong>Nievo Cup</strong>, torneo estivo di calcio a 7 disputato presso la <em>Skoop Poke Arena</em> a Verona, sia per la competizione maschile che per la competizione femminile (<em>Women's Nievo Cup</em>).</p>
+    <p>La piattaforma eroga servizi di aggiornamento in tempo reale dei risultati, dei gironi, dei tabelloni, dei marcatori, delle rose e dei contenuti multimediali associati all'evento sportivo.</p>
+
+    <h2>2. PROPRIETÀ INTELLETTUALE ED ESCLUSIVA SUI CONTENUTI</h2>
+    <p>Tutti i contenuti presenti sul sito — inclusi, a titolo esemplificativo e non esaustivo, loghi (tra cui il marchio Nievo Cup), grafica, testi, immagini, marchi degli sponsor, fogli di stile (CSS), codice sorgente, script e struttura del tabellone — sono di proprietà esclusiva di Nievo Cup o dei rispettivi aventi diritto e sono protetti dalle leggi vigenti in materia di diritto d'autore e proprietà industriale (Legge 633/1941 e Codice della Proprietà Industriale D.Lgs. 30/2005).</p>
+    <p>È severamente vietato riprodurre, distribuire, modificare, pubblicare o riutilizzare, anche parzialmente, qualsiasi contenuto privo di preventiva autorizzazione scritta da parte di Nievo Cup.</p>
+
+    <h2>3. LIMITAZIONE DI RESPONSABILITÀ</h2>
+    <p>Nievo Cup si impegna a garantire l'accuratezza e la tempestività delle informazioni (inclusi i punteggi e gli orari delle partite forniti in tempo reale via Firebase). Tuttavia:</p>
+    <ul>
+      <li>I risultati, i tempi di gioco e le decisioni pubblicate online sono a fini di consultazione e non costituiscono verbali ufficiali di gara, il cui unico valore legale risiede nei referti arbitrali dell'organizzazione.</li>
+      <li>Il Titolare non garantisce la continuità ininterrotta o priva di errori del sito web e declina ogni responsabilità per eventuali malfunzionamenti di rete, attacchi informatici o interruzioni dovute a fornitori terzi (es. Vercel, Firebase).</li>
+      <li>I link verso siti esterni (es. profili Instagram dei partner o sponsor) vengono forniti esclusivamente per comodità dell'utente; Nievo Cup non esercita alcun controllo sui contenuti di tali siti e declina ogni responsabilità al riguardo.</li>
+    </ul>
+
+    <h2>4. USO CONSENTITO ED ACCESSO ALL'AREA RISERVATA (PANNELLO ADMIN)</h2>
+    <p>L'utente si impegna ad utilizzare il sito in conformità alle leggi vigenti e secondo buona fede. È fatto espresso divieto di:</p>
+    <ul>
+      <li>Effettuare operazioni di reverse engineering, scraping o estrazione massiva dei dati non autorizzata.</li>
+      <li>Tentare accessi non autorizzati all'area di amministrazione (<code>admin.html</code>, <code>admin-dashboard.html</code>) o violare i sistemi di autenticazione Firebase.</li>
+      <li>Utilizzare la piattaforma per diffondere codici malevoli, malware o interrompere le funzionalità del server.</li>
+    </ul>
+    <p>L'accesso improprio all'area Admin da parte di soggetti non autorizzati costituisce violazione perseguibile ai sensi dell'art. 615-ter del Codice Penale italiano (Accesso abusivo ad un sistema informatico o telematico).</p>
+
+    <h2>5. STRUMENTI ED ELABORAZIONE DI IMMAGINI (SCRIPT WEB)</h2>
+    <p>Ove il sito contenga funzionalità client-side per l'elaborazione di immagini (es. rimozione sfondo o conversione file tramite modelli AI locali Transformers.js o browser-side execution), il trattamento dei file avviene interamente nella memoria temporanea del dispositivo dell'utente. Nievo Cup non memorizza né acquisisce i file caricati per tali elaborazioni temporanee.</p>
+
+    <h2>6. MODIFICHE AI TERMINI ED AL SITO</h2>
+    <p>Nievo Cup si riserva il diritto discrezionale di modificare, aggiornare o integrare i presenti Termini e Condizioni in qualsiasi momento senza preavviso. Le modifiche avranno efficacia immediata dalla data di pubblicazione sul sito.</p>
+
+    <h2>7. LEGGE APPLICABILE E FORO COMPETENTE</h2>
+    <p>I presenti Termini sono regolati e interpretati secondo la legge italiana. Per qualsiasi controversia derivante dall'interpretazione, esecuzione o validità dei presenti Termini e Condizioni d'Uso, sarà competente in via esclusiva il Foro di Verona.</p>
+  </div>
+
+  <footer class="legal-footer">
+    Nievo Cup · Verona · Tutti i diritti riservati · <a href="privacy_policy.html">Privacy & Cookie Policy</a>
+  </footer>
+</body>
+</html>
