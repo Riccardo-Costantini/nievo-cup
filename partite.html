@@ -112,124 +112,126 @@
       return timeA.localeCompare(timeB);
     });
   }
+function getMatchIdNum(match) {
+  if (!match || !match.id) return NaN;
+  return parseInt(String(match.id).replace(/^m/i, ''), 10);
+}
+
+function getPhaseLabel(idNum) {
+  if (idNum >= 61 && idNum <= 66) return 'Spareggi';
+  if (idNum >= 67 && idNum <= 74) return 'Ottavi di finale';
+  if (idNum >= 75 && idNum <= 78) return 'Quarti di finale';
+  if (idNum >= 79 && idNum <= 80) return 'Semifinali';
+  if (idNum === 81) return 'Finale 3/4 posto';
+  if (idNum === 82) return 'Finale';
+  return '';
+}
+
+function phaseHeader(title) {
+  return `<div class="playoff-title" style="width: 100%; text-align: center; font-family: 'Bebas Neue', sans-serif; font-size: 6rem; margin: 40px 0 10px 0; color: #ffcc00; letter-spacing: 1px;">${title}</div>`;
+}
 
 function renderCalendar() {
-    const container = document.getElementById('calendar');
-    const matchesArray = Object.values(matchesData);
-    
-    if (matchesArray.length === 0) {
-      container.innerHTML = `<p class="cal-loading">Nessuna partita disponibile nel database.</p>`;
-      return;
-    }
+  const container = document.getElementById('calendar');
+  const matchesArray = Object.values(matchesData);
 
-    const grouped = {};
-    for (const match of matchesArray) {
-      const date = match.date || '2025-01-01';
-      if (!grouped[date]) grouped[date] = [];
-      grouped[date].push(match);
-    }
+  if (matchesArray.length === 0) {
+    container.innerHTML = `<p class="cal-loading">Nessuna partita disponibile nel database.</p>`;
+    return;
+  }
 
-    let html = '';
-    let playOffHeaderInserted = false;
-    let ottaviHeaderInserted = false; 
-    const sortedDates = Object.keys(grouped).sort();
+  const grouped = {};
+  for (const match of matchesArray) {
+    const date = match.date || '2025-01-01';
+    if (!grouped[date]) grouped[date] = [];
+    grouped[date].push(match);
+  }
 
-    for (const date of sortedDates) {
-      const matchesOnDate = grouped[date];
-      const sortedMatches = sortMatchesByDateTime(matchesOnDate);
-      
-      const round = (() => {
-        const firstMatchId = parseInt(sortedMatches[0]?.id?.replace('m', ''));
-        if (firstMatchId >= 61 && firstMatchId <= 66) {
-          return 'Spareggi';
+  let html = '';
+  const headersInserted = {}; // tiene traccia delle fasi già introdotte
+
+  const sortedDates = Object.keys(grouped).sort();
+
+  for (const date of sortedDates) {
+    const matchesOnDate = grouped[date];
+    const sortedMatches = sortMatchesByDateTime(matchesOnDate);
+
+    const firstMatchId = getMatchIdNum(sortedMatches[0]);
+    const round = getPhaseLabel(firstMatchId) || sortedMatches[0]?.round || '';
+
+    // Intestazione del giorno
+    html += `<div class="day-group" id="day-${date}"><div class="day-hdr">📅 ${fmtDate(date)} &nbsp;·&nbsp; ${esc(round)}</div>`;
+
+    let currentPhase = null;
+    for (const match of sortedMatches) {
+      const idNum = getMatchIdNum(match);
+      const phase = getPhaseLabel(idNum) || match.round || '';
+
+      // Se cambia la fase, inserisci il titolo (solo se non già inserito)
+      if (phase && phase !== currentPhase) {
+        if (!headersInserted[phase]) {
+          html += phaseHeader(phase.toUpperCase());
+          headersInserted[phase] = true;
         }
-        if (firstMatchId >= 67 && firstMatchId <= 74) {
-          return 'Ottavi di finale';
-        }
-        return sortedMatches[0]?.round || '';
-      })();
-
-      // Controlla se nella giornata corrente è presente ALMENO un match delle rispettive fasi
-      const hasPlayOffs = sortedMatches.some(m => {
-        const idNum = parseInt(m.id?.replace('m', ''));
-        return idNum >= 61 && idNum <= 66;
-      });
-
-      const hasOttavi = sortedMatches.some(m => {
-        const idNum = parseInt(m.id?.replace('m', ''));
-        return idNum >= 67 && idNum <= 74;
-      });
-
-      // CONTROLLO SPAREGGI
-      if (hasPlayOffs && !playOffHeaderInserted) {
-        html += `<div class="playoff-title" style="width: 100%; text-align: center; font-family: 'Bebas Neue', sans-serif; font-size: 6rem; margin: 40px 0 10px 0; color: #ffcc00; letter-spacing: 1px;">SPAREGGI</div>`;
-        playOffHeaderInserted = true;
+        currentPhase = phase;
       }
 
-      // CONTROLLO OTTAVI
-      if (hasOttavi && !ottaviHeaderInserted) {
-        html += `<div class="playoff-title" style="width: 100%; text-align: center; font-family: 'Bebas Neue', sans-serif; font-size: 6rem; margin: 40px 0 10px 0; color: #ffcc00; letter-spacing: 1px;">OTTAVI</div>`;
-        ottaviHeaderInserted = true;
-      }
+      // Render della card della partita
+      const result = liveResultsData[match.id] || {};
+      const scorersHome = toArray(result.scorersHome);
+      const scorersAway = toArray(result.scorersAway);
+      const status = result.status || 'In programma';
+      const cls = status === 'Live' ? ' is-live' : (status === 'Finita' ? ' is-finished' : '');
+      const badgeHtml = status === 'Live' ? '<span class="badge b-live">● LIVE</span>'
+                        : status === 'Finita' ? '<span class="badge b-fin">✔ Finita</span>'
+                        : '<span class="badge b-sched">In programma</span>';
 
-      // Badge del giorno
-      html += `<div class="day-group" id="day-${date}"><div class="day-hdr">📅 ${fmtDate(date)} &nbsp;·&nbsp; ${esc(round)}</div>`;
-      
-      // Ciclo delle card dei match
-      for (const match of sortedMatches) {
-        const result = liveResultsData[match.id] || {};
-        const scorersHome = toArray(result.scorersHome);
-        const scorersAway = toArray(result.scorersAway);
-        const status = result.status || 'In programma';
-        const cls = status === 'Live' ? ' is-live' : (status === 'Finita' ? ' is-finished' : '');
-        const badgeHtml = status === 'Live' ? '<span class="badge b-live">● LIVE</span>'
-                          : status === 'Finita' ? '<span class="badge b-fin">✔ Finita</span>'
-                          : '<span class="badge b-sched">In programma</span>';
-        
-        const hList = scorersHome.length
-          ? scorersHome.map(s => `<div class="sc-item"><span class="sc-ball">⚽</span>${esc(s)}</div>`).join('')
-          : '<div class="sc-empty">—</div>';
-        const aList = scorersAway.length
-          ? scorersAway.map(s => `<div class="sc-item">${esc(s)}<span class="sc-ball sc-ball-away">⚽</span></div>`).join('')
-          : '<div class="sc-empty">—</div>';
+      const hList = scorersHome.length
+        ? scorersHome.map(s => `<div class="sc-item"><span class="sc-ball">⚽</span>${esc(s)}</div>`).join('')
+        : '<div class="sc-empty">—</div>';
 
-        html += `
-          <div class="match-card${cls}" id="match-${match.id}" data-match-id="${match.id}">
-            <div class="card-top">
-              <div class="match-meta">
-                <span>⏱ ${esc(match.time || '--:--')}</span>
-                <span class="meta-dot">·</span>
-                <span>${esc(match.id?.toUpperCase() || '?')}</span>
-              </div>
-              <div id="badge-${match.id}">${badgeHtml}</div>
+      const aList = scorersAway.length
+        ? scorersAway.map(s => `<div class="sc-item">${esc(s)}<span class="sc-ball sc-ball-away">⚽</span></div>`).join('')
+        : '<div class="sc-empty">—</div>';
+
+      html += `
+        <div class="match-card${cls}" id="match-${match.id}" data-match-id="${match.id}">
+          <div class="card-top">
+            <div class="match-meta">
+              <span>⏱ ${esc(match.time || '--:--')}</span>
+              <span class="meta-dot">·</span>
+              <span>${esc(match.id?.toUpperCase() || '?')}</span>
             </div>
-            <div class="score-row">
-              <div class="team-blk">
-                <img class="team-logo" src="${getLogoUrl(match.home?.name)}" alt="${esc(match.home?.name)}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling?.style?.setProperty('display', 'block');" />
-                <div class="t-name">${esc(match.home?.name || 'Casa')}</div>
-              </div>
-              <div class="score-ctr">
-                <span class="score-n" id="home-score-${match.id}">${scorersHome.length}</span>
-                <span class="score-sep">:</span>
-                <span class="score-n" id="away-score-${match.id}">${scorersAway.length}</span>
-              </div>
-              <div class="team-blk away">
-                <img class="team-logo" src="${getLogoUrl(match.away?.name)}" alt="${esc(match.away?.name)}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling?.style?.setProperty('display', 'block');" />
-                <div class="t-name">${esc(match.away?.name || 'Trasferta')}</div>
-              </div>
+            <div id="badge-${match.id}">${badgeHtml}</div>
+          </div>
+          <div class="score-row">
+            <div class="team-blk">
+              <img class="team-logo" src="${getLogoUrl(match.home?.name)}" alt="${esc(match.home?.name)}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling?.style?.setProperty('display', 'block');" />
+              <div class="t-name">${esc(match.home?.name || 'Casa')}</div>
             </div>
-            <div class="scorers-wrap">
-              <div class="sc-col" id="home-scorers-${match.id}">${hList}</div>
-              <div class="sc-col right" id="away-scorers-${match.id}">${aList}</div>
+            <div class="score-ctr">
+              <span class="score-n" id="home-score-${match.id}">${scorersHome.length}</span>
+              <span class="score-sep">:</span>
+              <span class="score-n" id="away-score-${match.id}">${scorersAway.length}</span>
+            </div>
+            <div class="team-blk away">
+              <img class="team-logo" src="${getLogoUrl(match.away?.name)}" alt="${esc(match.away?.name)}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling?.style?.setProperty('display', 'block');" />
+              <div class="t-name">${esc(match.away?.name || 'Trasferta')}</div>
             </div>
           </div>
-        `;
-      }
-      html += `</div>`;
+          <div class="scorers-wrap">
+            <div class="sc-col" id="home-scorers-${match.id}">${hList}</div>
+            <div class="sc-col right" id="away-scorers-${match.id}">${aList}</div>
+          </div>
+        </div>
+      `;
     }
-    container.innerHTML = html;
+
+    html += `</div>`;
   }
-  
+
+  container.innerHTML = html;
+}
   // Funzione per scorrere la pagina fino alle partite di oggi
   function scrollToToday() {
     const today = new Date();
