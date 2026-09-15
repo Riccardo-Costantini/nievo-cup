@@ -57,8 +57,6 @@
             }
         }
 
-    
-
         /* ---- PAGE TITLE ---- */
         .page-hero {
             text-align: center;
@@ -165,7 +163,7 @@
             padding: 0.5rem 0.6rem;
             transition: all 0.25s ease;
             position: relative;
-            min-height: 56px;
+            min-height: 48px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -247,25 +245,6 @@
             color: #4b5675;
         }
 
-        .b-match-status {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 0.5rem;
-            font-weight: 700;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            color: #4b5675;
-            text-align: center;
-            padding-top: 0.15rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.04);
-            margin-top: 0.15rem;
-        }
-        .b-match-status.live {
-            color: #22c55e;
-        }
-        .b-match-status.finished {
-            color: #a78bfa;
-        }
-
         /* ---- FINALI CENTRO ---- */
         .final-card {
             background: var(--card-bg-bracket);
@@ -336,23 +315,6 @@
         .final-card .final-score.empty {
             color: #4b5675;
         }
-        .final-card .final-status {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 0.5rem;
-            font-weight: 700;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            color: #4b5675;
-            margin-top: 0.2rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.04);
-            padding-top: 0.2rem;
-        }
-        .final-card .final-status.live {
-            color: #22c55e;
-        }
-        .final-card .final-status.finished {
-            color: #a78bfa;
-        }
 
         /* ---- RESPONSIVE ---- */
         @media (max-width: 1024px) {
@@ -374,7 +336,7 @@
             }
             .b-match {
                 padding: 0.4rem 0.5rem;
-                min-height: 48px;
+                min-height: 44px;
             }
             .b-match-team .b-logo {
                 width: 18px;
@@ -414,15 +376,12 @@
             }
             .b-match {
                 padding: 0.3rem 0.4rem;
-                min-height: 40px;
+                min-height: 38px;
                 border-radius: 10px;
             }
             .b-match-team .b-logo {
                 width: 16px;
                 height: 16px;
-            }
-            .b-match-status {
-                font-size: 0.45rem;
             }
             .bracket-col-label {
                 font-size: 0.5rem;
@@ -479,15 +438,12 @@
             }
             .b-match {
                 padding: 0.2rem 0.3rem;
-                min-height: 34px;
+                min-height: 32px;
                 border-radius: 8px;
             }
             .b-match-team .b-logo {
                 width: 14px;
                 height: 14px;
-            }
-            .b-match-status {
-                font-size: 0.4rem;
             }
             .bracket-col-label {
                 font-size: 0.4rem;
@@ -689,8 +645,6 @@
         const OTTaviSX = ['m73', 'm68', 'm71', 'm70'];
         const OTTaviDX = ['m72', 'm67', 'm69', 'm74'];
 
-        // Quarti, semifinali e finali corrispondono a match GIA' PRESENTI su Firebase
-        // (stessi id usati in partite.html), quindi vanno letti da li' e non ricalcolati.
         const QuartiSX = ['m78', 'm76'];
         const QuartiDX = ['m77', 'm75'];
         const SemiSX = 'm79';
@@ -715,9 +669,6 @@
         let loaded = false;
 
         // ---- FUNZIONI ----
-        // Legge un turno reale (ottavi, quarti, semifinali, finali) direttamente
-        // dai nodi 'matches' + 'liveResults' di Firebase: stessa fonte dati usata
-        // da partite.html, così il tabellone resta sempre sincronizzato.
         function buildRealMatch(id, visualOverride, label) {
             const m = matchesData[id];
             if (!m) return null;
@@ -731,9 +682,6 @@
             const sa = toArray(r.scorersAway);
             const status = r.status || 'In programma';
 
-            // Se l'ordine visivo è invertito rispetto ai dati Firebase (home/away
-            // scambiati per mantenere coerente il lato del tabellone), invertiamo
-            // di conseguenza anche i goal calcolati dai marcatori.
             const fbHomeName = m.home?.name || '';
             const visualMatchesFb = homeName.toLowerCase() === fbHomeName.toLowerCase();
             const homeGoals = visualMatchesFb ? sh.length : sa.length;
@@ -753,7 +701,6 @@
         }
 
         function buildBracket(matches, results) {
-            // matches/results sono già in matchesData/liveResultsData (buildRealMatch li legge da lì)
             const ottaviSX = OTTaviSX.map(id => buildRealMatch(id, VISUAL_ORDER[id])).filter(Boolean);
             const ottaviDX = OTTaviDX.map(id => buildRealMatch(id, VISUAL_ORDER[id])).filter(Boolean);
 
@@ -812,7 +759,7 @@
             bracket.ottaviDX.forEach(m => colDX.appendChild(createMatchElement(m, 'ottavi')));
         }
 
-        // ---- CREA MATCH (OTT, QUARTI, SEMI) ----
+        // ---- CREA MATCH (OTT, QUARTI, SEMI) ---- (status rimosso)
         function createMatchElement(match, round) {
             const div = document.createElement('div');
             div.className = 'b-match';
@@ -822,7 +769,6 @@
                 div.innerHTML = `
                     <div class="b-match-row"><div class="b-match-team"><span class="b-name tbd">TBD</span></div></div>
                     <div class="b-match-row"><div class="b-match-team"><span class="b-name tbd">TBD</span></div></div>
-                    <div class="b-match-status">In programma</div>
                 `;
                 return div;
             }
@@ -854,14 +800,11 @@
                     </div>
                     <span class="b-match-score ${!showScore ? 'empty' : ''}">${showScore ? awayScore : ''}</span>
                 </div>
-                <div class="b-match-status ${match.status === 'Live' ? 'live' : match.status === 'Finita' ? 'finished' : ''}">
-                    ${match.status === 'Live' ? '● LIVE' : match.status === 'Finita' ? '✔ Finita' : 'In programma'}
-                </div>
             `;
             return div;
         }
 
-        // ---- CREA FINALE (CENTRO) ----
+        // ---- CREA FINALE (CENTRO) ---- (status rimosso)
         function createFinalElement(match, type) {
             const div = document.createElement('div');
             div.className = 'final-card';
@@ -876,7 +819,6 @@
                         <div class="final-team"><span class="f-name tbd">TBD</span></div>
                         <div class="final-team"><span class="f-name tbd">TBD</span></div>
                     </div>
-                    <div class="final-status">In programma</div>
                 `;
                 return div;
             }
@@ -905,9 +847,6 @@
                         <span class="f-name ${awayIsTBD ? 'tbd' : ''}">${esc(awayDisplay)}</span>
                         <span class="final-score ${!showScore ? 'empty' : ''}">${showScore ? awayScore : ''}</span>
                     </div>
-                </div>
-                <div class="final-status ${match.status === 'Live' ? 'live' : match.status === 'Finita' ? 'finished' : ''}">
-                    ${match.status === 'Live' ? '● LIVE' : match.status === 'Finita' ? '✔ Finita' : 'In programma'}
                 </div>
             `;
             return div;
