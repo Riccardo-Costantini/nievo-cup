@@ -425,7 +425,7 @@
   <div class="masthead">
     <div class="eyebrow">Serata quiz</div>
     <h1>Otto Categorie</h1>
-    <div class="sub">Mitologia greca · Film Disney · Macchine · Guerre Mondiali · Sport · Geografia · Bandiere · Musica · My Hero Academia · Inazuma Eleven</div>
+    <div class="sub">Mitologia greca · Film Disney · Macchine · Guerre Mondiali · Sport · Geografia · Bandiere · Musica · My Hero Academia · Inazuma Eleven · Hellas Verona</div>
   </div>
 
   <!-- ===================== SETUP SCREEN ===================== -->
@@ -438,7 +438,7 @@
 
     <div class="cat-title">Scegli le categorie da giocare</div>
     <div class="cat-grid" id="cat-grid"></div>
-    <div class="cat-note" id="cat-note">Seleziona almeno una categoria — 30 domande per categoria.</div>
+    <div class="cat-note" id="cat-note">Seleziona almeno una categoria per iniziare.</div>
 
     <button class="primary-btn" id="start-btn">Inizia il quiz</button>
   </div>
@@ -489,7 +489,7 @@
     <button class="primary-btn" id="restart-btn">Gioca ancora</button>
   </div>
 
-  <footer>Fino a 300 domande · 10 categorie selezionabili · 3 livelli di difficoltà · 3 skip a testa</footer>
+  <footer>Fino a 312 domande · 11 categorie selezionabili · 3 livelli di difficoltà · 3 skip a testa</footer>
 </div>
 
 <script>
@@ -906,6 +906,31 @@ const QUESTIONS = {
       ["Come si chiama il difensore più piccolo d'età della Raimon, con il numero 6 nell'Inazuma Japan?", "Scott Banyan"],
     ],
   },
+
+  hellas: {
+    label: "Hellas Verona",
+    color: "#f0c808",
+    facile: [],
+    media: [],
+    difficile: [
+      ["In che anno è stato fondato l'Hellas Verona?", "1903"],
+      ["In quale stagione l'Hellas Verona ha vinto il suo unico scudetto?", "1984-85"],
+      ["Chi era l'allenatore dell'Hellas Verona nella stagione dello scudetto 1984-85?", "Osvaldo Bagnoli"],
+      ["Qual è il soprannome dei giocatori e dei tifosi dell'Hellas Verona, legato alla famiglia che governò Verona nel Medioevo?", "Scaligeri"],
+      ["Quale attaccante danese fu uno dei grandi protagonisti dello scudetto dell'Hellas Verona nel 1985?", "Preben Elkjær"],
+      ["Chi era il capitano dell'Hellas Verona nella stagione dello scudetto 1984-85?", "Roberto Tricella"],
+      ["Quale playmaker italiano fu il regista dell'Hellas Verona nella stagione dello scudetto 1984-85?", "Antonio Di Gennaro"],
+      ["Quale difensore tedesco, campione d'Europa nel 1980, militò nell'Hellas Verona nella stagione dello scudetto?", "Hans-Peter Briegel"],
+      ["Quale attaccante italiano vinse la classifica marcatori della Serie A 2014-15 con la maglia dell'Hellas Verona, a pari merito con Mauro Icardi?", "Luca Toni"],
+      ["In quale stadio gioca l'Hellas Verona, condiviso per anni con il Chievo?", "Stadio Marcantonio Bentegodi"],
+      ["Chi allenò l'Hellas Verona nella stagione 2018-19, riportando la squadra in Serie A attraverso i playoff?", "Fabio Grosso"],
+      ["Contro quale squadra l'Hellas Verona vinse la finale dei playoff di Serie B nel 2019, tornando in Serie A?", "Cittadella"],
+      ["Da quale squadra italiana fu eliminato l'Hellas Verona nella Coppa dei Campioni 1985-86?", "Juventus"],
+      ["Come viene chiamato il derby cittadino tra Hellas Verona e Chievo Verona?", "Derby della Scala"],
+      ["In che anno il club fu rifondato con la denominazione 'Hellas Verona Football Club' dopo il fallimento?", "1991"],
+      ["Quale allenatore guidò l'Hellas Verona nella stagione 2013-14, chiusa al quinto posto in Serie A con Luca Toni in attacco?", "Andrea Mandorlini"],
+    ],
+  },
 };
 
 const DIFF_POINTS = { facile: 1, media: 3, difficile: 5 };
@@ -989,14 +1014,21 @@ function renderCatGrid(){
   });
 }
 
+function countQuestionsFor(catKey){
+  const cat = QUESTIONS[catKey];
+  return cat.facile.length + cat.media.length + cat.difficile.length;
+}
+
 function updateStartState(){
-  const count = selectedCats.size * 30;
+  let total = 0;
+  selectedCats.forEach(k => { total += countQuestionsFor(k); });
+
   if(selectedCats.size === 0){
     catNote.textContent = 'Seleziona almeno una categoria per iniziare.';
     catNote.classList.add('warn');
     startBtn.disabled = true;
   } else {
-    catNote.textContent = `${selectedCats.size} categorie selezionate — ${count} domande in gioco.`;
+    catNote.textContent = `${selectedCats.size} categorie selezionate — ${total} domande in gioco.`;
     catNote.classList.remove('warn');
     startBtn.disabled = false;
   }
