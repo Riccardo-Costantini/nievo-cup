@@ -685,9 +685,18 @@
             return `assets/images/loghi_squadre/${slug}.webp`;
         }
 
-        // ---- MAPPATURA OTTAVI (ordine visivo) ----
+        // ---- MAPPATURA TURNI (ordine visivo + ID reali Firebase) ----
         const OTTaviSX = ['m73', 'm68', 'm71', 'm70'];
         const OTTaviDX = ['m72', 'm67', 'm69', 'm74'];
+
+        // Quarti, semifinali e finali corrispondono a match GIA' PRESENTI su Firebase
+        // (stessi id usati in partite.html), quindi vanno letti da li' e non ricalcolati.
+        const QuartiSX = ['m78', 'm76'];
+        const QuartiDX = ['m77', 'm75'];
+        const SemiSX = 'm79';
+        const SemiDX = 'm80';
+        const FinaleId = 'm81';
+        const Finale3Id = 'm82';
 
         const VISUAL_ORDER = {
             'm73': { home: 'Longobarda', away: 'Bootay' },
@@ -706,117 +715,66 @@
         let loaded = false;
 
         // ---- FUNZIONI ----
-        function getWinner(match) {
-            if (!match) return null;
-            if (match.status === 'Finita') {
-                if (match.homeGoals > match.awayGoals) return match.home;
-                if (match.awayGoals > match.homeGoals) return match.away;
-                return null;
-            }
-            return null;
-        }
+        // Legge un turno reale (ottavi, quarti, semifinali, finali) direttamente
+        // dai nodi 'matches' + 'liveResults' di Firebase: stessa fonte dati usata
+        // da partite.html, così il tabellone resta sempre sincronizzato.
+        function buildRealMatch(id, visualOverride, label) {
+            const m = matchesData[id];
+            if (!m) return null;
 
-        function getLoser(match) {
-            if (!match) return null;
-            if (match.status === 'Finita') {
-                if (match.homeGoals > match.awayGoals) return match.away;
-                if (match.awayGoals > match.homeGoals) return match.home;
-                return null;
-            }
-            return null;
+            const vis = visualOverride || {};
+            const homeName = vis.home || m.home?.name || 'TBD';
+            const awayName = vis.away || m.away?.name || 'TBD';
+
+            const r = liveResultsData[id] || {};
+            const sh = toArray(r.scorersHome);
+            const sa = toArray(r.scorersAway);
+            const status = r.status || 'In programma';
+
+            // Se l'ordine visivo è invertito rispetto ai dati Firebase (home/away
+            // scambiati per mantenere coerente il lato del tabellone), invertiamo
+            // di conseguenza anche i goal calcolati dai marcatori.
+            const fbHomeName = m.home?.name || '';
+            const visualMatchesFb = homeName.toLowerCase() === fbHomeName.toLowerCase();
+            const homeGoals = visualMatchesFb ? sh.length : sa.length;
+            const awayGoals = visualMatchesFb ? sa.length : sh.length;
+
+            return {
+                id,
+                home: homeName,
+                away: awayName,
+                homeGoals,
+                awayGoals,
+                status,
+                label: label || '',
+                rawHome: m.home?.name || homeName,
+                rawAway: m.away?.name || awayName,
+            };
         }
 
         function buildBracket(matches, results) {
-            function buildOttavo(id) {
-                const m = matches[id];
-                if (!m) return null;
-                const vis = VISUAL_ORDER[id] || {};
-                const homeName = vis.home || m.home?.name || 'TBD';
-                const awayName = vis.away || m.away?.name || 'TBD';
-                const r = results[id] || {};
-                const sh = toArray(r.scorersHome);
-                const sa = toArray(r.scorersAway);
-                const status = r.status || 'In programma';
+            // matches/results sono già in matchesData/liveResultsData (buildRealMatch li legge da lì)
+            const ottaviSX = OTTaviSX.map(id => buildRealMatch(id, VISUAL_ORDER[id])).filter(Boolean);
+            const ottaviDX = OTTaviDX.map(id => buildRealMatch(id, VISUAL_ORDER[id])).filter(Boolean);
 
-                // Controlla se l'ordine visivo è invertito rispetto ai dati Firebase.
-                // Firebase chiama "home" la prima squadra e "away" la seconda;
-                // se nel VISUAL_ORDER le abbiamo messe al contrario, invertiamo i goal.
-                const fbHomeName = m.home?.name || '';
-                const visualMatchesFb = homeName.toLowerCase() === fbHomeName.toLowerCase();
-                const homeGoals = visualMatchesFb ? sh.length : sa.length;
-                const awayGoals = visualMatchesFb ? sa.length : sh.length;
+            const quartiSX = QuartiSX.map(id => buildRealMatch(id)).filter(Boolean);
+            const quartiDX = QuartiDX.map(id => buildRealMatch(id)).filter(Boolean);
 
-                return {
-                    id,
-                    home: homeName,
-                    away: awayName,
-                    homeGoals,
-                    awayGoals,
-                    status,
-                    rawHome: m.home?.name || homeName,
-                    rawAway: m.away?.name || awayName,
-                };
-            }
+            const semifinaleSX = buildRealMatch(SemiSX, null, 'Semifinale');
+            const semifinaleDX = buildRealMatch(SemiDX, null, 'Semifinale');
 
-            const ottaviSX = OTTaviSX.map(id => buildOttavo(id)).filter(Boolean);
-            const ottaviDX = OTTaviDX.map(id => buildOttavo(id)).filter(Boolean);
-
-            function buildComputedMatch(id, winner1, winner2, sourceMatches, label) {
-                // winner1 e winner2 possono essere null (non ancora determinati)
-                return {
-                    id,
-                    home: winner1 || null,
-                    away: winner2 || null,
-                    homeGoals: 0,
-                    awayGoals: 0,
-                    status: 'In programma',
-                    isComputed: true,
-                    label: label || '',
-                    sourceMatches: sourceMatches || [],
-                    rawHome: winner1 || null,
-                    rawAway: winner2 || null,
-                };
-            }
-
-            const w73 = getWinner(ottaviSX[0]);
-            const w68 = getWinner(ottaviSX[1]);
-            const w71 = getWinner(ottaviSX[2]);
-            const w70 = getWinner(ottaviSX[3]);
-            const w72 = getWinner(ottaviDX[0]);
-            const w67 = getWinner(ottaviDX[1]);
-            const w69 = getWinner(ottaviDX[2]);
-            const w74 = getWinner(ottaviDX[3]);
-
-            const q1 = buildComputedMatch('q1', w73, w68, [ottaviSX[0], ottaviSX[1]]);
-            const q2 = buildComputedMatch('q2', w71, w70, [ottaviSX[2], ottaviSX[3]]);
-            const q3 = buildComputedMatch('q3', w72, w67, [ottaviDX[0], ottaviDX[1]]);
-            const q4 = buildComputedMatch('q4', w69, w74, [ottaviDX[2], ottaviDX[3]]);
-
-            const wq1 = getWinner(q1);
-            const wq2 = getWinner(q2);
-            const wq3 = getWinner(q3);
-            const wq4 = getWinner(q4);
-
-            const sf1 = buildComputedMatch('sf1', wq1, wq2, [q1, q2], 'Semifinale');
-            const sf2 = buildComputedMatch('sf2', wq3, wq4, [q3, q4], 'Semifinale');
-
-            const wsf1 = getWinner(sf1);
-            const wsf2 = getWinner(sf2);
-            const loser1 = getLoser(sf1);
-            const loser2 = getLoser(sf2);
-
-            const f1 = buildComputedMatch('f1', wsf1, wsf2, [sf1, sf2], 'Finale 1°/2°');
-            const f2 = buildComputedMatch('f2', loser1, loser2, [sf1, sf2], 'Finale 3°/4°');
+            const finale1 = buildRealMatch(FinaleId, null, 'Finale 1°/2°');
+            const finale2 = buildRealMatch(Finale3Id, null, 'Finale 3°/4°');
 
             return {
                 ottaviSX,
                 ottaviDX,
-                quartiSX: [q1, q2],
-                quartiDX: [q3, q4],
-                semifinaleSX: sf1,
-                semifinaleDX: sf2,
-                finale1: f1,
-                finale2: f2
+                quartiSX,
+                quartiDX,
+                semifinaleSX,
+                semifinaleDX,
+                finale1,
+                finale2
             };
         }
 
@@ -858,32 +816,24 @@
         function createMatchElement(match, round) {
             const div = document.createElement('div');
             div.className = 'b-match';
+
+            // Guard: la partita non è (ancora) presente su Firebase
+            if (!match) {
+                div.innerHTML = `
+                    <div class="b-match-row"><div class="b-match-team"><span class="b-name tbd">TBD</span></div></div>
+                    <div class="b-match-row"><div class="b-match-team"><span class="b-name tbd">TBD</span></div></div>
+                    <div class="b-match-status">In programma</div>
+                `;
+                return div;
+            }
+
             if (match.status === 'Live') div.classList.add('is-live');
             if (match.status === 'Finita') div.classList.add('is-finished');
 
-            let homeDisplay, awayDisplay;
-            let homeIsTBD = false, awayIsTBD = false;
-
-            if (match.isComputed) {
-                // Per i match calcolati: se il vincitore è null, mostriamo "TBD"
-                homeDisplay = match.home !== null ? match.home : 'TBD';
-                awayDisplay = match.away !== null ? match.away : 'TBD';
-                homeIsTBD = match.home === null;
-                awayIsTBD = match.away === null;
-                // Se il match è finito e ha un vincitore, mostriamo il nome reale
-                if (match.status === 'Finita' && match.home !== null && match.away !== null) {
-                    homeDisplay = match.home;
-                    awayDisplay = match.away;
-                    homeIsTBD = false;
-                    awayIsTBD = false;
-                }
-            } else {
-                // Ottavi – nomi sempre noti
-                homeDisplay = match.home || 'TBD';
-                awayDisplay = match.away || 'TBD';
-                homeIsTBD = homeDisplay === 'TBD';
-                awayIsTBD = awayDisplay === 'TBD';
-            }
+            const homeDisplay = match.home || 'TBD';
+            const awayDisplay = match.away || 'TBD';
+            const homeIsTBD = homeDisplay === 'TBD';
+            const awayIsTBD = awayDisplay === 'TBD';
 
             const showScore = match.status === 'Finita' || match.status === 'Live';
             const homeScore = (match.homeGoals !== undefined && match.homeGoals !== null) ? match.homeGoals : '-';
@@ -918,26 +868,23 @@
             if (type === 'gold') div.classList.add('is-final');
             else div.classList.add('is-final-3');
 
-            let homeDisplay, awayDisplay;
-            let homeIsTBD = false, awayIsTBD = false;
-
-            if (match.isComputed) {
-                homeDisplay = match.home !== null ? match.home : 'TBD';
-                awayDisplay = match.away !== null ? match.away : 'TBD';
-                homeIsTBD = match.home === null;
-                awayIsTBD = match.away === null;
-                if (match.status === 'Finita' && match.home !== null && match.away !== null) {
-                    homeDisplay = match.home;
-                    awayDisplay = match.away;
-                    homeIsTBD = false;
-                    awayIsTBD = false;
-                }
-            } else {
-                homeDisplay = match.home || 'TBD';
-                awayDisplay = match.away || 'TBD';
-                homeIsTBD = homeDisplay === 'TBD';
-                awayIsTBD = awayDisplay === 'TBD';
+            // Guard: la partita non è (ancora) presente su Firebase
+            if (!match) {
+                div.innerHTML = `
+                    <div class="final-label ${type === 'gold' ? '' : 'third'}">${type === 'gold' ? 'Finale 1°/2°' : 'Finale 3°/4°'}</div>
+                    <div class="final-teams">
+                        <div class="final-team"><span class="f-name tbd">TBD</span></div>
+                        <div class="final-team"><span class="f-name tbd">TBD</span></div>
+                    </div>
+                    <div class="final-status">In programma</div>
+                `;
+                return div;
             }
+
+            const homeDisplay = match.home || 'TBD';
+            const awayDisplay = match.away || 'TBD';
+            const homeIsTBD = homeDisplay === 'TBD';
+            const awayIsTBD = awayDisplay === 'TBD';
 
             const showScore = match.status === 'Finita' || match.status === 'Live';
             const homeScore = (match.homeGoals !== undefined && match.homeGoals !== null) ? match.homeGoals : '-';
@@ -1040,7 +987,7 @@
             }, 800);
         });
 
-        console.log('🏆 Tabellone Nievo Cup – placeholder rimossi, solo TBD');
+        console.log('🏆 Tabellone Nievo Cup – sincronizzato con i risultati reali (matches + liveResults)');
     </script>
 
     <script defer src="/_vercel/insights/script.js"></script>
