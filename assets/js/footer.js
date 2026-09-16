@@ -17,8 +17,8 @@
      ⚠️ PLACEHOLDER — SOSTITUIRE CON I LINK REALI
      ------------------------------------------------------------ */
   var SOCIAL = {
-    instagram: 'https://www.instagram.com/[USERNAME_INSTAGRAM]',
-    tiktok:    'https://www.tiktok.com/@[USERNAME_TIKTOK]'
+    instagram: 'https://www.instagram.com/nievocup',
+    tiktok:    'https://www.tiktok.com/@nievo.cup'
   };
 
   /* ------------------------------------------------------------
@@ -126,15 +126,15 @@
     return '' +
       '<div class="nf-inner">' +
 
-        /* colonna 1 — brand + dati fiscali */
-        '<div class="nf-col nf-brand">' +
-          '<div class="nf-brand-name">NIEVO <span>CUP</span></div>' +
-          '<p class="nf-tag">Verona Gioca Qui.</p>' +
-          '<p class="nf-fiscal">' +
-            '<b>C.F.</b><span>' + FISCAL.cf + '</span><br>' +
-            '<b>P.IVA</b><span>' + FISCAL.piva + '</span>' +
-          '</p>' +
-        '</div>' +
+        // /* colonna 1 — brand + dati fiscali */
+        // '<div class="nf-col nf-brand">' +
+        //   '<div class="nf-brand-name">NIEVO <span>CUP</span></div>' +
+        //   '<p class="nf-tag">Verona Gioca Qui.</p>' +
+        //   '<p class="nf-fiscal">' +
+        //     '<b>C.F.</b><span>' + FISCAL.cf + '</span><br>' +
+        //     '<b>P.IVA</b><span>' + FISCAL.piva + '</span>' +
+        //   '</p>' +
+        // '</div>' +
 
         /* colonna 2 — link legali */
         '<div class="nf-col">' +
