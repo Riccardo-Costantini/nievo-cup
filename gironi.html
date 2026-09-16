@@ -1,16 +1,25 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-LNX14N1XMB"></script>
+  <meta charset="UTF-8"/>
+
+  <!-- Consent Mode v2: default DENIED prima di tutto -->
 <script>
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-LNX14N1XMB');
+  function gtag(){ dataLayer.push(arguments); }
+  window.gtag = gtag;
+  gtag('consent', 'default', {
+    analytics_storage: 'denied',
+    ad_storage: 'denied',
+    ad_user_data: 'denied',
+    ad_personalization: 'denied',
+    wait_for_update: 500
+  });
+  window.__nievoConsentDefaultSet = true;
 </script>
-  <meta charset="UTF-8" />
+
+<!-- Cookie banner: carica GA4 solo se l'utente acconsente -->
+<script src="assets/js/cookie-banner.js" defer></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <meta name="theme-color" content="#000000" />
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b0f17">
@@ -234,7 +243,6 @@
     storageBucket: "nievo-fcc94.firebasestorage.app",
     messagingSenderId: "497831212426",
     appId: "1:497831212426:web:357e8c37b249042c53c473",
-    measurementId: "G-ZERXCC9LH8"
   };
 
   const app = initializeApp(firebaseConfig);

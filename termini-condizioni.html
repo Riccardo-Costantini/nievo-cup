@@ -1,7 +1,25 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
+    <meta charset="UTF-8"/>
+
+  <!-- Consent Mode v2: default DENIED prima di tutto -->
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){ dataLayer.push(arguments); }
+  window.gtag = gtag;
+  gtag('consent', 'default', {
+    analytics_storage: 'denied',
+    ad_storage: 'denied',
+    ad_user_data: 'denied',
+    ad_personalization: 'denied',
+    wait_for_update: 500
+  });
+  window.__nievoConsentDefaultSet = true;
+</script>
+
+<!-- Cookie banner: carica GA4 solo se l'utente acconsente -->
+<script src="assets/js/cookie-banner.js" defer></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Termini e Condizioni d'Uso - Nievo Cup</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
