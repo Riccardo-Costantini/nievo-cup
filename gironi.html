@@ -236,7 +236,6 @@
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
   import { getDatabase, ref, onValue, get } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
-  import { initializeAppCheck, ReCaptchaEnterpriseProvider } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check.js';
 
   const firebaseConfig = {
     apiKey: "AIzaSyB0LUxAWKVUIhXYRb2T2JOT3ypiX9q_5Ck",
@@ -249,12 +248,6 @@
   };
 
   const app = initializeApp(firebaseConfig);
-
-  // ✅ APP CHECK
-  initializeAppCheck(app, {
-    provider: new ReCaptchaEnterpriseProvider('6Lcmi8ItAAAAAHFg2w0o1BdFJXraGqGQ5KZVLT_d'),
-    isTokenAutoRefreshEnabled: true
-  });
 
   const db = getDatabase(app);
 

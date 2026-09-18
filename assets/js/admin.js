@@ -16,12 +16,6 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-// ✅ APP CHECK — PRIMA di getAuth
-initializeAppCheck(app, {
-  provider: new ReCaptchaEnterpriseProvider('6Lcmi8ItAAAAAHFg2w0o1BdFJXraGqGQ5KZVLT_d'),
-  isTokenAutoRefreshEnabled: true
-});
-
 const auth = getAuth(app);
 
 // Messaggi generici: non distinguiamo "utente inesistente" da "password errata"
