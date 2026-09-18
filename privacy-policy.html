@@ -1,110 +1,69 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8"/>
-
-  <!-- Consent Mode v2: default DENIED prima di tutto -->
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){ dataLayer.push(arguments); }
-  window.gtag = gtag;
-  gtag('consent', 'default', {
-    analytics_storage: 'denied',
-    ad_storage: 'denied',
-    ad_user_data: 'denied',
-    ad_personalization: 'denied',
-    wait_for_update: 500
-  });
-  window.__nievoConsentDefaultSet = true;
-</script>
-
-<!-- Cookie banner: carica GA4 solo se l'utente acconsente -->
-<script src="assets/js/cookie-banner.js" defer></script>
+  <meta charset="UTF-8" />
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    window.gtag = gtag;
+    gtag('consent', 'default', { analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied', wait_for_update: 500 });
+    window.__nievoConsentDefaultSet = true;
+  </script>
+  <script src="assets/js/cookie-banner.js" defer></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <meta name="theme-color" content="#0b0f17" />
-  <title>Nievo Cup – Privacy Policy</title>
+  <title>Privacy Policy - Nievo Cup</title>
+  <meta name="description" content="Privacy Policy di Nievo Cup: dati trattati, finalità, basi giuridiche, fornitori, diritti GDPR e contatti privacy." />
+  <link rel="canonical" href="https://nievocup.it/privacy-policy.html" />
+  <meta property="og:title" content="Privacy Policy - Nievo Cup" />
+  <meta property="og:description" content="Informazioni GDPR sul trattamento dei dati personali nel sito Nievo Cup." />
+  <meta property="og:image" content="https://nievocup.it/assets/images/loghi/Nievo_cup_black.png" />
+  <meta property="og:url" content="https://nievocup.it/privacy-policy.html" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Privacy Policy - Nievo Cup" />
+  <meta name="twitter:description" content="Informazioni GDPR sul trattamento dei dati personali nel sito Nievo Cup." />
+  <meta name="twitter:image" content="https://nievocup.it/assets/images/loghi/Nievo_cup_black.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=Exo+2:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/style.css" />
-  <link rel="shortcut icon" href="assets/images/loghi/favicon_nievo_cup.ico" type="image/x-icon" />
+  <link rel="icon" href="assets/images/loghi/logo_nievo_white.png" type="image/png" />
   <script src="assets/js/navbar.js" defer></script>
   <script src="assets/js/footer.js" defer></script>
-
   <style>
-    body.page-legal { background-color: #0b0f17; color: #e2e8f0; font-family: 'Exo 2', sans-serif; min-height: 100vh; line-height: 1.7; }
-    .legal-container { max-width: 960px; margin: 3rem auto 5rem; padding: 2.5rem; background: rgba(8, 12, 22, 0.88); border: 1px solid rgba(94, 100, 107, 0.35); border-radius: 24px; backdrop-filter: blur(12px); }
-    h1 { font-family: 'Bebas Neue', sans-serif; font-size: 3.2rem; color: #fff; letter-spacing: 0.05em; margin-bottom: 0.2rem; }
-    h2 { font-family: 'Rajdhani', sans-serif; font-size: 1.6rem; color: #feda00; margin-top: 2.2rem; border-bottom: 1px solid rgba(254,218,0,0.25); padding-bottom: 0.4rem; text-transform: uppercase; }
-    h3 { font-family: 'Rajdhani', sans-serif; font-size: 1.25rem; color: #fff; margin-top: 1.4rem; }
-    p, li { font-size: 0.95rem; color: #cbd5e1; margin-bottom: 1rem; }
-    ul { margin-left: 1.5rem; }
-    .last-update { font-family: 'Rajdhani', sans-serif; font-size: 0.85rem; color: #94a3b8; margin-bottom: 2rem; }
-    .placeholder-legal { background: rgba(254, 218, 0, 0.12); border: 1px dashed #feda00; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 600; color: #feda00; }
+    body.page-legal{background:#0b0f17;color:#e2e8f0;font-family:'Exo 2',sans-serif;min-height:100vh;line-height:1.7;}
+    body.page-legal::before{content:'';position:fixed;inset:0;background-image:url('assets/images/sfondi/sfondo_tabellone.webp');background-size:cover;background-position:center;z-index:-2;opacity:.35;}
+    body.page-legal::after{content:'';position:fixed;inset:0;background:linear-gradient(180deg,rgba(11,15,23,.88),rgba(11,15,23,.97));z-index:-1;}
+    .legal-container{max-width:960px;margin:3rem auto 5rem;padding:2.5rem;background:rgba(8,12,22,.9);border:1px solid rgba(94,100,107,.35);border-radius:20px;backdrop-filter:blur(12px);}
+    .legal-container h1{font-family:'Bebas Neue',sans-serif;font-size:3.2rem;color:#fff;letter-spacing:.05em;margin-bottom:.2rem;}.legal-container h2{font-family:'Rajdhani',sans-serif;font-size:1.45rem;color:#feda00;margin-top:2.1rem;border-bottom:1px solid rgba(254,218,0,.25);padding-bottom:.4rem;text-transform:uppercase;}.legal-container h3{font-family:'Rajdhani',sans-serif;font-size:1.1rem;color:#fff;margin-top:1.2rem;}.legal-container p,.legal-container li{font-size:.95rem;color:#cbd5e1;margin-bottom:1rem;}.legal-container ul{margin-left:1.3rem;}.last-update{font-family:'Rajdhani',sans-serif;font-size:.85rem;color:#94a3b8;margin-bottom:2rem;}.placeholder-legal{background:rgba(254,218,0,.12);border:1px dashed #feda00;padding:.15rem .45rem;border-radius:4px;font-weight:700;color:#feda00;}.legal-container a{color:#feda00;text-decoration:underline;text-underline-offset:2px;}
   </style>
 </head>
 <body class="page-legal">
-
   <custom-navbar></custom-navbar>
-
-  <div class="legal-container">
+  <main class="legal-container">
     <h1>Privacy Policy</h1>
-    <div class="last-update">Ultimo aggiornamento: 15 Settembre 2026</div>
-
-    <p>La presente Privacy Policy descrive le modalità con cui vengono raccolti e trattati i dati personali degli utenti che consultano il sito web ufficiale della <strong>Nievo Cup</strong> (di seguito, il "Sito"), in conformità al Regolamento (UE) 2016/679 ("GDPR"), al D.Lgs. 196/2003 ("Codice Privacy"), novellato dal D.Lgs. 101/2018, e alle Linee Guida del Garante per la Protezione dei Dati Personali.</p>
-
-    <h2>1. Titolare del Trattamento</h2>
-    <p>Il Titolare del Trattamento dei dati personali è:</p>
-    <p>
-      <strong>[NOME RAGIONE SOCIALE / ASSOCIAZIONE TITOLARE DA INSERIRE]</strong><br>
-      Sede legale: <span class="placeholder-legal">[INDIRIZZO SEDE DA INSERIRE]</span><br>
-      C.F. / P.IVA: <span class="placeholder-legal">[PARTITA IVA DA INSERIRE]</span><br>
-      Email di contatto Privacy: <span class="placeholder-legal">[EMAIL PRIVACY DA INSERIRE]</span><br>
-      PEC: <span class="placeholder-legal">[PEC DA INSERIRE]</span>
-    </p>
-
-    <h2>2. Categorie di Dati Trattati e Finalità del Trattamento</h2>
-
-    <h3>A. Dati di navigazione e tecnici</h3>
-    <p>I sistemi informatici e le procedure software preposte al funzionamento di questo Sito acquisiscono, nel corso del loro normale esercizio, alcuni dati personali la cui trasmissione è implicita nell'uso dei protocolli di comunicazione di Internet. In questa categoria rientrano gli indirizzi IP, il tipo di browser, il sistema operativo, il nome di dominio e gli indirizzi di siti web dai quali è stato effettuato l'accesso o l'uscita, le informazioni sulle pagine visitate all'interno del sito, l'orario d'accesso, l'permanenza sulla singola pagina.</p>
-    <p><strong>Finalità:</strong> Garantire il corretto funzionamento delle pagine web, la sicurezza dell'infrastruttura e prevenire attività illecite o attacchi informatici.</p>
-    <p><strong>Base Giuridica:</strong> Legittimo interesse del Titolare alla gestione tecnica e alla sicurezza del Sito (Art. 6, par. 1, lett. f del GDPR).</p>
-
-    <h3>B. Dati di misurazione e performance (Analytics)</h3>
-    <p>Il Sito utilizza strumenti di misurazione come Google Analytics 4 (con identificativo di tracciamento `G-LNX14N1XMB`) e Vercel Speed Insights per raccogliere dati statistici aggregati in merito alle visite e al comportamento di navigazione degli utenti.</p>
-    <p><strong>Finalità:</strong> Elaborare analisi statistiche aggregate sull'uso del Sito al fine di ottimizzare i contenuti e migliorare l'esperienza utente.</p>
-    <p><strong>Base Giuridica:</strong> Consenso dell'utente prestato mediante il banner cookie o legittimo interesse ove lo strumento operi con mascheramento dell'IP ed in forma puramente aggregata priva di incroci con altri dati (Art. 6, par. 1, lett. a / f del GDPR).</p>
-
-    <h3>C. Dati relativi alle prestazioni sportive dei partecipanti al torneo</h3>
-    <p>I dati inerenti a nomi, cognomi, appartenenza alla squadra, ruoli, gol segnati e cartellini vengono gestiti e pubblicati sul Sito tramite l'infrastruttura Google Firebase Realtime Database per finalità esclusive di cronaca sportiva e gestione del torneo "Nievo Cup".</p>
-
-    <h2>3. Modalità del Trattamento e Misure di Sicurezza</h2>
-    <p>Il trattamento viene effettuato mediante strumenti informatici e telematici con logiche strettamente correlate alle finalità sopra indicate. Il Titolare adotta adeguate misure di sicurezza tecniche e organizzative volti a prevenire la perdita dei dati, usi illeciti o non corretti ed accessi non autorizzati.</p>
-
-    <h2>4. Destinatari e Trasferimento dei Dati in Paesi Extra-UE</h2>
-    <p>I dati personali raccolti potranno essere trattati da soggetti terzi designati quali Responsabili del Trattamento ex art. 28 GDPR o Autonomi Titolari:</p>
-    <ul>
-      <li><strong>Google Ireland Limited / Google LLC:</strong> per i servizi di Firebase Realtime Database, Google Fonts e Google Analytics 4;</li>
-      <li><strong>Vercel Inc.:</strong> quale provider dell'infrastruttura di hosting e per Vercel Speed Insights.</li>
-    </ul>
-    <p>Qualora tali terze parti trasferiscano dati verso Paesi situati al di fuori dello Spazio Economico Europeo (es. USA), tale trasferimento avviene sulla base del <em>Data Privacy Framework UE-USA</em> o mediante la sottoscrizione delle Clausole Contrattuali Standard (Standard Contractual Clauses - SCC) approvate dalla Commissione Europea.</p>
-
-    <h2>5. Periodo di Conservazione dei Dati</h2>
-    <p>I dati di navigazione tecnica sono conservati per il tempo strettamente necessario all'erogazione del servizio e comunque cancellati immediatamente dopo la loro aggregazione o scadenza delle sessioni operative. I dati analitici associati a Google Analytics sono conservati per il periodo impostato all'interno del pannello di controllo della proprietà (da 2 a 14 mesi).</p>
-
-    <h2>6. Diritti dell'Interessato</h2>
-    <p>Ai sensi degli artt. 15-22 del GDPR, l'utente ha il diritto di richiedere in qualsiasi momento:</p>
-    <ul>
-      <li>L'accesso ai propri dati personali e la rettifica o la cancellazione degli stessi;</li>
-      <li>La limitazione del trattamento o l'opposizione allo stesso;</li>
-      <li>La portabilità dei dati, ove applicabile;</li>
-      <li>La revoca del consenso prestato in qualsiasi momento, senza pregiudicare la liceità del trattamento basata sul consenso prestato prima della revoca.</li>
-    </ul>
-    <p>Per esercitare tali diritti è possibile inviare una richiesta scritta all'indirizzo email: <span class="placeholder-legal">[EMAIL PRIVACY DA INSERIRE]</span>.</p>
-    <p>L'interessato ha inoltre il diritto di proporre reclamo all'Autorità Garante per la Protezione dei Dati Personali (Piazza Venezia n. 11, 00187 Roma - <a href="https://www.garanteprivacy.it" target="_blank" style="color:#feda00;">www.garanteprivacy.it</a>).</p>
-  </div>
-
+    <div class="last-update">Ultimo aggiornamento: 18 settembre 2026</div>
+    <p>La presente Privacy Policy descrive come vengono trattati i dati personali degli utenti che visitano il sito ufficiale della <strong>Nievo Cup</strong>, in conformità al Regolamento (UE) 2016/679 (GDPR), al D.Lgs. 196/2003 e alle linee guida del Garante Privacy.</p>
+    <h2>1. Titolare del trattamento</h2>
+    <p>Il Titolare del trattamento è <span class="placeholder-legal">[DA INSERIRE: denominazione legale / associazione / società titolare]</span>.</p>
+    <p>Sede legale: <span class="placeholder-legal">[DA INSERIRE: indirizzo sede legale]</span><br>C.F. / P.IVA: <span class="placeholder-legal">[DA INSERIRE: codice fiscale e/o partita IVA]</span><br>Email privacy: <span class="placeholder-legal">[DA INSERIRE: email privacy]</span><br>PEC: <span class="placeholder-legal">[DA INSERIRE: PEC, se disponibile]</span></p>
+    <h2>2. Dati raccolti</h2>
+    <h3>Dati di navigazione e tecnici</h3><p>Durante la navigazione possono essere trattati indirizzo IP, user agent, informazioni tecniche del browser, log di sicurezza, pagine richieste, data e ora delle richieste e dati necessari al funzionamento del sito.</p>
+    <h3>Dati analytics</h3><p>Solo dopo consenso analytics, il sito può attivare Google Analytics 4 (<code>G-LNX14N1XMB</code>) e Vercel Insights per statistiche aggregate su traffico, performance e uso delle pagine.</p>
+    <h3>Dati sportivi pubblicati</h3><p>Il sito mostra dati relativi al torneo, come nomi squadre, calendario, risultati, marcatori e statistiche. Tali dati sono trattati per gestione e cronaca dell'evento sportivo.</p>
+    <h3>Dati di autenticazione admin</h3><p>L'area admin usa Firebase Auth. Le credenziali sono gestite da Google Firebase; il sito usa lo stato di autenticazione e il ruolo admin per consentire l'accesso agli utenti autorizzati.</p>
+    <h2>3. Finalità e basi giuridiche</h2>
+    <ul><li><strong>Funzionamento tecnico e sicurezza:</strong> esecuzione del servizio e legittimo interesse del Titolare alla sicurezza del sito.</li><li><strong>Statistiche analytics:</strong> consenso dell'utente, revocabile in qualsiasi momento dalle preferenze cookie.</li><li><strong>Gestione torneo e pubblicazione risultati:</strong> legittimo interesse alla comunicazione e organizzazione dell'evento sportivo, salvo ulteriori basi specifiche definite dal Titolare.</li><li><strong>Gestione area admin:</strong> misure organizzative e sicurezza del servizio, limitata agli utenti autorizzati.</li></ul>
+    <h2>4. Modalità del trattamento</h2><p>I dati sono trattati con strumenti informatici e misure tecniche adeguate a ridurre rischi di accesso non autorizzato, perdita, alterazione o uso improprio. L'accesso amministrativo deve essere protetto da Firebase Auth e da regole Firebase che limitano la scrittura ai soli amministratori.</p>
+    <h2>5. Destinatari e fornitori</h2><p>I dati possono essere trattati da fornitori tecnici nominati responsabili o autonomi titolari, tra cui:</p><ul><li>Google Ireland Limited / Google LLC: Firebase, Firebase Auth, Google Fonts, Google Analytics 4;</li><li>Vercel Inc.: hosting, distribuzione e Vercel Insights;</li><li>eventuali fornitori tecnici necessari alla manutenzione del sito.</li></ul>
+    <h2>6. Trasferimenti extra UE</h2><p>Alcuni fornitori possono trattare dati fuori dallo Spazio Economico Europeo. In tali casi il trasferimento avviene, ove applicabile, sulla base del Data Privacy Framework UE-USA, Clausole Contrattuali Standard o altre garanzie previste dagli artt. 44 e seguenti GDPR.</p>
+    <h2>7. Conservazione</h2><ul><li>Dati tecnici e log: per il tempo necessario a sicurezza, diagnostica e funzionamento del servizio.</li><li>Dati analytics: secondo le impostazioni dei fornitori e comunque solo dopo consenso.</li><li>Dati sportivi del torneo: per finalità storiche, informative e di archivio dell'evento, salvo richiesta legittima di rimozione o rettifica.</li><li>Dati admin: per la durata dell'autorizzazione dell'utente amministratore.</li></ul>
+    <h2>8. Cookie e consenso</h2><p>Gli analytics sono disattivati di default. L'utente può accettarli, rifiutarli o modificare la scelta dal footer tramite "Preferenze cookie". Per maggiori dettagli consulta la <a href="cookie-policy.html">Cookie Policy</a>.</p>
+    <h2>9. Diritti dell'interessato</h2><p>Ai sensi degli artt. 15-22 GDPR, l'utente può chiedere accesso, rettifica, cancellazione, limitazione, opposizione, portabilità ove applicabile e revoca del consenso. La revoca non pregiudica la liceità del trattamento svolto prima della revoca.</p><p>Le richieste possono essere inviate a <span class="placeholder-legal">[DA INSERIRE: email privacy]</span>.</p>
+    <h2>10. Reclamo al Garante</h2><p>L'utente può proporre reclamo al Garante per la Protezione dei Dati Personali, Piazza Venezia 11, 00187 Roma, tramite il sito <a href="https://www.garanteprivacy.it" target="_blank" rel="noopener noreferrer">www.garanteprivacy.it</a>.</p>
+    <h2>11. Dati ancora da fornire</h2><ul><li><span class="placeholder-legal">[DA INSERIRE: denominazione legale completa del titolare]</span></li><li><span class="placeholder-legal">[DA INSERIRE: indirizzo sede legale]</span></li><li><span class="placeholder-legal">[DA INSERIRE: C.F. / P.IVA]</span></li><li><span class="placeholder-legal">[DA INSERIRE: email privacy e PEC]</span></li><li><span class="placeholder-legal">[DA INSERIRE: eventuali responsabili esterni formalmente nominati]</span></li></ul>
+  </main>
   <custom-footer></custom-footer>
-      <script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
