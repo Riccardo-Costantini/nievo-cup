@@ -1,5 +1,5 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 // 🔧 INCOLLA QUI IL TUO CONFIG FIREBASE
 const firebaseConfig = {
@@ -16,6 +16,21 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
+// Messaggi generici: non distinguiamo "utente inesistente" da "password errata"
+// per non facilitare tentativi di enumerazione delle email registrate.
+function getGenericLoginError(error) {
+  const rateLimited = ['auth/too-many-requests'];
+  const invalidFormat = ['auth/invalid-email'];
+  if (rateLimited.includes(error.code)) {
+    return 'Troppi tentativi di accesso. Riprova più tardi.';
+  }
+  if (invalidFormat.includes(error.code)) {
+    return 'Formato email non valido.';
+  }
+  // auth/user-not-found, auth/wrong-password, auth/invalid-credential, ecc.
+  return 'Credenziali non valide. Controlla email e password.';
+}
+
 window.login = function () {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
@@ -26,6 +41,6 @@ window.login = function () {
       window.location.href = "admin-dashboard.html";
     })
     .catch((error) => {
-      alert(error.message);
+      alert(getGenericLoginError(error));
     });
 };

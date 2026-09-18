@@ -3,20 +3,8 @@
 <head>
   <meta charset="UTF-8"/>
 
-  <!-- Consent Mode v2: default DENIED prima di tutto -->
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){ dataLayer.push(arguments); }
-  window.gtag = gtag;
-  gtag('consent', 'default', {
-    analytics_storage: 'denied',
-    ad_storage: 'denied',
-    ad_user_data: 'denied',
-    ad_personalization: 'denied',
-    wait_for_update: 500
-  });
-  window.__nievoConsentDefaultSet = true;
-</script>
+  <!-- Consent Mode v2: default DENIED, centralizzato in consent-default.js -->
+  <script src="assets/js/consent-default.js"></script>
 <script src="assets/js/footer.js" defer></script>
 <!-- Cookie banner: carica GA4 solo se l'utente acconsente -->
 <script src="assets/js/cookie-banner.js" defer></script>
@@ -37,10 +25,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+Tamil:wght@100..900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
     <link rel="shortcut icon" href="assets/images/loghi/favicon_nievo_cup.ico" type="image/x-icon">
+    <meta name="description" content="Nievo Cup - Il torneo di calcio a 7 più prestigioso di Verona. Risultati, gironi, marcatori e partite in tempo reale.">
+    <link rel="canonical" href="https://nievocup.it/index.html">
     <style>
       /* Fix per il logo stretchato su mobile dentro #hero */
 #hero .logo {
@@ -67,6 +54,13 @@
     max-height: 22vh;
   }
 }
+
+/* Bridge: id "info" duplicati resi unici (info, info-women, info-community).
+   Se style.css definisce regole su #info, aggiungere anche #info-women e
+   #info-community allo stesso selettore per garantire coerenza visiva. */
+#info, #info-women, #info-community {
+  /* eredita già le regole via classe .info per compatibilità */
+}
     </style>
 </head>
 <body>
@@ -87,7 +81,7 @@
 
       <div id="hero">
         <div class="logo">
-          <img src="assets/images/loghi/logo_nievo_white.png">
+          <img src="assets/images/loghi/logo_nievo_white.png" alt="Logo Nievo Cup">
         </div>
         <h3>Verona Gioca Qui.</h3>
       </div>
@@ -100,92 +94,92 @@
 
     <div id="immagini-sponsor">
 
-  <a href="https://instagram.com/hosteriamodernaverona_" target="_blank"
+  <a href="https://instagram.com/hosteriamodernaverona_" target="_blank" rel="noopener noreferrer"
      onclick="gtag('event', 'click_sponsor', {sponsor: 'hosteria_moderna'})">
     <img src="assets/images/loghi_sponsor/hosteria_moderna.png" alt="hosteria_moderna">
   </a>
 
-  <a href="https://instagram.com/axer.verona" target="_blank"
+  <a href="https://instagram.com/axer.verona" target="_blank" rel="noopener noreferrer"
      onclick="gtag('event', 'click_sponsor', {sponsor: 'axer'})">
     <img src="assets/images/loghi_sponsor/axer.png" alt="axer">
   </a>
 
-  <a href="https://instagram.com/skoop_vr" target="_blank"
+  <a href="https://instagram.com/skoop_vr" target="_blank" rel="noopener noreferrer"
      onclick="gtag('event', 'click_sponsor', {sponsor: 'skoop'})">
     <img src="assets/images/loghi_sponsor/skoop_no_papera.png" alt="skoop">
   </a>
 
-  <a href="https://instagram.com/jb.barberr_" target="_blank"
+  <a href="https://instagram.com/jb.barberr_" target="_blank" rel="noopener noreferrer"
      onclick="gtag('event', 'click_sponsor', {sponsor: 'jb_barber'})">
     <img src="assets/images/loghi_sponsor/jb_barber.jpg" alt="jb_barber">
   </a>
 
-  <a href="https://instagram.com/scuolaguidamontreal" target="_blank"
+  <a href="https://instagram.com/scuolaguidamontreal" target="_blank" rel="noopener noreferrer"
      onclick="gtag('event', 'click_sponsor', {sponsor: 'montreal'})">
     <img src="assets/images/loghi_sponsor/montreal_logo.png" alt="montreal_logo">
   </a>
 
-  <a href="https://instagram.com/spydernestloungebar" target="_blank"
+  <a href="https://instagram.com/spydernestloungebar" target="_blank" rel="noopener noreferrer"
      onclick="gtag('event', 'click_sponsor', {sponsor: 'fatboy'})">
     <img src="assets/images/loghi_sponsor/fatboy_logo.png" alt="fatboy">
   </a>
 
-  <a href="https://socageraptor.com" target="_blank"
+  <a href="https://socageraptor.com" target="_blank" rel="noopener noreferrer"
      onclick="gtag('event', 'click_sponsor', {sponsor: 'raptor'})">
     <img src="assets/images/loghi_sponsor/raptor.png" alt="raptor">
   </a>
 
-  <a href="https://instagram.com/ristoranterubiani" target="_blank"
+  <a href="https://instagram.com/ristoranterubiani" target="_blank" rel="noopener noreferrer"
      onclick="gtag('event', 'click_sponsor', {sponsor: 'rubiani'})">
     <img src="assets/images/loghi_sponsor/rubiani.png" alt="rubiani">
   </a>
 
-  <a href="https://instagram.com/fluffylabverona" target="_blank"
+  <a href="https://instagram.com/fluffylabverona" target="_blank" rel="noopener noreferrer"
      onclick="gtag('event', 'click_sponsor', {sponsor: 'Fluffy Lab'})">
     <img src="assets/images/loghi_sponsor/IMG_4093.png" alt="Fluffy Lab">
   </a>
 
-  <a href="https://instagram.com/hosteriamodernaverona_" target="_blank"
+  <a href="https://instagram.com/hosteriamodernaverona_" target="_blank" rel="noopener noreferrer"
      onclick="gtag('event', 'click_sponsor', {sponsor: 'hosteria_moderna'})">
     <img src="assets/images/loghi_sponsor/hosteria_moderna.png" alt="hosteria_moderna">
   </a>
 
-  <a href="https://instagram.com/axer.verona" target="_blank"
+  <a href="https://instagram.com/axer.verona" target="_blank" rel="noopener noreferrer"
      onclick="gtag('event', 'click_sponsor', {sponsor: 'axer'})">
     <img src="assets/images/loghi_sponsor/axer.png" alt="axer">
   </a>
 
-  <a href="https://instagram.com/skoop_vr" target="_blank"
+  <a href="https://instagram.com/skoop_vr" target="_blank" rel="noopener noreferrer"
      onclick="gtag('event', 'click_sponsor', {sponsor: 'skoop'})">
     <img src="assets/images/loghi_sponsor/skoop_no_papera.png" alt="skoop">
   </a>
 
-  <a href="https://instagram.com/jb.barberr_" target="_blank"
+  <a href="https://instagram.com/jb.barberr_" target="_blank" rel="noopener noreferrer"
      onclick="gtag('event', 'click_sponsor', {sponsor: 'jb_barber'})">
     <img src="assets/images/loghi_sponsor/jb_barber.jpg" alt="jb_barber">
   </a>
 
-  <a href="https://instagram.com/scuolaguidamontreal" target="_blank"
+  <a href="https://instagram.com/scuolaguidamontreal" target="_blank" rel="noopener noreferrer"
      onclick="gtag('event', 'click_sponsor', {sponsor: 'montreal'})">
     <img src="assets/images/loghi_sponsor/montreal_logo.png" alt="montreal_logo">
   </a>
 
-  <a href="https://instagram.com/spydernestloungebar" target="_blank"
+  <a href="https://instagram.com/spydernestloungebar" target="_blank" rel="noopener noreferrer"
      onclick="gtag('event', 'click_sponsor', {sponsor: 'fatboy'})">
     <img src="assets/images/loghi_sponsor/fatboy_logo.png" alt="fatboy">
   </a>
 
-  <a href="https://socageraptor.com" target="_blank"
+  <a href="https://socageraptor.com" target="_blank" rel="noopener noreferrer"
      onclick="gtag('event', 'click_sponsor', {sponsor: 'raptor'})">
     <img src="assets/images/loghi_sponsor/raptor.png" alt="raptor">
   </a>
 
-  <a href="https://instagram.com/ristoranterubiani" target="_blank"
+  <a href="https://instagram.com/ristoranterubiani" target="_blank" rel="noopener noreferrer"
      onclick="gtag('event', 'click_sponsor', {sponsor: 'rubiani'})">
     <img src="assets/images/loghi_sponsor/rubiani.png" alt="rubiani">
   </a>
   
-  <a href="https://instagram.com/fluffylabverona" target="_blank"
+  <a href="https://instagram.com/fluffylabverona" target="_blank" rel="noopener noreferrer"
      onclick="gtag('event', 'click_sponsor', {sponsor: 'Fluffy Lab'})">
     <img src="assets/images/loghi_sponsor/IMG_4093.png" alt="Fluffy Lab">
   </a>
@@ -195,7 +189,7 @@
   </div>
 </div>
 
-<div id="info">
+<div id="info" class="info">
   <p>
       La Nievo Cup è il torneo di calcio a 7 più prestigioso di Verona che si svolge ogni estate nel centro di Verona.<br><br>
 
@@ -265,7 +259,7 @@
   </div>
 </div>
 
-<div id="info" style="height: 70dvh;">
+<div id="info-women" class="info" style="height: 70dvh;">
   <p>
     Quest’anno si svolgerà anche la Women’s Nievo Cup per la seconda edizione. 8 squadre del femminile si sfideranno alla Skoop Poke Arena il 20 e 21 Giugno.<br><br>
 
@@ -278,14 +272,14 @@
 
 
 <div id="arena">
-  <img src="assets/images/sfondi/skoop_arena.webp">
+  <img src="assets/images/sfondi/skoop_arena.webp" alt="Skoop Poke Arena, sede della Nievo Cup">
 </div>
 
 
 
 
 
-<div id="info">
+<div id="info-community" class="info">
   <p>
     La Nievo Cup non è soltanto un torneo di calcio. È uno dei principali momenti di aggregazione dell’estate veronese.<br><br>
 
@@ -297,7 +291,6 @@
   </p>
 </div>
 <custom-footer></custom-footer>
-<script defer src="/_vercel/insights/script.js"></script>
 
 </body>
 </html>

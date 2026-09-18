@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow">
   <title>Nievo Cup – Pannello Admin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -24,7 +25,7 @@
       </div>
     </div>
     <div class="hdr-badges">
-      <div class="fb-badge" id="fb-badge" class="fb-badge-admin">
+      <div class="fb-badge" id="fb-badge">
         <div class="fb-dot" id="fb-dot"></div>
         <span id="fb-lbl">Non connesso</span>
       </div>
@@ -87,8 +88,7 @@
     <hr class="div" />
 
     <button class="btn btn-red" id="resetMatchBtn">🔄 RESET PARTITA</button>
-    
-    <!-- Sezione per creare nuove partite (solo se necessario) -->
+
     <hr class="div" />
     <div class="adm-sub adm-sub-create">➕ CREA NUOVA PARTITA</div>
     <div class="fg"><input type="text" id="newMatchId" placeholder="ID (es. m61)" /></div>
@@ -122,12 +122,11 @@
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   let db = null;
-  let matchesData = {};      // match fissi dal nodo 'matches'
-  let resultsData = {};      // risultati dinamici dal nodo 'liveResults'
+  let matchesData = {};
+  let resultsData = {};
   let selMatchId = '';
   let selTeam = 'home';
 
-  // Helper
   function toArray(val) {
     if (!val) return [];
     if (Array.isArray(val)) return val;
@@ -135,13 +134,11 @@
     return [];
   }
 
-  // Estrae il numero dall'ID (es. "m10" -> 10)
   function extractMatchNumber(id) {
     const match = id.match(/m(\d+)/i);
     return match ? parseInt(match[1], 10) : 0;
   }
 
-  // Ottiene lo stato combinato (match fisso + risultati)
   function getCombinedState(matchId) {
     const match = matchesData[matchId];
     const result = resultsData[matchId] || {};
@@ -154,7 +151,6 @@
     };
   }
 
-  // Scrive solo i risultati (senza toccare i dettagli del match)
   async function writeResult(matchId, data) {
     if (!db) throw new Error('DB non connesso');
     const resultRef = ref(db, `liveResults/${matchId}`);
@@ -184,16 +180,20 @@
   }
 
   function updateAdminPreview() {
+    const mlbl = document.getElementById('adm-mlbl');
+    const score = document.getElementById('adm-score');
+    const stato = document.getElementById('adm-stato');
+
     if (!selMatchId || !matchesData[selMatchId]) {
-      document.getElementById('adm-mlbl').innerHTML = '⚡ Nessuna partita selezionata';
-      document.getElementById('adm-score').innerHTML = '— : —';
-      document.getElementById('adm-stato').innerHTML = '–';
+      mlbl.textContent = '⚡ Nessuna partita selezionata';
+      score.textContent = '— : —';
+      stato.textContent = '–';
       return;
     }
     const state = getCombinedState(selMatchId);
-    document.getElementById('adm-mlbl').innerHTML = `${state.homeName}  VS  ${state.awayName}`;
-    document.getElementById('adm-score').innerHTML = `${state.scorersHome.length} : ${state.scorersAway.length}`;
-    document.getElementById('adm-stato').innerHTML = state.status === 'Live' ? '🔴 LIVE' : (state.status === 'Finita' ? '🏁 FINITA' : '⚪ IN PROGRAMMA');
+    mlbl.textContent = `${state.homeName} VS ${state.awayName}`;
+    score.textContent = `${state.scorersHome.length} : ${state.scorersAway.length}`;
+    stato.textContent = state.status === 'Live' ? '🔴 LIVE' : (state.status === 'Finita' ? '🏁 FINITA' : '⚪ IN PROGRAMMA');
     
     const statusSelect = document.getElementById('adm-status');
     for (let i = 0; i < statusSelect.options.length; i++) {
@@ -202,9 +202,8 @@
         break;
       }
     }
-    // Aggiorna i bottoni squadra con i nomi reali
-    document.getElementById('btn-h').innerHTML = `🏠 ${state.homeName}`;
-    document.getElementById('btn-a').innerHTML = `✈️ ${state.awayName}`;
+    document.getElementById('btn-h').textContent = `🏠 ${state.homeName}`;
+    document.getElementById('btn-a').textContent = `✈️ ${state.awayName}`;
   }
 
   function populateAdminSelect() {
@@ -214,7 +213,6 @@
       sel.innerHTML = '<option value="">— Nessuna partita —</option>';
       return;
     }
-    // Ordina per numero estratto dall'ID (m1, m2, ..., m60)
     matchesArray.sort((a, b) => extractMatchNumber(a.id) - extractMatchNumber(b.id));
     
     sel.innerHTML = '<option value="">— Seleziona partita —</option>';
@@ -227,7 +225,6 @@
     if (selMatchId) sel.value = selMatchId;
   }
 
-  // Listener per i match fissi
   function startMatchesListener() {
     if (!db) return;
     const matchesRef = ref(db, 'matches');
@@ -237,7 +234,6 @@
       if (selMatchId && matchesData[selMatchId]) {
         updateAdminPreview();
       } else if (Object.keys(matchesData).length > 0 && !selMatchId) {
-        // Seleziona automaticamente il primo match in ordine (m1)
         const sortedIds = Object.keys(matchesData).sort((a,b) => extractMatchNumber(a) - extractMatchNumber(b));
         const firstId = sortedIds[0];
         document.getElementById('adm-match').value = firstId;
@@ -250,7 +246,6 @@
     });
   }
 
-  // Listener per i risultati live
   function startResultsListener() {
     if (!db) return;
     const resultsRef = ref(db, 'liveResults');
@@ -262,7 +257,6 @@
     });
   }
 
-  // Eventi UI
   window.onMatchChange = function() {
     selMatchId = document.getElementById('adm-match').value;
     updateAdminPreview();
@@ -379,14 +373,12 @@
       home: { name: homeName, emoji: '⚽' },
       away: { name: awayName, emoji: '⚽' },
       round: 'Fase a Gironi',
-      group: '' // opzionale
+      group: ''
     };
     const matchRef = ref(db, `matches/${id}`);
     await set(matchRef, newMatch);
-    // Inizializza anche i risultati vuoti
     await writeResult(id, { scorersHome: [], scorersAway: [], status: 'In programma' });
     showToast(`Partita ${id} creata`, 'ok');
-    // pulisci form
     document.getElementById('newMatchId').value = '';
     document.getElementById('newMatchDate').value = '';
     document.getElementById('newMatchTime').value = '';
@@ -394,7 +386,6 @@
     document.getElementById('newAwayName').value = '';
   };
 
-  // Auth e init
   onAuthStateChanged(auth, (user) => {
     if (!user) {
       window.location.href = 'admin.html';
@@ -405,7 +396,6 @@
     setConnected(true);
     startMatchesListener();
     startResultsListener();
-    // Collega i bottoni
     document.getElementById('addGoalBtn').onclick = () => window.addGoal();
     document.getElementById('undoGoalBtn').onclick = () => window.undoGoal();
     document.getElementById('resetMatchBtn').onclick = () => window.resetMatch();

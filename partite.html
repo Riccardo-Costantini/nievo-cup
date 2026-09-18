@@ -3,20 +3,8 @@
 <head>
   <meta charset="UTF-8"/>
 
-  <!-- Consent Mode v2: default DENIED prima di tutto -->
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){ dataLayer.push(arguments); }
-  window.gtag = gtag;
-  gtag('consent', 'default', {
-    analytics_storage: 'denied',
-    ad_storage: 'denied',
-    ad_user_data: 'denied',
-    ad_personalization: 'denied',
-    wait_for_update: 500
-  });
-  window.__nievoConsentDefaultSet = true;
-</script>
+  <!-- Consent Mode v2: default DENIED, centralizzato in consent-default.js -->
+  <script src="assets/js/consent-default.js"></script>
 
 <!-- Cookie banner: carica GA4 solo se l'utente acconsente -->
 <script src="assets/js/cookie-banner.js" defer></script>
@@ -25,6 +13,13 @@
   <meta name="theme-color" content="#000000">
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b0f17">
   <title>Nievo Cup – Partite Live</title>
+  <meta name="description" content="Segui in tempo reale le partite della Nievo Cup: risultati live, marcatori e calendario del torneo di calcio a 7 di Verona." />
+  <link rel="canonical" href="https://nievocup.it/partite.html" />
+  <meta property="og:title" content="Nievo Cup – Partite Live" />
+  <meta property="og:description" content="Risultati live, marcatori e calendario della Nievo Cup." />
+  <meta property="og:image" content="https://nievocup.it/assets/images/loghi/Nievo_cup_black.png" />
+  <meta property="og:url" content="https://nievocup.it/partite.html" />
+  <meta property="og:type" content="website" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=Exo+2:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
@@ -330,6 +325,5 @@ function renderCalendar() {
   });
 </script>
 <custom-footer></custom-footer>
-<script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
