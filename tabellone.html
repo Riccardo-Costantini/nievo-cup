@@ -598,21 +598,29 @@
     FIREBASE + LOGICA BRACKET (SENZA PLACEHOLDER CON NOMI)
     ============================================================ -->
     <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-        import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+    import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+    import { initializeAppCheck, ReCaptchaEnterpriseProvider } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check.js';
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyB0LUxAWKVUIhXYRb2T2JOT3ypiX9q_5Ck",
-            authDomain: "nievo-fcc94.firebaseapp.com",
-            databaseURL: "https://nievo-fcc94-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "nievo-fcc94",
-            storageBucket: "nievo-fcc94.firebasestorage.app",
-            messagingSenderId: "497831212426",
-            appId: "1:497831212426:web:357e8c37b249042c53c473",
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyB0LUxAWKVUIhXYRb2T2JOT3ypiX9q_5Ck",
+        authDomain: "nievo-fcc94.firebaseapp.com",
+        databaseURL: "https://nievo-fcc94-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "nievo-fcc94",
+        storageBucket: "nievo-fcc94.firebasestorage.app",
+        messagingSenderId: "497831212426",
+        appId: "1:497831212426:web:357e8c37b249042c53c473",
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+    const app = initializeApp(firebaseConfig);
+
+    // ✅ APP CHECK
+    initializeAppCheck(app, {
+    provider: new ReCaptchaEnterpriseProvider('6Lcmi8ItAAAAAHFg2w0o1BdFJXraGqGQ5KZVLT_d'),
+    isTokenAutoRefreshEnabled: true
+    });
+
+    const db = getDatabase(app);
 
         // ---- UTILITY ----
         function toArray(val) {

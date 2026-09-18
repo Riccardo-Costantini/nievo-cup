@@ -1,7 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+// 👇 NUOVO IMPORT
+import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check.js";
 
-// 🔧 INCOLLA QUI IL TUO CONFIG FIREBASE
 const firebaseConfig = {
     apiKey: "AIzaSyB0LUxAWKVUIhXYRb2T2JOT3ypiX9q_5Ck",
     authDomain: "nievo-fcc94.firebaseapp.com",
@@ -11,9 +12,16 @@ const firebaseConfig = {
     messagingSenderId: "497831212426",
     appId: "1:497831212426:web:357e8c37b249042c53c473",
     measurementId: "G-ZERXCC9LH8"
-  };
+};
 
 const app = initializeApp(firebaseConfig);
+
+// ✅ APP CHECK — PRIMA di getAuth
+initializeAppCheck(app, {
+  provider: new ReCaptchaEnterpriseProvider('6Lcmi8ItAAAAAHFg2w0o1BdFJXraGqGQ5KZVLT_d'),
+  isTokenAutoRefreshEnabled: true
+});
+
 const auth = getAuth(app);
 
 // Messaggi generici: non distinguiamo "utente inesistente" da "password errata"

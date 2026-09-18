@@ -108,6 +108,7 @@
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
   import { getDatabase, ref, onValue, set } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
   import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+  import { initializeAppCheck, ReCaptchaEnterpriseProvider } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check.js';
 
   const firebaseConfig = {
     apiKey: "AIzaSyB0LUxAWKVUIhXYRb2T2JOT3ypiX9q_5Ck",
@@ -120,6 +121,13 @@
   };
 
   const app = initializeApp(firebaseConfig);
+
+  // ✅ APP CHECK — prima di getAuth e getDatabase
+  initializeAppCheck(app, {
+    provider: new ReCaptchaEnterpriseProvider('6Lcmi8ItAAAAAHFg2w0o1BdFJXraGqGQ5KZVLT_d'),
+    isTokenAutoRefreshEnabled: true
+  });
+
   const auth = getAuth(app);
   let db = null;
   let matchesData = {};
