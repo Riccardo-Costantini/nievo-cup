@@ -386,26 +386,48 @@
     document.getElementById('newAwayName').value = '';
   };
 
-  onAuthStateChanged(auth, (user) => {
-    if (!user) {
+// ✅ Whitelist email admin (deve corrispondere alle regole Firebase)
+const ADMIN_EMAILS = [
+  'riccardo.costantini.eu@gmail.com',
+  'admin@gmail.com'
+];
+
+onAuthStateChanged(auth, (user) => {
+  if (!user) {
+    window.location.href = 'admin.html';
+    return;
+  }
+
+  // 🚫 Blocco accesso a utenti autenticati ma non autorizzati
+  if (!ADMIN_EMAILS.includes(user.email)) {
+    console.warn('Accesso negato: utente non autorizzato →', user.email);
+    // Chiude la sessione e reindirizza al login
+    auth.signOut().finally(() => {
       window.location.href = 'admin.html';
-      return;
-    }
-    console.log('Admin autenticato:', user.email);
-    db = getDatabase(app);
-    setConnected(true);
-    startMatchesListener();
-    startResultsListener();
-    document.getElementById('addGoalBtn').onclick = () => window.addGoal();
-    document.getElementById('undoGoalBtn').onclick = () => window.undoGoal();
-    document.getElementById('resetMatchBtn').onclick = () => window.resetMatch();
-    document.getElementById('adm-status').onchange = () => window.saveStatus();
-    document.getElementById('adm-match').onchange = () => window.onMatchChange();
-    document.getElementById('btn-h').onclick = () => window.pickTeam('home');
-    document.getElementById('btn-a').onclick = () => window.pickTeam('away');
-    document.getElementById('createMatchBtn').onclick = () => window.createMatch();
-    showToast('🔥 Connesso a Firebase', 'ok');
-  });
+    });
+    return;
+  }
+
+  console.log('Admin autenticato:', user.email);
+
+  // 🔐 Sessione attiva: inizializza il resto
+  db = getDatabase(app);
+  setConnected(true);
+  startMatchesListener();
+  startResultsListener();
+
+  // Binding dei pulsanti
+  document.getElementById('addGoalBtn').onclick = () => window.addGoal();
+  document.getElementById('undoGoalBtn').onclick = () => window.undoGoal();
+  document.getElementById('resetMatchBtn').onclick = () => window.resetMatch();
+  document.getElementById('adm-status').onchange = () => window.saveStatus();
+  document.getElementById('adm-match').onchange = () => window.onMatchChange();
+  document.getElementById('btn-h').onclick = () => window.pickTeam('home');
+  document.getElementById('btn-a').onclick = () => window.pickTeam('away');
+  document.getElementById('createMatchBtn').onclick = () => window.createMatch();
+
+  showToast('🔥 Connesso a Firebase', 'ok');
+});
 </script>
 </body>
 </html>
