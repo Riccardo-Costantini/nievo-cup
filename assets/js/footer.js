@@ -57,10 +57,10 @@
     var style = document.createElement('style');
     style.id = STYLE_ID;
     style.textContent =
-      '.nievo-footer{display:block;position:relative;z-index:5;margin-top:4rem;' +
-      'background:black;' +
+      '.nievo-footer{position:relative;z-index:5;margin-top:4rem;' +
+      'background:linear-gradient(180deg,rgba(8,12,22,.72) 0%,rgba(8,12,22,.97) 100%);' +
       'backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);' +
-      'border-top:2px solid #feda00;' +
+      'border-top:1px solid rgba(254,218,0,.25);' +
       'font-family:"Rajdhani","Rubik",Arial,sans-serif;color:#cbd5e1;}' +
 
       '.nievo-footer .nf-inner{max-width:1400px;margin:0 auto;padding:2.6rem 1.5rem 1.4rem;' +
