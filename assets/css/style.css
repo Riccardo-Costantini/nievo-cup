@@ -294,7 +294,7 @@ body {
 /* =====================================================
    INDEX – INFO
    ===================================================== */
-#info{
+.info{
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -972,11 +972,11 @@ footer {
   #hero h3{
     font-size: 7vw;
   }
-    #info{
+    .info{
         width: 80%;
         height: 75dvh;
     }
-#info p{
+.info p{
     font-size: 3.5vw;
     font-family: "Montserrat", sans-serif;
     font-optical-sizing: auto;
