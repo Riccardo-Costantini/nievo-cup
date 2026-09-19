@@ -15,7 +15,7 @@
 
 <div id="bg-fx" aria-hidden="true"></div>
 
-<div class="wrap-admin">
+<div class="wrap-admin" style="visibility:hidden">
   <header class="admin-hdr-bar">
     <div class="brand">
       <div class="brand-logo-admin">⚽</div>
@@ -79,7 +79,7 @@
 
     <div class="fg">
       <label class="fl" for="scorer-in">👤 NOME MARCATORE</label>
-      <input type="text" id="scorer-in" placeholder="Es. M. Rossi, Autogol" autocomplete="off" />
+      <input type="text" id="scorer-in" placeholder="Es. M. Rossi, Autogol" autocomplete="off" maxlength="40" />
     </div>
 
     <button class="btn btn-primary" id="addGoalBtn">⚽ AGGIUNGI GOAL</button>
@@ -91,12 +91,15 @@
 
     <hr class="div" />
     <div class="adm-sub adm-sub-create">➕ CREA NUOVA PARTITA</div>
-    <div class="fg"><input type="text" id="newMatchId" placeholder="ID (es. m61)" /></div>
+    <div class="fg"><input type="text" id="newMatchId" placeholder="ID (es. m61)" maxlength="4" autocomplete="off" /></div>
     <div class="fg"><input type="date" id="newMatchDate" /></div>
-    <div class="fg"><input type="text" id="newMatchTime" placeholder="Orario (es. 20:10)" /></div>
-    <div class="fg"><input type="text" id="newHomeName" placeholder="Squadra casa" /></div>
-    <div class="fg"><input type="text" id="newAwayName" placeholder="Squadra trasferta" /></div>
+    <div class="fg"><input type="text" id="newMatchTime" placeholder="Orario (es. 20:10)" maxlength="5" autocomplete="off" /></div>
+    <div class="fg"><input type="text" id="newHomeName" placeholder="Squadra casa" maxlength="40" autocomplete="off" /></div>
+    <div class="fg"><input type="text" id="newAwayName" placeholder="Squadra trasferta" maxlength="40" autocomplete="off" /></div>
     <button class="btn btn-primary" id="createMatchBtn">➕ CREA</button>
+
+    <hr class="div" />
+    <button class="btn btn-amber" id="logoutBtn">🚪 ESCI (LOGOUT)</button>
   </div>
 
   <footer class="admin-footer">Nievo Cup · Pannello Amministrazione · Firebase Realtime DB</footer>
@@ -106,8 +109,8 @@
 
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-  import { getDatabase, ref, onValue, set } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
-  import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+  import { getDatabase, ref, onValue, set, runTransaction } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+  import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
   const firebaseConfig = {
     apiKey: "AIzaSyB0LUxAWKVUIhXYRb2T2JOT3ypiX9q_5Ck",
@@ -156,6 +159,39 @@
     if (!db) throw new Error('DB non connesso');
     const resultRef = ref(db, `liveResults/${matchId}`);
     await set(resultRef, { ...data, updatedAt: Date.now() });
+  }
+
+  // Rimuove caratteri di controllo e < >, limita la lunghezza
+  const clean = (v, max) => String(v === null || v === undefined ? '' : v).replace(/[\u0000-\u001F\u007F<>]/g, '').trim().slice(0, max);
+
+  // Aggiornamento atomico: legge il valore piu' recente dal server e applica la modifica,
+  // cosi' due operatori contemporanei non si sovrascrivono i gol a vicenda.
+  async function updateResult(matchId, mutator) {
+    if (!db) throw new Error('DB non connesso');
+    return runTransaction(ref(db, `liveResults/${matchId}`), (current) => {
+      const base = (current && typeof current === 'object') ? current : {};
+      const next = mutator({
+        scorersHome: toArray(base.scorersHome),
+        scorersAway: toArray(base.scorersAway),
+        status: base.status || 'In programma'
+      });
+      if (!next) return; // annulla la transazione
+      return { ...next, updatedAt: Date.now() };
+    });
+  }
+
+  function reportError(err) {
+    console.error(err);
+    const denied = (err && err.code === 'PERMISSION_DENIED') || /permission_denied/i.test(String(err && err.message));
+    showToast(denied ? 'Permesso negato: scrittura non autorizzata' : 'Errore di salvataggio, riprova', 'err');
+  }
+
+  // Evita doppi invii (es. doppio tap su "Aggiungi goal")
+  let busy = false;
+  async function runExclusive(fn) {
+    if (busy) return;
+    busy = true;
+    try { await fn(); } catch (err) { reportError(err); } finally { busy = false; }
   }
 
   function setConnected(on) {
@@ -278,91 +314,76 @@
 
   window.addGoal = async function() {
     if (!selMatchId) { showToast('Seleziona una partita', 'err'); return; }
-    const scorer = document.getElementById('scorer-in').value.trim();
+    const scorer = clean(document.getElementById('scorer-in').value, 40);
     if (!scorer) { showToast('Inserisci il nome del marcatore', 'err'); return; }
-    
-    const state = getCombinedState(selMatchId);
-    const scorersHome = [...state.scorersHome];
-    const scorersAway = [...state.scorersAway];
-    let newStatus = state.status;
-    
-    if (selTeam === 'home') {
-      scorersHome.push(scorer);
-    } else {
-      scorersAway.push(scorer);
-    }
-    
-    if (newStatus === 'In programma' && (scorersHome.length + scorersAway.length) === 1) {
-      newStatus = 'Live';
-    }
-    
-    await writeResult(selMatchId, {
-      scorersHome: scorersHome,
-      scorersAway: scorersAway,
-      status: newStatus
+    const team = selTeam;
+    return runExclusive(async () => {
+      await updateResult(selMatchId, (s) => {
+        const home = [...s.scorersHome];
+        const away = [...s.scorersAway];
+        (team === 'home' ? home : away).push(scorer);
+        let status = s.status;
+        if (status === 'In programma' && (home.length + away.length) === 1) status = 'Live';
+        return { scorersHome: home, scorersAway: away, status };
+      });
+      showToast(`⚽ Goal di ${scorer} aggiunto`, 'ok');
+      document.getElementById('scorer-in').value = '';
+      document.getElementById('scorer-in').focus();
     });
-    showToast(`⚽ Goal di ${scorer} aggiunto`, 'ok');
-    document.getElementById('scorer-in').value = '';
-    document.getElementById('scorer-in').focus();
   };
 
   window.undoGoal = async function() {
     if (!selMatchId) { showToast('Seleziona una partita', 'err'); return; }
-    const state = getCombinedState(selMatchId);
-    const scorersHome = [...state.scorersHome];
-    const scorersAway = [...state.scorersAway];
-    let removed = '';
-    
-    if (selTeam === 'home' && scorersHome.length > 0) {
-      removed = scorersHome.pop();
-    } else if (selTeam === 'away' && scorersAway.length > 0) {
-      removed = scorersAway.pop();
-    } else {
-      showToast('Nessun goal da annullare per questa squadra', 'err');
-      return;
-    }
-    
-    await writeResult(selMatchId, {
-      scorersHome: scorersHome,
-      scorersAway: scorersAway,
-      status: state.status
+    const team = selTeam;
+    return runExclusive(async () => {
+      let removed = '';
+      const tx = await updateResult(selMatchId, (s) => {
+        removed = '';
+        const home = [...s.scorersHome];
+        const away = [...s.scorersAway];
+        const list = team === 'home' ? home : away;
+        if (list.length === 0) return; // niente da annullare
+        removed = list.pop();
+        return { scorersHome: home, scorersAway: away, status: s.status };
+      });
+      if (!tx.committed) { showToast('Nessun goal da annullare per questa squadra', 'err'); return; }
+      showToast(`↩️ Annullato goal di ${removed}`, 'inf');
     });
-    showToast(`↩️ Annullato goal di ${removed}`, 'inf');
   };
 
   window.saveStatus = async function() {
     if (!selMatchId) { showToast('Seleziona una partita', 'err'); return; }
     const newStatus = document.getElementById('adm-status').value;
-    const state = getCombinedState(selMatchId);
-    await writeResult(selMatchId, {
-      scorersHome: state.scorersHome,
-      scorersAway: state.scorersAway,
-      status: newStatus
+    if (!['In programma', 'Live', 'Finita'].includes(newStatus)) return;
+    return runExclusive(async () => {
+      await updateResult(selMatchId, (s) => ({ scorersHome: s.scorersHome, scorersAway: s.scorersAway, status: newStatus }));
+      showToast(`Stato cambiato in ${newStatus}`, 'ok');
     });
-    showToast(`Stato cambiato in ${newStatus}`, 'ok');
   };
 
   window.resetMatch = async function() {
     if (!selMatchId) { showToast('Seleziona una partita', 'err'); return; }
     if (!confirm('Resettare la partita cancellerà tutti i goal. Continuare?')) return;
-    await writeResult(selMatchId, {
-      scorersHome: [],
-      scorersAway: [],
-      status: 'In programma'
+    const id = selMatchId;
+    return runExclusive(async () => {
+      await writeResult(id, { scorersHome: [], scorersAway: [], status: 'In programma' });
+      showToast('Partita resettata', 'inf');
     });
-    showToast('Partita resettata', 'inf');
   };
 
   window.createMatch = async function() {
-    const id = document.getElementById('newMatchId').value.trim();
+    const id = document.getElementById('newMatchId').value.trim().toLowerCase();
     const date = document.getElementById('newMatchDate').value;
     const time = document.getElementById('newMatchTime').value.trim();
-    const homeName = document.getElementById('newHomeName').value.trim();
-    const awayName = document.getElementById('newAwayName').value.trim();
+    const homeName = clean(document.getElementById('newHomeName').value, 40);
+    const awayName = clean(document.getElementById('newAwayName').value, 40);
     if (!id || !date || !time || !homeName || !awayName) {
       showToast('Compila tutti i campi', 'err');
       return;
     }
+    if (!/^m\d{1,3}$/.test(id)) { showToast('ID non valido: usa "m" + numero (es. m61)', 'err'); return; }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { showToast('Data non valida', 'err'); return; }
+    if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) { showToast('Orario non valido: usa HH:MM (es. 20:10)', 'err'); return; }
     if (matchesData[id]) {
       showToast(`Esiste già una partita con ID ${id}`, 'err');
       return;
@@ -376,24 +397,28 @@
       round: 'Fase a Gironi',
       group: ''
     };
-    const matchRef = ref(db, `matches/${id}`);
-    await set(matchRef, newMatch);
-    await writeResult(id, { scorersHome: [], scorersAway: [], status: 'In programma' });
-    showToast(`Partita ${id} creata`, 'ok');
-    document.getElementById('newMatchId').value = '';
-    document.getElementById('newMatchDate').value = '';
-    document.getElementById('newMatchTime').value = '';
-    document.getElementById('newHomeName').value = '';
-    document.getElementById('newAwayName').value = '';
+    return runExclusive(async () => {
+      await set(ref(db, `matches/${id}`), newMatch);
+      await writeResult(id, { scorersHome: [], scorersAway: [], status: 'In programma' });
+      showToast(`Partita ${id} creata`, 'ok');
+      document.getElementById('newMatchId').value = '';
+      document.getElementById('newMatchDate').value = '';
+      document.getElementById('newMatchTime').value = '';
+      document.getElementById('newHomeName').value = '';
+      document.getElementById('newAwayName').value = '';
+    });
   };
 
+  let started = false;
   onAuthStateChanged(auth, (user) => {
     if (!user) {
-      window.location.href = 'admin.html';
+      window.location.replace('admin.html');
       return;
     }
-    console.log('Admin autenticato:', user.email);
+    if (started) return;
+    started = true;
     db = getDatabase(app);
+    document.querySelector('.wrap-admin').style.visibility = 'visible';
     setConnected(true);
     startMatchesListener();
     startResultsListener();
@@ -405,6 +430,10 @@
     document.getElementById('btn-h').onclick = () => window.pickTeam('home');
     document.getElementById('btn-a').onclick = () => window.pickTeam('away');
     document.getElementById('createMatchBtn').onclick = () => window.createMatch();
+    document.getElementById('logoutBtn').onclick = async () => {
+      try { await signOut(auth); } catch (e) { console.error(e); }
+      window.location.replace('admin.html');
+    };
     showToast('🔥 Connesso a Firebase', 'ok');
   });
 </script>

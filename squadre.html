@@ -711,7 +711,7 @@
   <!-- FIREBASE + LOGIC -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-    import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+    import { getDatabase, ref, onValue, goOffline, goOnline } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
     const firebaseConfig = {
       apiKey: "AIzaSyB0LUxAWKVUIhXYRb2T2JOT3ypiX9q_5Ck",
@@ -734,7 +734,7 @@
     /* ── NORMALISATION ── */
     function normalize(name) {
       if (!name) return '';
-      return name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, '');
+      return String(name).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, '');
     }
 
     const GROUPS_MAP = {
@@ -792,7 +792,7 @@
 
       for (const matchId in matchesData) {
         const match = matchesData[matchId];
-        if (!match.home?.name || !match.away?.name) continue;
+        if (!match || typeof match !== 'object' || !match.home?.name || !match.away?.name) continue;
         const hR = resolveTeam(match.home.name);
         const aR = resolveTeam(match.away.name);
         if (!hR || !aR) continue;
@@ -826,7 +826,7 @@
 
         const today = new Date().toISOString().slice(0,10);
         if (match.date && match.date >= today && status !== 'Finita') {
-          const upcomingObj = { date: match.date, time: match.time, homeTeam: match.home.name, awayTeam: match.away.name, status, hg, ag };
+          const upcomingObj = { date: String(match.date), time: (match.time === null || match.time === undefined) ? '' : String(match.time), homeTeam: match.home.name, awayTeam: match.away.name, status, hg, ag };
           const hs = map.get(hR.canonicalName);
           const as_ = map.get(aR.canonicalName);
           if (hs) hs.upcomingMatches.push(upcomingObj);
@@ -845,8 +845,8 @@
 
     /* ── HTML HELPERS ── */
     function esc(s) {
-      if (!s) return '';
-      return s.replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+      if (s === null || s === undefined) return '';
+      return String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
     }
 
     function fmtDate(ds) {
@@ -916,9 +916,9 @@
             for (const m of upcoming3) {
               const opponent = normalize(m.homeTeam) === normalize(team.name) ? m.awayTeam : m.homeTeam;
               const isLive = m.status === 'Live';
-              const scoreStr = isLive ? `${m.hg}:${m.ag}` : (m.status === 'Finita' ? `${m.hg}:${m.ag}` : m.time || '--:--');
+              const scoreStr = isLive ? `${m.hg}:${m.ag}` : (m.status === 'Finita' ? `${m.hg}:${m.ag}` : esc(m.time || '--:--'));
               const statusClass = isLive ? 'live' : 'scheduled';
-              const statusLabel = isLive ? `${m.hg}:${m.ag}` : (m.status === 'Finita' ? `${m.hg}:${m.ag}` : (m.time || '--:--'));
+              const statusLabel = isLive ? `${m.hg}:${m.ag}` : (m.status === 'Finita' ? `${m.hg}:${m.ag}` : esc(m.time || '--:--'));
               upcomingHtml += `
                 <div class="tc-match">
                   <div class="tc-match-date">${fmtDate(m.date)}</div>
@@ -1036,7 +1036,22 @@
       resultsLoaded = true;
       checkRender();
     }, err => { console.error(err); resultsLoaded = true; checkRender(); });
-  </script>
+  
+  // Risparmio connessioni: dopo 60s in background chiude la connessione realtime
+  // (utile con il limite di connessioni simultanee del piano Firebase).
+  // Al ritorno in primo piano si riconnette e i listener si riallineano da soli.
+  (function () {
+    let offTimer = null;
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) {
+        offTimer = setTimeout(function () { goOffline(db); }, 60000);
+      } else {
+        clearTimeout(offTimer);
+        goOnline(db);
+      }
+    });
+  })();
+</script>
 <custom-footer></custom-footer>
 </body>
 </html>

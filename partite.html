@@ -49,7 +49,7 @@
 
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-  import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+  import { getDatabase, ref, onValue, goOffline, goOnline } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
   const firebaseConfig = {
     apiKey: "AIzaSyB0LUxAWKVUIhXYRb2T2JOT3ypiX9q_5Ck",
@@ -72,7 +72,7 @@
   // Mappa nomi squadre -> file png
   function getLogoUrl(teamName) {
     if (!teamName) return '';
-    let slug = teamName.toLowerCase()
+    let slug = String(teamName).toLowerCase()
       .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
       .replace(/[^a-z0-9]+/g, '_')
       .replace(/^_|_$/g, '');
@@ -99,8 +99,29 @@
   }
 
   function esc(s) {
-    if (!s) return '';
-    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    if (s === null || s === undefined) return '';
+    return String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+  }
+
+  // Normalizza i dati letti dal DB: scarta record non validi e forza i campi a stringa,
+  // cosi' un record malformato non puo' bloccare l'intero calendario.
+  function sanitizeMatches(raw) {
+    const out = {};
+    if (!raw || typeof raw !== 'object') return out;
+    for (const [key, m] of Object.entries(raw)) {
+      if (!m || typeof m !== 'object') continue;
+      const str = v => (v === null || v === undefined) ? '' : String(v);
+      out[key] = {
+        ...m,
+        id: str(m.id !== undefined && m.id !== null ? m.id : key),
+        date: str(m.date),
+        time: str(m.time),
+        round: str(m.round),
+        home: { ...(typeof m.home === 'object' && m.home ? m.home : {}), name: str(m.home && m.home.name) },
+        away: { ...(typeof m.away === 'object' && m.away ? m.away : {}), name: str(m.away && m.away.name) }
+      };
+    }
+    return out;
   }
 
   function fmtDate(dateStr) {
@@ -168,7 +189,7 @@ function renderCalendar() {
     const round = getPhaseLabel(firstMatchId) || sortedMatches[0]?.round || '';
 
     // Intestazione del giorno
-    html += `<div class="day-group" id="day-${date}"><div class="day-hdr">📅 ${fmtDate(date)} &nbsp;·&nbsp; ${esc(round)}</div>`;
+    html += `<div class="day-group" id="day-${esc(date)}"><div class="day-hdr">📅 ${fmtDate(date)} &nbsp;·&nbsp; ${esc(round)}</div>`;
 
     let currentPhase = null;
     for (const match of sortedMatches) {
@@ -203,33 +224,33 @@ function renderCalendar() {
         : '<div class="sc-empty">—</div>';
 
       html += `
-        <div class="match-card${cls}" id="match-${match.id}" data-match-id="${match.id}">
+        <div class="match-card${cls}" id="match-${esc(match.id)}" data-match-id="${esc(match.id)}">
           <div class="card-top">
             <div class="match-meta">
               <span>⏱ ${esc(match.time || '--:--')}</span>
               <span class="meta-dot">·</span>
-              <span>${esc(match.id?.toUpperCase() || '?')}</span>
+              <span>${esc(String(match.id || '?').toUpperCase())}</span>
             </div>
-            <div id="badge-${match.id}">${badgeHtml}</div>
+            <div id="badge-${esc(match.id)}">${badgeHtml}</div>
           </div>
           <div class="score-row">
             <div class="team-blk">
-              <img class="team-logo" src="${getLogoUrl(match.home?.name)}" alt="${esc(match.home?.name)}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling?.style?.setProperty('display', 'block');" />
+              <img class="team-logo" src="${esc(getLogoUrl(match.home?.name))}" alt="${esc(match.home?.name)}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling?.style?.setProperty('display', 'block');" />
               <div class="t-name">${esc(match.home?.name || 'Casa')}</div>
             </div>
             <div class="score-ctr">
-              <span class="score-n" id="home-score-${match.id}">${scorersHome.length}</span>
+              <span class="score-n" id="home-score-${esc(match.id)}">${scorersHome.length}</span>
               <span class="score-sep">:</span>
-              <span class="score-n" id="away-score-${match.id}">${scorersAway.length}</span>
+              <span class="score-n" id="away-score-${esc(match.id)}">${scorersAway.length}</span>
             </div>
             <div class="team-blk away">
-              <img class="team-logo" src="${getLogoUrl(match.away?.name)}" alt="${esc(match.away?.name)}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling?.style?.setProperty('display', 'block');" />
+              <img class="team-logo" src="${esc(getLogoUrl(match.away?.name))}" alt="${esc(match.away?.name)}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling?.style?.setProperty('display', 'block');" />
               <div class="t-name">${esc(match.away?.name || 'Trasferta')}</div>
             </div>
           </div>
           <div class="scorers-wrap">
-            <div class="sc-col" id="home-scorers-${match.id}">${hList}</div>
-            <div class="sc-col right" id="away-scorers-${match.id}">${aList}</div>
+            <div class="sc-col" id="home-scorers-${esc(match.id)}">${hList}</div>
+            <div class="sc-col right" id="away-scorers-${esc(match.id)}">${aList}</div>
           </div>
         </div>
       `;
@@ -306,7 +327,7 @@ function renderCalendar() {
 
   // Listener match fissi (crea il calendario una sola volta)
   onValue(ref(db, 'matches'), (snapshot) => {
-    matchesData = snapshot.val() || {};
+    matchesData = sanitizeMatches(snapshot.val());
     if (!calendarBuilt) {
       renderCalendar();
       calendarBuilt = true;
@@ -324,6 +345,21 @@ function renderCalendar() {
   }, (error) => {
     console.error('Errore lettura liveResults:', error);
   });
+
+  // Risparmio connessioni: dopo 60s in background chiude la connessione realtime
+  // (utile con il limite di connessioni simultanee del piano Firebase).
+  // Al ritorno in primo piano si riconnette e i listener si riallineano da soli.
+  (function () {
+    let offTimer = null;
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) {
+        offTimer = setTimeout(function () { goOffline(db); }, 60000);
+      } else {
+        clearTimeout(offTimer);
+        goOnline(db);
+      }
+    });
+  })();
 </script>
 <custom-footer></custom-footer>
 </body>

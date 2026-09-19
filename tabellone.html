@@ -599,7 +599,7 @@
     ============================================================ -->
     <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-    import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+    import { getDatabase, ref, onValue, goOffline, goOnline } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
     const firebaseConfig = {
         apiKey: "AIzaSyB0LUxAWKVUIhXYRb2T2JOT3ypiX9q_5Ck",
@@ -624,13 +624,13 @@
         }
 
         function esc(s) {
-            if (!s) return '';
-            return s.replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' } [m] || m));
+          if (s === null || s === undefined) return '';
+          return String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
         }
 
         function getLogoUrl(teamName) {
             if (!teamName) return '';
-            let slug = teamName.toLowerCase()
+            let slug = String(teamName).toLowerCase()
                 .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
                 .replace(/[^a-z0-9]+/g, '_')
                 .replace(/^_|_$/g, '');
@@ -680,18 +680,18 @@
         // ---- FUNZIONI ----
         function buildRealMatch(id, visualOverride, label) {
             const m = matchesData[id];
-            if (!m) return null;
+            if (!m || typeof m !== 'object') return null;
 
             const vis = visualOverride || {};
-            const homeName = vis.home || m.home?.name || 'TBD';
-            const awayName = vis.away || m.away?.name || 'TBD';
+            const homeName = String(vis.home || m.home?.name || 'TBD');
+            const awayName = String(vis.away || m.away?.name || 'TBD');
 
             const r = liveResultsData[id] || {};
             const sh = toArray(r.scorersHome);
             const sa = toArray(r.scorersAway);
             const status = r.status || 'In programma';
 
-            const fbHomeName = m.home?.name || '';
+            const fbHomeName = String(m.home?.name || '');
             const visualMatchesFb = homeName.toLowerCase() === fbHomeName.toLowerCase();
             const homeGoals = visualMatchesFb ? sh.length : sa.length;
             const awayGoals = visualMatchesFb ? sa.length : sh.length;
@@ -800,14 +800,14 @@
                         <img class="b-logo" src="${!homeIsTBD ? getLogoUrl(homeDisplay) : ''}" alt="${esc(homeDisplay)}" loading="lazy" onerror="this.style.display='none'" />
                         <span class="b-name ${homeIsTBD ? 'tbd' : ''}">${esc(homeDisplay)}</span>
                     </div>
-                    <span class="b-match-score ${!showScore ? 'empty' : ''}">${showScore ? homeScore : ''}</span>
+                    <span class="b-match-score ${!showScore ? 'empty' : ''}">${showScore ? esc(homeScore) : ''}</span>
                 </div>
                 <div class="b-match-row">
                     <div class="b-match-team">
                         <img class="b-logo" src="${!awayIsTBD ? getLogoUrl(awayDisplay) : ''}" alt="${esc(awayDisplay)}" loading="lazy" onerror="this.style.display='none'" />
                         <span class="b-name ${awayIsTBD ? 'tbd' : ''}">${esc(awayDisplay)}</span>
                     </div>
-                    <span class="b-match-score ${!showScore ? 'empty' : ''}">${showScore ? awayScore : ''}</span>
+                    <span class="b-match-score ${!showScore ? 'empty' : ''}">${showScore ? esc(awayScore) : ''}</span>
                 </div>
             `;
             return div;
@@ -849,12 +849,12 @@
                     <div class="final-team">
                         <img class="f-logo" src="${!homeIsTBD ? getLogoUrl(homeDisplay) : ''}" alt="${esc(homeDisplay)}" loading="lazy" onerror="this.style.display='none'" />
                         <span class="f-name ${homeIsTBD ? 'tbd' : ''}">${esc(homeDisplay)}</span>
-                        <span class="final-score ${!showScore ? 'empty' : ''}">${showScore ? homeScore : ''}</span>
+                        <span class="final-score ${!showScore ? 'empty' : ''}">${showScore ? esc(homeScore) : ''}</span>
                     </div>
                     <div class="final-team">
                         <img class="f-logo" src="${!awayIsTBD ? getLogoUrl(awayDisplay) : ''}" alt="${esc(awayDisplay)}" loading="lazy" onerror="this.style.display='none'" />
                         <span class="f-name ${awayIsTBD ? 'tbd' : ''}">${esc(awayDisplay)}</span>
-                        <span class="final-score ${!showScore ? 'empty' : ''}">${showScore ? awayScore : ''}</span>
+                        <span class="final-score ${!showScore ? 'empty' : ''}">${showScore ? esc(awayScore) : ''}</span>
                     </div>
                 </div>
             `;
@@ -936,7 +936,22 @@
         });
 
         console.log('🏆 Tabellone Nievo Cup – sincronizzato con i risultati reali (matches + liveResults)');
-    </script>
+    
+  // Risparmio connessioni: dopo 60s in background chiude la connessione realtime
+  // (utile con il limite di connessioni simultanee del piano Firebase).
+  // Al ritorno in primo piano si riconnette e i listener si riallineano da soli.
+  (function () {
+    let offTimer = null;
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) {
+        offTimer = setTimeout(function () { goOffline(db); }, 60000);
+      } else {
+        clearTimeout(offTimer);
+        goOnline(db);
+      }
+    });
+  })();
+</script>
 <custom-footer></custom-footer>
 </body>
 </html>

@@ -2,6 +2,7 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
   <title>Admin Nievo Cup</title>
   <link rel="shortcut icon" href="assets/images/loghi/favicon_nievo_cup.ico" type="image/x-icon">
@@ -10,11 +11,19 @@
 
   <h1>Admin Login</h1>
 
-  <input id="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Password">
+  <form id="login-form" novalidate>
+    <input id="email" name="email" type="email" placeholder="Email" autocomplete="username" maxlength="254" required>
+    <input id="password" name="password" type="password" placeholder="Password" autocomplete="current-password" maxlength="128" required>
+    <button type="submit">Login</button>
+  </form>
 
-  <button onclick="login()">Login</button>
-
+  <script>
+    // Invio con Enter + niente onclick inline. login() e' definita da admin.js.
+    document.getElementById('login-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (typeof window.login === 'function') window.login();
+    });
+  </script>
   <script type="module" src="./assets/js/admin.js"></script>
 
 </body>

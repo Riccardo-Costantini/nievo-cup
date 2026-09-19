@@ -235,7 +235,7 @@
 
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-  import { getDatabase, ref, onValue, get } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+  import { getDatabase, ref, onValue, get, goOffline, goOnline } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
   const firebaseConfig = {
     apiKey: "AIzaSyB0LUxAWKVUIhXYRb2T2JOT3ypiX9q_5Ck",
@@ -254,7 +254,7 @@
   // ---------- NORMALIZZAZIONE NOMI (uguale a quella usata per i logo) ----------
   function normalizeTeamName(name) {
     if (!name) return '';
-    return name
+    return String(name)
       .toLowerCase()
       .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
       .replace(/[^a-z0-9]/g, '');
@@ -291,7 +291,7 @@
 
   function getLogoUrl(teamName) {
     if (!teamName) return '';
-    let slug = teamName.toLowerCase()
+    let slug = String(teamName).toLowerCase()
       .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
       .replace(/[^a-z0-9]+/g, '_')
       .replace(/^_|_$/g, '');
@@ -318,12 +318,9 @@
   }
 
   function escapeHtml(str) {
-    if (!str) return '';
-    return str.replace(/[&<>]/g, function(m) {
-      if (m === '&') return '&amp;';
-      if (m === '<') return '&lt;';
-      if (m === '>') return '&gt;';
-      return m;
+    if (str === null || str === undefined) return '';
+    return String(str).replace(/[&<>"']/g, function(m) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
     });
   }
 
@@ -338,6 +335,7 @@
     const liveCanonical = new Set();
     for (const matchId of Object.keys(matchesData)) {
       const match = matchesData[matchId];
+      if (!match || typeof match !== 'object') continue;
       // Solo partite della fase a gironi: una squadra impegnata in un ottavo/
       // quarto/semifinale non deve risultare "live" nella classifica del girone.
       if ((match.round || '') !== 'Fase a Gironi') continue;
@@ -361,6 +359,7 @@
     }
 
     function processMatch(match, result) {
+      if (!match || typeof match !== 'object') return;
       // Considera esclusivamente le partite della fase a gironi: esclude
       // ottavi/quarti/semifinali/finali anche nel caso (già verificato nei dati
       // reali, es. m67 e m68) in cui due squadre della fase finale appartengano
@@ -499,19 +498,14 @@
       liveResultsData = snapshot.val() || {};
       if (!isLoading) renderStandings();
     };
-    onValue(liveRef, handler, (error) => console.error("Errore liveResults:", error));
-    currentLiveListener = { ref: liveRef, handler };
+    // onValue restituisce la funzione per staccare il listener (SDK modulare)
+    const unsubscribe = onValue(liveRef, handler, (error) => console.error("Errore liveResults:", error));
+    currentLiveListener = { unsubscribe };
   }
 
   function detachLiveListener() {
     if (currentLiveListener) {
-      // rimuove il listener attivo
-      const { ref, handler } = currentLiveListener;
-      // Per staccare onValue: chiamata con la stessa funzione e poi null? Firebase non ha off() diretto? In realtà sì: ref.off('value', handler)
-      // Ma dobbiamo usare il metodo off del Reference
-      if (ref && handler) {
-        ref.off('value', handler);
-      }
+      try { currentLiveListener.unsubscribe(); } catch (e) { console.error(e); }
       currentLiveListener = null;
     }
   }
@@ -562,6 +556,21 @@
       }
     }, 1800);
   });
+
+  // Risparmio connessioni: dopo 60s in background chiude la connessione realtime
+  // (utile con il limite di connessioni simultanee del piano Firebase).
+  // Al ritorno in primo piano si riconnette e i listener si riallineano da soli.
+  (function () {
+    let offTimer = null;
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) {
+        offTimer = setTimeout(function () { goOffline(db); }, 60000);
+      } else {
+        clearTimeout(offTimer);
+        goOnline(db);
+      }
+    });
+  })();
 </script>
 <custom-footer></custom-footer>
 </body>
