@@ -1,4 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check.js";
 import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -13,6 +14,12 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+
+// Firebase App Check: attesta che le richieste arrivino dal sito reale
+initializeAppCheck(app, {
+  provider: new ReCaptchaEnterpriseProvider('6LcRi8wtAAAAAEtHZHqZr_AFPd4NCVO9jWPwQ2MM'),
+  isTokenAutoRefreshEnabled: true
+});
 
 const auth = getAuth(app);
 
