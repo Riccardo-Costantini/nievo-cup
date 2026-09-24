@@ -23,6 +23,27 @@ initializeAppCheck(app, {
 
 const auth = getAuth(app);
 
+// Lockout progressivo lato client: rallenta i tentativi ripetuti di login.
+// Non è una protezione definitiva (aggirabile pulendo sessionStorage), ma
+// alza il costo di un attacco manuale e riduce il traffico verso Firebase Auth.
+// La protezione reale resta il rate-limiting nativo di Firebase Auth +
+// App Check, già attivi.
+const MAX_ATTEMPTS = 5;
+const LOCKOUT_MS = 60_000; // 60s iniziali, raddoppia ad ogni round oltre la soglia
+const LOGIN_STATE_KEY = 'nievo_login_state';
+
+function getLoginState() {
+  try {
+    return JSON.parse(sessionStorage.getItem(LOGIN_STATE_KEY)) || { attempts: 0, lockUntil: 0 };
+  } catch (e) {
+    return { attempts: 0, lockUntil: 0 };
+  }
+}
+
+function setLoginState(state) {
+  try { sessionStorage.setItem(LOGIN_STATE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+
 // Messaggi generici: non distinguiamo "utente inesistente" da "password errata"
 // per non facilitare tentativi di enumerazione delle email registrate.
 function getGenericLoginError(error) {
@@ -39,15 +60,30 @@ function getGenericLoginError(error) {
 }
 
 window.login = function () {
+  const state = getLoginState();
+  const now = Date.now();
+
+  if (now < state.lockUntil) {
+    const secs = Math.ceil((state.lockUntil - now) / 1000);
+    alert(`Troppi tentativi. Riprova tra ${secs} secondi.`);
+    return;
+  }
+
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
   signInWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
+      setLoginState({ attempts: 0, lockUntil: 0 });
       console.log("LOGGATO:", userCredential.user);
       window.location.href = "admin-dashboard.html";
     })
     .catch((error) => {
+      const attempts = state.attempts + 1;
+      const lockUntil = attempts >= MAX_ATTEMPTS
+        ? now + LOCKOUT_MS * Math.pow(2, attempts - MAX_ATTEMPTS)
+        : 0;
+      setLoginState({ attempts, lockUntil });
       alert(getGenericLoginError(error));
     });
 };
