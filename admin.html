@@ -4,26 +4,205 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>Admin Nievo Cup</title>
+  <title>Admin Login - Nievo Cup</title>
   <link rel="shortcut icon" href="assets/images/loghi/favicon_nievo_cup.ico" type="image/x-icon">
+
+  <style>
+    [hidden] {
+      display: none !important;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 420px;
+      margin: 60px auto;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 30px;
+    }
+
+    section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    input,
+    button {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .status {
+      min-height: 22px;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .info {
+      padding: 12px;
+      background: #f3f3f3;
+      border-radius: 8px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .code-row {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    #recaptcha-container {
+      min-height: 1px;
+    }
+  </style>
 </head>
 <body>
 
-  <h1>Admin Login</h1>
+  <!-- LOGIN -->
+  <section id="login-section">
+    <h1>Admin Login</h1>
 
-  <form id="login-form" novalidate>
-    <input id="email" name="email" type="email" placeholder="Email" autocomplete="username" maxlength="254" required>
-    <input id="password" name="password" type="password" placeholder="Password" autocomplete="current-password" maxlength="128" required>
-    <button type="submit">Login</button>
-  </form>
+    <form id="login-form" novalidate>
+      <section>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          placeholder="Email"
+          autocomplete="username"
+          maxlength="254"
+          required
+        >
+
+        <input
+          id="password"
+          name="password"
+          type="password"
+          placeholder="Password"
+          autocomplete="current-password"
+          maxlength="128"
+          required
+        >
+
+        <button type="submit">Login</button>
+
+        <div
+          id="login-status"
+          class="status"
+          aria-live="polite"
+        ></div>
+      </section>
+    </form>
+  </section>
+
+  <!-- PRIMA CONFIGURAZIONE MFA -->
+  <section id="mfa-setup-section" hidden>
+    <h1>Attiva MFA</h1>
+
+    <div class="info">
+      Questo account admin non ha ancora un secondo fattore.
+      Inserisci il numero di telefono che vuoi utilizzare per ricevere
+      i codici SMS.
+    </div>
+
+    <input
+      id="mfa-phone"
+      type="tel"
+      inputmode="tel"
+      autocomplete="tel"
+      placeholder="+393331234567"
+      maxlength="16"
+    >
+
+    <button id="send-mfa-enroll-btn" type="button">
+      Invia codice SMS
+    </button>
+
+    <div id="mfa-enroll-code-row" class="code-row" hidden>
+      <input
+        id="mfa-enroll-code"
+        type="text"
+        inputmode="numeric"
+        autocomplete="one-time-code"
+        maxlength="6"
+        placeholder="Codice SMS"
+      >
+
+      <button id="verify-mfa-enroll-btn" type="button">
+        Attiva MFA
+      </button>
+    </div>
+
+    <div
+      id="mfa-setup-status"
+      class="status"
+      aria-live="polite"
+    ></div>
+  </section>
+
+  <!-- LOGIN CON MFA -->
+  <section id="mfa-login-section" hidden>
+    <h1>Verifica MFA</h1>
+
+    <div class="info">
+      La password è corretta.
+      Devi completare l'accesso con il codice SMS inviato a:
+      <strong id="mfa-login-phone">numero configurato</strong>
+    </div>
+
+    <button id="send-mfa-login-btn" type="button">
+      Invia di nuovo codice SMS
+    </button>
+
+    <div id="mfa-login-code-row" class="code-row" hidden>
+      <input
+        id="mfa-login-code"
+        type="text"
+        inputmode="numeric"
+        autocomplete="one-time-code"
+        maxlength="6"
+        placeholder="Codice SMS"
+      >
+
+      <button id="verify-mfa-login-btn" type="button">
+        Verifica e accedi
+      </button>
+    </div>
+
+    <div
+      id="mfa-login-status"
+      class="status"
+      aria-live="polite"
+    ></div>
+
+    <div id="recaptcha-container"></div>
+  </section>
 
   <script>
-    // Invio con Enter + niente onclick inline. login() e' definita da admin.js.
     document.getElementById('login-form').addEventListener('submit', function (e) {
       e.preventDefault();
-      if (typeof window.login === 'function') window.login();
+
+      if (typeof window.login === 'function') {
+        window.login();
+      }
     });
   </script>
+
   <script type="module" src="./assets/js/admin.js"></script>
 
 </body>

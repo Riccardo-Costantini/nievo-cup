@@ -132,6 +132,12 @@
   });
 
   const auth = getAuth(app);
+  auth.onAuthStateChanged((user) => {
+  if (user) {
+    console.log("EMAIL:", user.email);
+    console.log("EMAIL VERIFICATA:", user.emailVerified);
+  }
+});
   let db = null;
   let matchesData = {};
   let resultsData = {};
@@ -416,33 +422,194 @@
     });
   };
 
-  let started = false;
-  onAuthStateChanged(auth, (user) => {
-    if (!user) {
+  const ADMIN_EMAILS = new Set([
+  "riccardo.costantini.eu@gmail.com",
+  "admin@gmail.com"
+]);
+
+function isAuthorizedAdmin(user) {
+  return (
+    !!user?.email &&
+    ADMIN_EMAILS.has(
+      user.email.toLowerCase()
+    )
+  );
+}
+
+let started = false;
+
+onAuthStateChanged(auth, async (user) => {
+
+  if (!user) {
+    window.location.replace('admin.html');
+    return;
+  }
+
+
+  /*
+    Secondo controllo admin.
+  */
+
+  if (!isAuthorizedAdmin(user)) {
+    try {
+      await signOut(auth);
+    } catch (e) {
+      console.error(e);
+    }
+
+    window.location.replace('admin.html');
+    return;
+  }
+
+
+  /*
+    MFA richiede email verificata.
+  */
+
+  if (!user.emailVerified) {
+    try {
+      await signOut(auth);
+    } catch (e) {
+      console.error(e);
+    }
+
+    window.location.replace('admin.html');
+    return;
+  }
+
+
+  /*
+    Controlliamo il token Firebase.
+
+    Dopo un login MFA SMS deve esserci:
+
+      firebase.sign_in_second_factor = "phone"
+  */
+
+  try {
+
+    const tokenResult =
+      await user.getIdTokenResult(true);
+
+    const secondFactor =
+      tokenResult?.claims?.firebase
+        ?.sign_in_second_factor;
+
+
+    if (secondFactor !== "phone") {
+
+      console.warn(
+        "Accesso dashboard rifiutato: MFA non completata."
+      );
+
+
+      await signOut(auth);
+
       window.location.replace('admin.html');
+
       return;
     }
-    if (started) return;
-    started = true;
-    db = getDatabase(app);
-    document.querySelector('.wrap-admin').style.visibility = 'visible';
-    setConnected(true);
-    startMatchesListener();
-    startResultsListener();
-    document.getElementById('addGoalBtn').onclick = () => window.addGoal();
-    document.getElementById('undoGoalBtn').onclick = () => window.undoGoal();
-    document.getElementById('resetMatchBtn').onclick = () => window.resetMatch();
-    document.getElementById('adm-status').onchange = () => window.saveStatus();
-    document.getElementById('adm-match').onchange = () => window.onMatchChange();
-    document.getElementById('btn-h').onclick = () => window.pickTeam('home');
-    document.getElementById('btn-a').onclick = () => window.pickTeam('away');
-    document.getElementById('createMatchBtn').onclick = () => window.createMatch();
-    document.getElementById('logoutBtn').onclick = async () => {
-      try { await signOut(auth); } catch (e) { console.error(e); }
-      window.location.replace('admin.html');
-    };
-    showToast('🔥 Connesso a Firebase', 'ok');
-  });
+
+  } catch (error) {
+
+    console.error(
+      "Errore controllo MFA:",
+      error
+    );
+
+
+    try {
+      await signOut(auth);
+    } catch (e) {
+      console.error(e);
+    }
+
+
+    window.location.replace('admin.html');
+
+    return;
+  }
+
+
+  /*
+    Tutti i controlli superati.
+  */
+
+  if (started) return;
+
+  started = true;
+
+  db = getDatabase(app);
+
+  document.querySelector(
+    '.wrap-admin'
+  ).style.visibility = 'visible';
+
+  setConnected(true);
+
+  startMatchesListener();
+  startResultsListener();
+
+  document.getElementById(
+    'addGoalBtn'
+  ).onclick = () =>
+    window.addGoal();
+
+  document.getElementById(
+    'undoGoalBtn'
+  ).onclick = () =>
+    window.undoGoal();
+
+  document.getElementById(
+    'resetMatchBtn'
+  ).onclick = () =>
+    window.resetMatch();
+
+  document.getElementById(
+    'adm-status'
+  ).onchange = () =>
+    window.saveStatus();
+
+  document.getElementById(
+    'adm-match'
+  ).onchange = () =>
+    window.onMatchChange();
+
+  document.getElementById(
+    'btn-h'
+  ).onclick = () =>
+    window.pickTeam('home');
+
+  document.getElementById(
+    'btn-a'
+  ).onclick = () =>
+    window.pickTeam('away');
+
+  document.getElementById(
+    'createMatchBtn'
+  ).onclick = () =>
+    window.createMatch();
+
+  document.getElementById(
+    'logoutBtn'
+  ).onclick = async () => {
+
+    try {
+      await signOut(auth);
+    } catch (e) {
+      console.error(e);
+    }
+
+    window.location.replace(
+      'admin.html'
+    );
+  };
+
+  showToast(
+    '🔥 Connesso a Firebase',
+    'ok'
+  );
+});
 </script>
 </body>
 </html>
