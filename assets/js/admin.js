@@ -11,7 +11,6 @@ import {
   setPersistence,
   signInWithEmailAndPassword,
   signOut,
-  sendEmailVerification,
   EmailAuthProvider,
   reauthenticateWithCredential,
   RecaptchaVerifier,
@@ -43,8 +42,7 @@ const firebaseConfig = {
 ========================================================= */
 
 const ADMIN_EMAILS = new Set([
-  "riccardo.costantini.eu@gmail.com",
-  "admin@gmail.com"
+  "riccardo.costantini.eu@gmail.com"
 ]);
 
 
@@ -891,56 +889,6 @@ window.login = async function () {
         "not-admin"
       );
     }
-
-
-    /*
-      ============================================
-      BLOCCO TEMPORANEO - VERIFICA EMAIL (OPZIONE A)
-      ============================================
-
-      Da rimuovere una volta verificate le email
-      di tutti gli admin. Serve solo per far
-      arrivare la mail di verifica di Firebase,
-      dato che il login normale bloccherebbe subito
-      un utente con emailVerified = false.
-    */
-
-    if (
-      !user.emailVerified
-    ) {
-
-      try {
-
-        await sendEmailVerification(user);
-
-        setText(
-          "login-status",
-          "Email di verifica inviata. Controlla la posta (anche spam), clicca il link e poi rifai il login."
-        );
-
-      } catch (verifyError) {
-
-        console.error(
-          "Errore invio email di verifica:",
-          verifyError
-        );
-
-        setText(
-          "login-status",
-          "Impossibile inviare l'email di verifica. Riprova più tardi."
-        );
-      }
-
-      await signOut(auth);
-
-      return;
-    }
-
-    /*
-      ============================================
-      FINE BLOCCO TEMPORANEO
-      ============================================
-    */
 
 
     /*
