@@ -167,7 +167,6 @@ function setText(id, message) {
 function showSection(idToShow) {
   [
     "login-section",
-    "email-verify-section",
     "mfa-setup-section",
     "mfa-login-section"
   ].forEach((id) => {
@@ -223,186 +222,6 @@ function resetMfaState() {
   pendingMode = null;
 
   clearRecaptcha();
-}
-
-
-/* =========================================================
-   VERIFICA EMAIL (per utenti creati manualmente)
-========================================================= */
-
-const RESEND_COOLDOWN_MS = 30_000;
-let lastVerificationSentAt = 0;
-
-async function sendVerificationEmail(user) {
-  const resendBtn = document.getElementById("resend-verify-btn");
-
-  try {
-    setText(
-      "email-verify-status",
-      "Invio dell'email di verifica in corso..."
-    );
-
-    await sendEmailVerification(user);
-
-    lastVerificationSentAt = Date.now();
-
-    setText(
-      "email-verify-status",
-      `Email inviata a ${user.email}. Controlla la posta (anche spam).`
-    );
-
-  } catch (error) {
-
-    console.error(
-      "Errore invio email di verifica:",
-      error
-    );
-
-    if (error?.code === "auth/too-many-requests") {
-      setText(
-        "email-verify-status",
-        "Troppe richieste. Attendi qualche minuto prima di richiedere un nuovo invio."
-      );
-    } else {
-      setText(
-        "email-verify-status",
-        "Non è stato possibile inviare l'email. Riprova più tardi."
-      );
-    }
-  } finally {
-    if (resendBtn) {
-      resendBtn.disabled = true;
-
-      setTimeout(() => {
-        resendBtn.disabled = false;
-      }, RESEND_COOLDOWN_MS);
-    }
-  }
-}
-
-
-async function goToEmailVerificationStep(user) {
-
-  document.getElementById(
-    "verify-email-addr"
-  ).textContent = user.email || "—";
-
-  showSection("email-verify-section");
-
-  await sendVerificationEmail(user);
-}
-
-
-async function resendVerificationEmail() {
-
-  const user = auth.currentUser;
-
-  if (!user) {
-    setText(
-      "email-verify-status",
-      "Sessione scaduta. Effettua nuovamente il login."
-    );
-
-    showSection("login-section");
-
-    return;
-  }
-
-  if (Date.now() - lastVerificationSentAt < RESEND_COOLDOWN_MS) {
-    setText(
-      "email-verify-status",
-      "Attendi qualche secondo prima di richiedere un nuovo invio."
-    );
-
-    return;
-  }
-
-  await sendVerificationEmail(user);
-}
-
-
-async function checkEmailVerifiedAndContinue() {
-
-  const user = auth.currentUser;
-
-  if (!user) {
-    setText(
-      "email-verify-status",
-      "Sessione scaduta. Effettua nuovamente il login."
-    );
-
-    showSection("login-section");
-
-    return;
-  }
-
-  setText(
-    "email-verify-status",
-    "Controllo in corso..."
-  );
-
-  try {
-    await user.reload();
-  } catch (error) {
-    console.error(
-      "Errore aggiornamento stato utente:",
-      error
-    );
-
-    setText(
-      "email-verify-status",
-      "Impossibile verificare lo stato dell'account. Riprova."
-    );
-
-    return;
-  }
-
-  if (!user.emailVerified) {
-    setText(
-      "email-verify-status",
-      "Email non ancora verificata. Apri il link ricevuto via email e riprova."
-    );
-
-    return;
-  }
-
-  /*
-    Email verificata: procediamo come nel flusso originale.
-    Se l'account non ha ancora un secondo fattore, si passa
-    alla configurazione MFA.
-  */
-
-  const enrolledFactors =
-    multiFactor(user).enrolledFactors;
-
-  if (enrolledFactors.length === 0) {
-
-    setText(
-      "mfa-setup-status",
-      "Email verificata. Configura ora il numero admin."
-    );
-
-    showSection("mfa-setup-section");
-
-    return;
-  }
-
-  /*
-    Caso anomalo: l'account ha già un secondo fattore ma siamo
-    arrivati qui senza passare dal flusso MFA login vero e proprio.
-    Per sicurezza non concediamo accesso diretto.
-  */
-
-  await signOut(auth);
-
-  registerFailedAttempt();
-
-  setText(
-    "login-status",
-    "Questo account deve effettuare l'accesso tramite MFA SMS."
-  );
-
-  showSection("login-section");
 }
 
 
@@ -1075,19 +894,72 @@ window.login = async function () {
 
 
     /*
-      MFA richiede email verificata.
+      ============================================
+      BLOCCO TEMPORANEO - VERIFICA EMAIL (OPZIONE A)
+      ============================================
 
-      Invece di bloccare l'accesso, avviamo il flusso di verifica:
-      inviamo un'email con link di conferma e restiamo in attesa
-      che l'utente la apra, senza fare logout (serve la sessione
-      corrente per rilanciare sendEmailVerification / user.reload()).
+      Da rimuovere una volta verificate le email
+      di tutti gli admin. Serve solo per far
+      arrivare la mail di verifica di Firebase,
+      dato che il login normale bloccherebbe subito
+      un utente con emailVerified = false.
     */
 
     if (
       !user.emailVerified
     ) {
 
-      await goToEmailVerificationStep(user);
+      try {
+
+        await sendEmailVerification(user);
+
+        setText(
+          "login-status",
+          "Email di verifica inviata. Controlla la posta (anche spam), clicca il link e poi rifai il login."
+        );
+
+      } catch (verifyError) {
+
+        console.error(
+          "Errore invio email di verifica:",
+          verifyError
+        );
+
+        setText(
+          "login-status",
+          "Impossibile inviare l'email di verifica. Riprova più tardi."
+        );
+      }
+
+      await signOut(auth);
+
+      return;
+    }
+
+    /*
+      ============================================
+      FINE BLOCCO TEMPORANEO
+      ============================================
+    */
+
+
+    /*
+      MFA richiede email verificata.
+    */
+
+    if (
+      !user.emailVerified
+    ) {
+
+      await signOut(auth);
+
+      registerFailedAttempt();
+
+
+      setText(
+        "login-status",
+        "La email dell'admin deve essere verificata prima di usare la MFA."
+      );
 
       return;
     }
@@ -1292,26 +1164,6 @@ window.login = async function () {
 /* =========================================================
    EVENT LISTENERS
 ========================================================= */
-
-document
-  .getElementById(
-    "resend-verify-btn"
-  )
-  ?.addEventListener(
-    "click",
-    resendVerificationEmail
-  );
-
-
-document
-  .getElementById(
-    "check-verify-btn"
-  )
-  ?.addEventListener(
-    "click",
-    checkEmailVerifiedAndContinue
-  );
-
 
 document
   .getElementById(
